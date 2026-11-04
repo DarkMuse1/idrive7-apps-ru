@@ -1,0 +1,14 @@
+# Build outputs (kit/tools/build.py and the on-car build write these)
+dist/
+dist-preview/
+
+# Python / Node caches
+__pycache__/
+*.pyc
+*.pyo
+node_modules/
+.font-cache/
+
+# BMW's oap-sdk is never committed: the MGU Store generates it on the car from a
+# donor app before the build (mgu-repo.json "sdk": "oap-sdk").
+/oap-sdk/

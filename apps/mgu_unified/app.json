@@ -1,0 +1,788 @@
+{
+  "id": "mgu_unified",
+  "title": "MGU Tools",
+  "version": "0.1.7",
+  "description": "Единая оболочка MGU — этап интеграции",
+  "vendor": "custom",
+  "loggingId": "OMGU",
+  "iconGlyph": "M",
+  "signals": {
+    "de.bmw.infotainment.controlelements.FrontCCU": {
+      "statusRotaryEncoderState": "rs"
+    },
+    "de.bmw.infotainment.climate.climatemaster.ClimateMaster": {
+      "statusClimateSystemOn": "rs",
+      "statusAirCondAC": "rs"
+    },
+    "de.bmw.infotainment.climate.Climate2": {
+      "statusACFront": "rs",
+      "statusAirConditionDRStatus": "rs"
+    },
+    "de.bmw.infotainment.climate.Climate": {
+      "statusSeatHeatingDR": "rs",
+      "statusSeatHeatingPS": "rs",
+      "statusSeatHeatingDRR": "rs",
+      "statusSeatHeatingPSR": "rs"
+    },
+    "de.bmw.body.steeringwheelcomfort.SteeringWheelClimate": {
+      "heatingState": "rs"
+    },
+    "com.harman.infotainment.systemfunctions.tasu.tasu.InternalTasu": {
+      "_instances": "SystemFunctionsInternalTasuInst1",
+      "_methods": [
+        "sendTasuRequest"
+      ],
+      "_broadcasts": [
+        "sendTasuResponse"
+      ]
+    },
+    "de.bmw.infotainment.checkcontrol.CheckControlMaster": {
+      "basicList": "rs"
+    },
+    "de.bmw.infotainment.misc.ComfortFunctionIuK": {
+      "_instances": "1",
+      "statusAmbientLightInteriorColour": "rs",
+      "ambientLightInteriorColour": "w"
+    },
+    "de.bmw.infotainment.KombiInterface_2": {
+      "cbsDataServiceList": "rs",
+      "cbsDataSBA": "rs",
+      "_methods": [
+        "requestCBSServiceHint"
+      ]
+    },
+    "de.bmw.infotainment.vehicle.CDS": {
+      "statusEngineSpeed2": "rs",
+      "statusEngineTemperature": "rs",
+      "statusEngineStatus": "rs",
+      "datenFahrdynamiksensorErweitert": "rs",
+      "statusHandBrake": "rs",
+      "statusBattery2": "rs"
+    },
+    "de.bmw.infotainment.vehicle.Vehicle2": {
+      "statusCarSpeed2": "rs",
+      "statusOilDipstick2": "rs",
+      "statusVehicleMass": "rs",
+      "statusVehiclePartType": "rs"
+    },
+    "de.bmw.infotainment.vehicle.Vehicle": {
+      "statusNewCurrentUnitsStatusExt": "rs"
+    },
+    "de.bmw.infrastructure.VehicleInformation": {
+      "statusGearboxDrive": "s",
+      "DataPowerTrain2": "s",
+      "Range": "s"
+    },
+    "de.bmw.infotainment.vehicle.CDS2": {
+      "statusLongitudinalAccelerationMassCenter": "rs",
+      "statusLateralAccelerationMassCenter": "rs",
+      "statusInjectionVolume": "rs",
+      "statusPushButtonMSA2": "rs",
+      "statusYawVelocityVehicle": "rs"
+    },
+    "de.bmw.infotainment.drivingexcitement.FES": {
+      "statusActualValueTorque2": "rs",
+      "statusSwitchDriveDynamicSport2": "rs",
+      "statusVehicleDynamicEngine": "rs",
+      "statusVehicleDynamicEngineMaxValue": "rs",
+      "statusFESVehicleDynamicSwitchHMI": "rs"
+    },
+    "de.bmw.infrastructure.EnvironmentalInformation": {
+      "ExteriorTemperature": "s"
+    },
+    "de.bmw.infrastructure.analytics.BasicDataSet": {
+      "basicDataSet": "s"
+    },
+    "de.bmw.infotainment.vehicle.TPMS": {
+      "statusTyreTemperature": "rs",
+      "statusTyrePressure": "rs",
+      "statusTargetTyrePressure": "rs"
+    },
+    "de.bmw.powertrain.AcceleratorPedal": {
+      "AngleAcceleratorPedal": "s"
+    },
+    "de.bmw.infotainment.KombiIF": {
+      "statusRangeTankStatus": "rs",
+      "statusBordcomputerAverage": "rs",
+      "statusBordcomputerTravelData": "rs"
+    },
+    "de.bmw.chassis.SteeringAngle": {
+      "ActualSteeringAngleDriver": "s",
+      "actualSteeringAngleDriverNoCRC": "s"
+    },
+    "de.bmw.powertrain.Powertrain": {
+      "ActualValueRPMWheel": "s"
+    },
+    "de.bmw.chassis.VehicleModel": {
+      "LaneSlope": "s",
+      "MassVehicle": "s"
+    },
+    "de.bmw.chassis.VehicleStabilizationManagement": {
+      "StabilizationManagement": "s"
+    },
+    "de.bmw.infrastructure.VehicleCondition": {
+      "VehicleCondition": "s"
+    }
+  },
+  "startWidget": {
+    "comment": "apps/edrive 2.2.0 home-screen widget (BMW Drive Recorder layout): the picture goes into BackgroundImage1; the small widget uses the layout's text cells.",
+    "name": "eDrive",
+    "layout": "LT_Table_OnlineApps_DriveRecorderWidget",
+    "image": "BackgroundImage1",
+    "size": [
+      384,
+      256
+    ],
+    "safe": [
+      0.09,
+      0.1
+    ],
+    "cells": {
+      "ErrorInfo": [
+        false,
+        "Bool"
+      ],
+      "background": [
+        true,
+        "Bool"
+      ],
+      "ProgressbarVisible": [
+        false,
+        "Bool"
+      ],
+      "TextRecordings": [
+        "",
+        "Text"
+      ]
+    }
+  },
+  "maxDiskUsage": 157286400,
+  "assets": [
+    {
+      "file": "freedoom1.wad",
+      "sha256": "7323bcc168c5a45ff10749b339960e98314740a734c30d4b9f3337001f9e703d"
+    }
+  ],
+  "screens": [
+    {
+      "name": "MAIN",
+      "kind": "canvas",
+      "title": "MGU Tools",
+      "buttons": [
+        [
+          "BTN_PREV",
+          "Назад по меню"
+        ],
+        [
+          "BTN_NEXT",
+          "Далее"
+        ],
+        [
+          "BTN_SELECT",
+          "Выбрать"
+        ],
+        [
+          "BTN_BACK",
+          "Назад"
+        ]
+      ]
+    },
+    {
+      "name": "DOOM_GAME",
+      "kind": "canvas",
+      "title": "Freedoom",
+      "chrome": false,
+      "buttons": [
+        [
+          "DOOM_BACK",
+          "Шаг назад"
+        ],
+        [
+          "DOOM_LEFT",
+          "Влево"
+        ],
+        [
+          "DOOM_STAND",
+          "Стоять / огонь"
+        ],
+        [
+          "DOOM_WALK",
+          "Вперёд"
+        ],
+        [
+          "DOOM_RIGHT",
+          "Вправо"
+        ],
+        [
+          "DOOM_WEAPON",
+          "Оружие"
+        ],
+        [
+          "DOOM_EXIT",
+          "В меню"
+        ]
+      ]
+    },
+    {
+      "name": "LD_MAIN",
+      "kind": "canvas",
+      "title": "MGU Tools · Данные автомобиля",
+      "buttons": [
+        [
+          "LD_BTN_ACTION",
+          "Компоновка"
+        ],
+        [
+          "LD_BTN_PAGE",
+          "Следующая"
+        ],
+        [
+          "LD_BTN_BROWSE",
+          "Обзор"
+        ],
+        [
+          "LD_BTN_SETTINGS",
+          "Настройки"
+        ],
+        [
+          "LD_RETURN",
+          "В меню MGU Tools"
+        ]
+      ]
+    },
+    {
+      "name": "EC_MAIN",
+      "kind": "canvas",
+      "title": "MGU Tools · Управление двигателем",
+      "buttons": [
+        [
+          "EC_BTN_OPEN",
+          "Открыть"
+        ],
+        [
+          "EC_BTN_CLOSE",
+          "Закрыть"
+        ],
+        [
+          "EC_BTN_OEM",
+          "Штатно"
+        ],
+        [
+          "EC_BTN_PAGE",
+          "Следующая"
+        ],
+        [
+          "EC_BTN_SETTINGS",
+          "Настройки"
+        ],
+        [
+          "EC_RETURN",
+          "В меню MGU Tools"
+        ]
+      ]
+    },
+    {
+      "name": "TC_MAIN",
+      "kind": "canvas",
+      "title": "MGU Tools · Трансмиссия ZF 8HP",
+      "buttons": [
+        [
+          "TC_BTN_PAGE",
+          "Следующая"
+        ],
+        [
+          "TC_BTN_SELECT",
+          "Следующий пункт"
+        ],
+        [
+          "TC_BTN_ACTION",
+          "Просмотр / обновить"
+        ],
+        [
+          "TC_BTN_SETTINGS",
+          "Настройки"
+        ],
+        [
+          "TC_RETURN",
+          "В меню MGU Tools"
+        ]
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "key": "theme",
+      "label": "Оформление",
+      "type": "choice",
+      "default": "mgu_tools",
+      "options": [
+        [
+          "mgu_tools",
+          "MGU Tools"
+        ]
+      ]
+    },
+    {
+      "key": "layout",
+      "label": "Компоновка",
+      "type": "choice",
+      "default": "full",
+      "reset": 1,
+      "options": [
+        [
+          "full",
+          "Полный экран"
+        ],
+        [
+          "standard",
+          "Стандартная"
+        ]
+      ]
+    },
+    {
+      "key": "renderer",
+      "label": "Отрисовка",
+      "type": "choice",
+      "default": "software",
+      "options": [
+        [
+          "software",
+          "Программная"
+        ],
+        [
+          "auto",
+          "GPU, если доступен"
+        ]
+      ]
+    },
+    {
+      "key": "demo",
+      "label": "Демонстрация",
+      "type": "choice",
+      "default": "off",
+      "options": [
+        [
+          "off",
+          "Выключена"
+        ],
+        [
+          "on",
+          "Включена"
+        ]
+      ]
+    },
+    {
+      "key": "units",
+      "label": "Скорость",
+      "type": "choice",
+      "default": "kmh",
+      "options": [
+        [
+          "kmh",
+          "км/ч"
+        ],
+        [
+          "mph",
+          "mph"
+        ]
+      ]
+    },
+    {
+      "key": "overview",
+      "label": "Обзор",
+      "type": "choice",
+      "default": "redline",
+      "options": [
+        [
+          "redline",
+          "Тахометр"
+        ],
+        [
+          "edrive",
+          "eDrive"
+        ]
+      ]
+    },
+    {
+      "key": "language",
+      "label": "Язык / Language",
+      "type": "choice",
+      "default": "ru",
+      "options": [
+        [
+          "ru",
+          "Русский"
+        ],
+        [
+          "en",
+          "English"
+        ]
+      ]
+    },
+    {
+      "key": "engine",
+      "label": "Тип двигателя",
+      "type": "choice",
+      "default": "auto",
+      "options": [
+        [
+          "auto",
+          "Авто (по данным автомобиля)"
+        ],
+        [
+          "diesel",
+          "Дизель"
+        ],
+        [
+          "petrol",
+          "Бензин"
+        ]
+      ]
+    },
+    {
+      "key": "homeWidget",
+      "label": "Виджет на главном экране",
+      "type": "choice",
+      "default": "edrive",
+      "options": [
+        [
+          "edrive",
+          "eDrive"
+        ],
+        [
+          "live_data",
+          "Live Data · выбранные приборы"
+        ]
+      ]
+    },
+    {
+      "key": "LD_show",
+      "label": "Данные автомобиля · Страницы блоков показывают",
+      "type": "choice",
+      "default": "known",
+      "reset": 2,
+      "options": [
+        [
+          "known",
+          "What the unit may have"
+        ],
+        [
+          "answering",
+          "Only what answered"
+        ],
+        [
+          "all",
+          "Everything it lists"
+        ]
+      ]
+    },
+    {
+      "key": "LD_names",
+      "label": "Данные автомобиля · Названия",
+      "type": "choice",
+      "default": "en",
+      "options": [
+        [
+          "en",
+          "English"
+        ],
+        [
+          "de",
+          "German (BMW)"
+        ],
+        [
+          "id",
+          "BMW identifiers"
+        ]
+      ],
+      "hidden": true
+    },
+    {
+      "key": "LD_autoScan",
+      "label": "Данные автомобиля · Опрашивать блоки при открытии",
+      "type": "bool",
+      "default": true
+    },
+    {
+      "key": "LD_widget",
+      "label": "Данные автомобиля · Виджет показывает",
+      "type": "choice",
+      "default": "1",
+      "options": [
+        [
+          "1",
+          "Gauges 1"
+        ],
+        [
+          "2",
+          "Gauges 2"
+        ],
+        [
+          "3",
+          "Gauges 3"
+        ],
+        [
+          "4",
+          "Gauges 4"
+        ],
+        [
+          "5",
+          "Gauges 5"
+        ],
+        [
+          "6",
+          "Gauges 6"
+        ]
+      ]
+    },
+    {
+      "key": "LD_widgetFit",
+      "label": "Данные автомобиля · Виджет: изображение",
+      "type": "choice",
+      "default": "medium",
+      "options": [
+        [
+          "small",
+          "Small, clear of the edges"
+        ],
+        [
+          "medium",
+          "Medium"
+        ],
+        [
+          "large",
+          "Fill the widget"
+        ]
+      ]
+    },
+    {
+      "key": "LD_widgetFps",
+      "label": "Данные автомобиля · Виджет: обновлений в секунду",
+      "type": "number",
+      "unit": "fps",
+      "default": 8,
+      "steps": [
+        2,
+        4,
+        8,
+        12
+      ]
+    },
+    {
+      "key": "LD_trips",
+      "label": "Данные автомобиля · Бортовой компьютер (каждая поездка)",
+      "type": "bool",
+      "default": true
+    },
+    {
+      "key": "LD_currency",
+      "label": "Данные автомобиля · Валюта",
+      "type": "choice",
+      "default": "EUR",
+      "options": [
+        [
+          "EUR",
+          "EUR"
+        ],
+        [
+          "USD",
+          "USD"
+        ],
+        [
+          "CAD",
+          "CAD"
+        ],
+        [
+          "GBP",
+          "GBP"
+        ],
+        [
+          "CHF",
+          "CHF"
+        ],
+        [
+          "PLN",
+          "PLN"
+        ],
+        [
+          "CZK",
+          "CZK"
+        ],
+        [
+          "SEK",
+          "SEK"
+        ],
+        [
+          "NOK",
+          "NOK"
+        ],
+        [
+          "DKK",
+          "DKK"
+        ],
+        [
+          "HUF",
+          "HUF"
+        ],
+        [
+          "UAH",
+          "UAH"
+        ]
+      ]
+    },
+    {
+      "key": "LD_details",
+      "label": "Данные автомобиля · Источники и непроверенные значения",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "EC_arm",
+      "label": "Управление двигателем · Заслонка выпуска",
+      "type": "choice",
+      "default": "off",
+      "options": [
+        [
+          "off",
+          "Disarmed · simulated (safe)"
+        ],
+        [
+          "on",
+          "Armed · actuates the real valve"
+        ]
+      ]
+    },
+    {
+      "key": "EC_tuner",
+      "label": "Управление двигателем · Программа тюнинга",
+      "type": "choice",
+      "default": "off",
+      "options": [
+        [
+          "off",
+          "Off · nothing is sent to the car (safe)"
+        ],
+        [
+          "bm3",
+          "BM3 · engine map, burbles, ASD"
+        ],
+        [
+          "mhd",
+          "MHD · engine map, Max Cooling"
+        ]
+      ]
+    },
+    {
+      "key": "EC_xdrive",
+      "label": "Управление двигателем · xDrive (эксперимент)",
+      "type": "choice",
+      "default": "off",
+      "options": [
+        [
+          "off",
+          "Off · nothing is sent (safe)"
+        ],
+        [
+          "on",
+          "On · xDrive tab, xDrive off until ignition off"
+        ]
+      ]
+    },
+    {
+      "key": "TC_variants",
+      "label": "Трансмиссия ZF 8HP · Вариант EGS",
+      "type": "choice",
+      "default": "verified",
+      "options": [
+        [
+          "verified",
+          "Verified only (0F25D0)"
+        ],
+        [
+          "any",
+          "Try any (unverified)"
+        ]
+      ]
+    },
+    {
+      "key": "TC_autoRefresh",
+      "label": "Трансмиссия ZF 8HP · Обновлять, пока страница видна",
+      "type": "bool",
+      "default": true
+    },
+    {
+      "key": "TC_liveInterval",
+      "label": "Трансмиссия ZF 8HP · Интервал обновления",
+      "type": "number",
+      "unit": "s",
+      "default": 2,
+      "steps": [
+        1,
+        2,
+        3,
+        5,
+        10
+      ]
+    },
+    {
+      "key": "TC_mapFamily",
+      "label": "Трансмиссия ZF 8HP · Семейство карт переключений",
+      "type": "choice",
+      "default": "1",
+      "options": [
+        [
+          "1",
+          "KF1"
+        ],
+        [
+          "2",
+          "KF2"
+        ],
+        [
+          "cold1",
+          "Cold KF1"
+        ],
+        [
+          "cold2",
+          "Cold KF2"
+        ]
+      ]
+    },
+    {
+      "key": "TC_shiftGroup",
+      "label": "Трансмиссия ZF 8HP · Таблица переключений",
+      "type": "choice",
+      "default": "up",
+      "options": [
+        [
+          "up",
+          "Upshifts"
+        ],
+        [
+          "down",
+          "Downshifts"
+        ],
+        [
+          "skip",
+          "Skip downshifts"
+        ]
+      ]
+    },
+    {
+      "key": "TC_tempUnit",
+      "label": "Трансмиссия ZF 8HP · Температура",
+      "type": "choice",
+      "default": "C",
+      "options": [
+        [
+          "C",
+          "Celsius"
+        ],
+        [
+          "F",
+          "Fahrenheit"
+        ]
+      ]
+    }
+  ]
+}
