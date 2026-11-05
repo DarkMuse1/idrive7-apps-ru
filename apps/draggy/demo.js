@@ -1,7 +1,7 @@
 'use strict';
 /** Synthetic launch for demo mode: stand, pull to ~205 km/h, brake, repeat (28 s). */
 class Demo {
-    constructor(now) { this.t0 = now === undefined ? Date.now() : now; }
+    constructor() { this.t0 = Date.now(); }
     speed(now) {
         const t = ((now - this.t0) / 1000) % 28;
         if (t < 3) return 0;

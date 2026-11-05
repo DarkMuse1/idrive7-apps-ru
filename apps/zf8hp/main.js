@@ -317,7 +317,7 @@ mgu.run({
         }
         function temperatures(cv, t) {
             const d = thermalDid(), vs = values(d), total = vs.reduce((a, b) => a + b, 0), max = Math.max.apply(null, [1].concat(vs));
-            const totalText = 'Total recorded ' + n(total / 3600, 1) + ' ' + translate('h') + ' / ' + age(rec(d));
+            const totalText = 'Total recorded ' + n(total / 3600, 1) + ' h / ' + age(rec(d));
             const head = (thermal % 2 ? 'EGS electronics' : 'Transmission oil') + ' / lifetime temperature distribution';
             subtitle(cv, t, head, cv.own ? '' : totalText);
             // where the kit runs the screen: oil or electronics picked here (else Next item), the total left of it
@@ -334,7 +334,7 @@ mgu.run({
                     const y = Math.round(180 + row * (304 + ex) / 7), v = vs[i];
                     cv.fillRect(x + 14, y - 23, 474 * (E.finite(v) ? v / max : 0), 29, withAlpha(BLUE, 0.14));
                     cv.text(tRange(C.ranges[i]) + ' ' + tU(), x + 18, y, 22, t.text);
-                    cv.text(E.finite(v) ? n(v / 3600, 2) + ' ' + translate('h') : '--', x + 356, y, 23, t.text, { align: 'right', font: 'num' });
+                    cv.text(E.finite(v) ? n(v / 3600, 2) + ' h' : '--', x + 356, y, 23, t.text, { align: 'right', font: 'num' });
                     cv.text(E.finite(v) && total ? n(v / total * 100, 1) + '%' : '--', x + 484, y, 19, t.dim, { align: 'right' });
                 }
             }
@@ -398,15 +398,15 @@ mgu.run({
                 G.panel(cv, t, xs[1], 94, w, 418, 'Gear engagement / release');
                 G.panel(cv, t, xs[2], 94, w, 418, 'EGS / oil service');
                 const list = (x, rows) => rowList(cv, t, x, w, top, rh, rows);
-                list(xs[0], [['Fast-fill correction', signed(value('41A0'), 1) + ' ' + translate('ms')], ['Fast-fill evaluations', n(value('41A1'))],
-                    ['Base-point adaptation', signed(value('41B3')) + ' ' + translate('mA')], ['Base-point evaluations', n(value('41B4'))]]);
+                list(xs[0], [['Fast-fill correction', signed(value('41A0'), 1) + ' ms'], ['Fast-fill evaluations', n(value('41A1'))],
+                    ['Base-point adaptation', signed(value('41B3')) + ' mA'], ['Base-point evaluations', n(value('41B4'))]]);
                 const dr = (label, d, fmt) => [{ text: label, color: t.dim }].concat([0, 1, 2].map((i) => fmt(value(d, i))));
                 G.table(cv, t, xs[1] + 18, 152, w - 36, [{ label: '', w: 252, size: 24 }, { label: 'D1', w: 72, align: 'right' },
                     { label: 'D2', w: 72, align: 'right' }, { label: 'R', w: 72, align: 'right' }],
                     [dr('Engage, mbar', '412F', signed), dr('Engage evaluations', '415F', n),
                         dr('Release, mbar', '41B0', signed), dr('Release evaluations', '41B1', n)], { rowH: rh, size: 30, headerSize: 18, middle: true });
                 const lt = value('6081'), win = values('DB03'), rpm = values('DB04');
-                list(xs[2], [['Operating time (no standby)', n(E.finite(lt) ? lt / 60 : null, 1) + ' ' + translate('h')], ['Stationary adaptations', n(value('6090'))],
+                list(xs[2], [['Operating time (no standby)', n(E.finite(lt) ? lt / 60 : null, 1) + ' h'], ['Stationary adaptations', n(value('6090'))],
                     ['Oil-service temperature', win.length ? win.map((v) => tN(v)).join('..') + ' ' + tU() : '--'],
                     ['Oil-service speed', rpm.length ? rpm.join('..') + ' rpm' : '--']]);
             } else if (detailMode === 1) {

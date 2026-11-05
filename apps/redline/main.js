@@ -18,7 +18,7 @@
 const mgu = require('./kit/mgu');
 const { withAlpha, ramp } = require('./kit/canvas');
 const G = require('./kit/gauges');
-const { plural, t: translate } = require('./kit/i18n');
+const { plural } = require('./kit/i18n');
 const Car = require('./kit/car');
 const Engine = require('./kit/engine');
 
@@ -29,21 +29,13 @@ const GX = 800;                                     // centre column (rpm, bar, 
 const MPH = 1.609344;
 const GREEN = '#2fd27a', YELLOW = '#ffc21a', BLUE = '#2a7dff';
 const N_LEDS = 12, LED_RANGE = 2000;
-/**
- * Width of a button on the page (G.button: only where the kit runs the screen): upstream's w, or wider where
- * the translated label - or the kit's Confirm of a reset that asks first - needs more, so it stays inside its pill.
- */
-function buttonW(cv, w, h, labels) {
-    if (!cv.own) return w;
-    return Math.max(w, ...labels.map((s) => Math.ceil(cv.textWidth(translate(s).toUpperCase(), h * 0.4, { font: 'bold', spacing: 1.5 }) + h)));
-}
 
 mgu.run({
     async start(ctx) {
         const { ui, settings, log } = ctx;
         // engine profile (diesel / petrol): rev scale top and the Auto redline / cold limit
         const engine = new Engine({ settings, dataDir: ctx.dataDir, log });
-        const car = new Car(ctx, ['rpm', 'speed', 'temps', 'gear'], { extra: { [Engine.SIGNAL[0]]: engine.handlers() } });
+        const car = new Car(ctx, ['rpm', 'speed', 'temps', 'gear'], { [Engine.SIGNAL[0]]: engine.handlers() });
 
         /* ---------- derived limits ---------- */
         const redline = () => engine.redline();
@@ -270,8 +262,7 @@ mgu.run({
 
         function drawLog(cv, t) {
             const lp = G.panel(cv, t, 24, 44, 760, 468, 'Recent upshifts');
-            const mw = buttonW(cv, 180, 40, ['Reset max', 'Confirm']);
-            G.button(cv, t, 784 - 20 - mw, 56, mw, 40, 'Reset max', resetMax, { key: 'reset', confirm: true });
+            G.button(cv, t, 784 - 20 - 180, 56, 180, 40, 'Reset max', resetMax, { key: 'reset', confirm: true });
             // room below the page (where the kit gives it): another row where one fits whole
             const up = shifts.slice(0, 9 + Math.floor((lp.y + lp.h - G.BOTTOM) / 41));
             if (!up.length) cv.text('No shifts yet - go and use the rev range.', 48, 189, 26, t.dim);
@@ -304,8 +295,8 @@ mgu.run({
             if (n) {
                 const ys = shifts.slice(0, 30).map((s) => s.rpm - s.target);
                 const avg = ys.reduce((a, b) => a + b, 0) / ys.length;
-                cv.text('AVG ' + (avg >= 0 ? '+' : '') + Math.round(avg) + ' rpm vs shift point', 1552, 199, 24, t.text, { align: 'right', font: 'bold' });
-                cv.text('PEAK ' + Math.round(sessionRpm) + ' RPM  ·  ' + G.fmt(mph() ? peakSpeed / MPH : peakSpeed, 0) + (mph() ? ' MPH' : ' KM/H'), 1552, 235, 22, t.dim, { align: 'right', font: 'bold', spacing: 0.5 });
+                cv.text('AVG ' + (avg >= 0 ? '+' : '') + Math.round(avg) + ' rpm vs shift point', 1240, 199, 24, t.text, { align: 'center', font: 'bold' });
+                cv.text('PEAK ' + Math.round(sessionRpm) + ' RPM  ·  ' + G.fmt(mph() ? peakSpeed / MPH : peakSpeed, 0) + (mph() ? ' MPH' : ' KM/H'), 1240, 235, 22, t.dim, { align: 'center', font: 'bold', spacing: 0.5 });
             }
         }
 
@@ -327,15 +318,14 @@ mgu.run({
         const flip = () => { page = 1 - page; return render(); };
         ui.onClick('BTN_PAGE', flip);
         ui.onClick('BTN_PREV', flip);
-        // (the tests' fake head unit, tests/diag/fakes.js, has no screen API: there the HMI's bar, as on the old path)
-        if (ctx.onTab) ctx.onTab((i) => i !== page && flip());
+        ctx.onTab((i) => i !== page && flip());
         // Reset max: on the Shift log page, or the bar's button
         function resetMax() {
             peakRpm = 0; peakRpmT = 0; sessionRpm = 0; peakSpeed = 0; limiterHits = 0; shifts = []; lastShift = null;
             log.info('peaks reset'); return render();
         }
         ui.onClick('BTN_RESET', resetMax);
-        if (ctx.hideButton) ctx.hideButton('BTN_RESET');
+        ctx.hideButton('BTN_RESET');
         // every screen refresh (60 fps) with the GPU renderer; 15 fps in software (PNG frames)
         ctx.loop('MAIN', 15, render);
         render().then(() => log.info('first frame done')).catch((e) => log.warn('first render: ' + e));

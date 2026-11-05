@@ -11,8 +11,7 @@
  *
  * Small spikes (kerbs, potholes) are filtered with a 150 ms moving average.
  */
-const FileStore = require('./kit/store');
-const History = require('./kit/history');
+const fs = require('fs');
 const path = require('path');
 const mgu = require('./kit/mgu');
 const { withAlpha } = require('./kit/canvas');
@@ -24,14 +23,6 @@ const W = 1600, H = 520;
 const MPH = 1.609344;
 const SECT = 48;
 const GO = '#2fd27a';
-/**
- * Width of a button on the page (G.button: only where the kit runs the screen): upstream's w, or wider where
- * the translated label - or the kit's Confirm of a reset that asks first - needs more, so it stays inside its pill.
- */
-function buttonW(cv, w, h, labels) {
-    if (!cv.own) return w;
-    return Math.max(w, ...labels.map((s) => Math.ceil(cv.textWidth(translate(s).toUpperCase(), h * 0.4, { font: 'bold', spacing: 1.5 }) + h)));
-}
 
 mgu.run({
     async start(ctx) {
@@ -39,12 +30,11 @@ mgu.run({
         const car = new Car(ctx, ['accel', 'speed', 'rpm']);
 
         const FILE = path.join(ctx.dataDir, 'gforce_records.json');
-        // kit/store.js: written atomically (synchronously, as the exit hook below needs); a file that does not
-        // parse is moved aside (and logged), not overwritten
-        const rec = FileStore.load(FILE, { log, fallback: {}, valid: History.gforce });
+        let rec = {};
+        try { rec = JSON.parse(fs.readFileSync(FILE, 'utf8')); } catch (e) { /* first start */ }
         const demoRec = {};
-        let saveTimer = null, saveError = false;
-        const saveNow = () => { clearTimeout(saveTimer); saveTimer = null; saveError = !FileStore.save(FILE, rec, { log }); };
+        let saveTimer = null;
+        const saveNow = () => { clearTimeout(saveTimer); saveTimer = null; try { fs.writeFileSync(FILE, JSON.stringify(rec)); } catch (e) { log.warn('save: ' + e); } };
         const saveSoon = () => { if (!saveTimer) saveTimer = setTimeout(saveNow, 5000); };
         // shutdown exits 200 ms after MainApp asks (kit mgu.js): a record still waiting for its 5 s goes now
         process.on('exit', () => { if (saveTimer) saveNow(); });
@@ -166,8 +156,7 @@ mgu.run({
 
             // session peaks
             G.panel(cv, t, 1092, 44, 484, 468, 'Session peaks');
-            const mw = buttonW(cv, 180, 40, ['Reset max', 'Confirm']);
-            G.button(cv, t, 1576 - 20 - mw, 56, mw, 40, 'Reset max', act, { key: 'reset', confirm: true });
+            G.button(cv, t, 1576 - 20 - 180, 56, 180, 40, 'Reset max', act, { key: 'reset', confirm: true });
             peakBox(cv, t, 1116, 116, 'ACCEL', S.peak.acc, R.acc);
             peakBox(cv, t, 1346, 116, 'BRAKE', S.peak.brk, R.brk);
             // (the room spread over the gaps, the last line at the panel's bottom)
@@ -184,8 +173,7 @@ mgu.run({
         function drawRecords(cv, t) {
             const R = car.data().demo ? demoRec : rec;
             const sh = G.panel(cv, t, 24, 44, 1552, 468, 'All-time records'), ex = sh.y + sh.h - G.BOTTOM;
-            const dw = buttonW(cv, 200, 40, ['Delete all', 'Yes, clear']);
-            G.button(cv, t, 1576 - 20 - dw, 56, dw, 40, clearArmed ? 'Yes, clear' : 'Delete all', act, { key: 'clear', color: clearArmed ? t.crit : null });
+            G.button(cv, t, 1576 - 20 - 200, 56, 200, 40, clearArmed ? 'Yes, clear' : 'Delete all', act, { key: 'clear', color: clearArmed ? t.crit : null });
             const rows = [['acc', 'Hardest launch', 'g'], ['brk', 'Hardest stop', 'g'], ['left', 'Left-hander', 'g'], ['right', 'Right-hander', 'g'], ['comb', 'Combined', 'g'], ['vmax', 'Top speed', mph() ? 'mph' : 'km/h']];
             rows.forEach(([k, label, u], i) => {
                 const col = i % 2, row = Math.floor(i / 2), x = 48 + col * 760, y = Math.round(135 + row * (123 + G.toMargin(ex, 60) / 2));     // the room spread over the gaps
@@ -199,8 +187,7 @@ mgu.run({
 
         /** G20-style frame: tab bar with the page names along the top. */
         function header(cv, t) {
-            const demo = car.data().demo;
-            G.frame(cv, t, ['G-force', 'Records'], page, [demo && { text: 'DEMO' }, !demo && saveError && { text: 'NOT SAVED', color: 'warn' }]);
+            G.frame(cv, t, ['G-force', 'Records'], page, [car.data().demo && { text: 'DEMO' }]);
         }
 
         async function render() {
@@ -215,8 +202,7 @@ mgu.run({
         const flip = () => { page = 1 - page; actionLabel(); return render(); };
         ui.onClick('BTN_PAGE', flip);
         ui.onClick('BTN_PREV', flip);
-        // (the tests' fake head unit, tests/diag/fakes.js, has no screen API: there the HMI's bar, as on the old path)
-        if (ctx.onTab) ctx.onTab((i) => i !== page && flip());
+        ctx.onTab((i) => i !== page && flip());
         // Reset max (G-force) / Delete all, pressed twice (Records): on the page, or the bar's button
         function act() {
             if (page === 0) { newSession(); return render(); }
@@ -228,7 +214,7 @@ mgu.run({
             actionLabel(); return render();
         }
         ui.onClick('BTN_ACTION', act);
-        if (ctx.hideButton) ctx.hideButton('BTN_ACTION');
+        ctx.hideButton('BTN_ACTION');
         // every screen refresh (60 fps) with the GPU renderer; 10 fps in software (PNG frames)
         ctx.loop('MAIN', 10, render);
         render().then(() => log.info('first frame done')).catch((e) => log.warn('first render: ' + e));

@@ -10,16 +10,13 @@
  * Pages: live run  /  best times + recent runs (saved in data/draggy_runs.json)
  * Speed: Vehicle2.statusCarSpeed2 (centre-of-gravity speed, BMW scaling).
  */
-const FileStore = require('./kit/store');
-const History = require('./kit/history');
+const fs = require('fs');
 const path = require('path');
 const mgu = require('./kit/mgu');
 const { withAlpha } = require('./kit/canvas');
 const G = require('./kit/gauges');
 const { RunTimer } = require('./timer');
 const Demo = require('./demo');
-const clock = require('./kit/clock');
-const { t: translate } = require('./kit/i18n');
 
 const W = 1600, H = 520;
 const MPH = 1.609344;
@@ -44,14 +41,6 @@ const DIST = {
     em: { key: 'em', label: '1/8 mile', dist: 201.168 },
     m1000: { key: 'm1000', label: '1000 m', dist: 1000 },
 };
-/**
- * Width of a button on the page (G.button: only where the kit runs the screen): upstream's w, or wider where
- * the translated label - or the kit's Confirm of a reset that asks first - needs more, so it stays inside its pill.
- */
-function buttonW(cv, w, h, labels) {
-    if (!cv.own) return w;
-    return Math.max(w, ...labels.map((s) => Math.ceil(cv.textWidth(translate(s).toUpperCase(), h * 0.4, { font: 'bold', spacing: 1.5 }) + h)));
-}
 
 mgu.run({
     async start(ctx) {
@@ -65,12 +54,11 @@ mgu.run({
 
         /* ---------- saved runs ---------- */
         const FILE = path.join(ctx.dataDir, 'draggy_runs.json');
-        // kit/store.js: written atomically; a file that does not parse is moved aside (and logged), not overwritten
-        const saved = Object.assign({ best: {}, runs: [] }, FileStore.load(FILE, { log, fallback: {}, valid: History.drag }));
+        let saved = { best: {}, runs: [] };
+        try { saved = Object.assign(saved, JSON.parse(fs.readFileSync(FILE, 'utf8'))); } catch (e) { /* first start */ }
         const demoStore = { best: {}, runs: [] };          // demo runs are shown but never saved
         let store = saved;
-        let saveError = false;
-        const save = () => { if (store === saved) saveError = !FileStore.save(FILE, saved, { log }); };
+        const save = () => { if (store !== saved) return; try { fs.writeFileSync(FILE, JSON.stringify(saved)); } catch (e) { log.warn('save runs: ' + e); } };
         const bestKey = (k) => k + (settings.get('rollout') ? '@ro' : '');
 
         /* ---------- timer ---------- */
@@ -98,18 +86,18 @@ mgu.run({
         /* ---------- live data ---------- */
         const live = { speed: null, g: null, rpm: null };
         let lastCar = 0, feedDemo = false, peakG = 0, speedSub = null;
-        const demo = new Demo(clock.now()), t0 = clock.now();
+        const demo = new Demo(), t0 = Date.now();
         // Auto: demo only until the car answers. A parked car sends no new speed for minutes; going by
         // "no speed for 5 s" switched to demo runs while standing (and back on the first real sample).
         const carPresent = () => lastCar > 0 || !!(speedSub && speedSub.available);
-        const usingDemo = () => settings.get('demo') === 'on' || (settings.get('demo') === 'auto' && !carPresent() && clock.now() - t0 > 5000);
+        const usingDemo = () => settings.get('demo') === 'on' || (settings.get('demo') === 'auto' && !carPresent() && Date.now() - t0 > 5000);
         newTimer();
 
         ctx.signals.watch('de.bmw.infotainment.vehicle.Vehicle2', '1', {
             statusCarSpeed2: (v) => {
                 const kmh = sc('speed', v.speedVehicleCentreOfGravity);
                 if (kmh === null) return;
-                lastCar = clock.now(); live.speed = kmh;
+                lastCar = Date.now(); live.speed = kmh;
                 if (!feedDemo) timer.feed(lastCar, kmh);
             },
         }, log).then((s) => { speedSub = s; log.info('speed signal ' + (s.error ? 'error ' + s.error : 'subscribed')); return s; });
@@ -130,8 +118,8 @@ mgu.run({
         setInterval(() => {
             const d = usingDemo();
             if (d !== feedDemo) { feedDemo = d; newTimer(); log.info(d ? 'demo data on' : 'live speed'); }
-            if (!feedDemo) { timer.idle(clock.now()); return; }
-            const now = clock.now(), v = demo.speed(now);
+            if (!feedDemo) { timer.idle(Date.now()); return; }
+            const now = Date.now(), v = demo.speed(now);
             live.g = (v - prevV) / 3.6 / 0.05 / 9.80665; prevV = v;
             live.speed = v;
             timer.feed(now, v);
@@ -141,7 +129,7 @@ mgu.run({
         /* ---------- units / format ---------- */
         const mph = () => settings.get('speedUnit') === 'mph';
         const V = (k) => (k == null ? null : mph() ? k / MPH : k);
-        const vU = () => translate(mph() ? 'mph' : 'km/h');
+        const vU = () => (mph() ? 'mph' : 'km/h');
         const secs = (s) => (G.isNum(s) ? s.toFixed(2) : '--.--');
         const when = (ms) => { const d = new Date(ms); const p = (n) => String(n).padStart(2, '0'); return p(d.getDate()) + '.' + p(d.getMonth() + 1) + '. ' + p(d.getHours()) + ':' + p(d.getMinutes()); };
 
@@ -153,11 +141,11 @@ mgu.run({
 
         /** G20-style frame: tab bar with the page names along the top. */
         function header(cv, t) {
-            G.frame(cv, t, ['Drag timer', 'Best times'], page, [feedDemo && { text: 'DEMO' }, !feedDemo && saveError && { text: 'NOT SAVED', color: 'warn' }, settings.get('rollout') && { text: 'ROLLOUT 1 FT', color: 'dim' }]);
+            G.frame(cv, t, ['Drag timer', 'Best times'], page, [feedDemo && { text: 'DEMO' }, settings.get('rollout') && { text: 'ROLLOUT 1 FT', color: 'dim' }]);
         }
 
         function drawRun(cv, t) {
-            const now = clock.now();
+            const now = Date.now();
             const [stTxt, stCol] = STATE[timer.state];
             const col = stCol === 'go' ? GO : t[stCol];
             // --- speed + clock ---
@@ -178,9 +166,7 @@ mgu.run({
             cv.text(stTxt, 284, 446 + es, 26, col, { align: 'center', font: 'bold', spacing: 3 });
             cv.text('PEAK ' + (peakG > 0 ? peakG.toFixed(2) : '-.--') + ' g', 44, 493 + eb, 22, t.dim, { font: 'bold', spacing: 1 });
             if (G.isNum(live.rpm)) cv.text(Math.round(live.rpm) + ' rpm', 524, 493 + eb, 22, t.dim, { align: 'right', font: 'bold', spacing: 1 });
-            // (centred under the state line as upstream's 140 px one; wider for a longer translated label)
-            const rw = buttonW(cv, 140, 38, ['Reset run', 'Confirm']);
-            G.button(cv, t, 284 - rw / 2, 466 + eb, rw, 38, 'Reset run', act, { key: 'reset', confirm: true });
+            G.button(cv, t, 214, 466 + eb, 140, 38, 'Reset run', act, { key: 'reset', confirm: true });
 
             // --- speed trace ---
             G.panel(cv, t, 568, 44, 520, 468, 'Speed trace');
@@ -218,9 +204,9 @@ mgu.run({
                 cv.text(s.label, 1136, y + 22, 24, t.dim, { font: 'bold', spacing: 0.5 });
                 cv.text(secs(r), 1520, y + 46, 44, G.isNum(r) ? t.text : withAlpha(t.dim, 0.6), { align: 'right', font: 'num' });
                 cv.text('s', 1528, y + 46, 22, t.dim);
-                let sub = b ? translate('best') + ' ' + secs(b.s) : 'no best yet', subCol = t.dim;
+                let sub = b ? 'best ' + secs(b.s) : 'no best yet', subCol = t.dim;
                 if (G.isNum(r) && lastNewBest[s.key]) { sub = 'NEW BEST'; subCol = GO; } else if (G.isNum(r) && b) {
-                    const d = r - b.s; sub = (d >= 0 ? '+' : '') + d.toFixed(2) + '  ' + translate('vs best') + ' ' + secs(b.s); subCol = d <= 0 ? GO : t.dim;
+                    const d = r - b.s; sub = (d >= 0 ? '+' : '') + d.toFixed(2) + '  vs best ' + secs(b.s); subCol = d <= 0 ? GO : t.dim;
                 }
                 if (s.dist && G.isNum(timer.trapSpeed[s.key])) sub = '@ ' + Math.round(V(timer.trapSpeed[s.key])) + ' ' + vU() + '   ' + sub;
                 cv.text(sub, 1136, y + 52, 22, subCol, { font: 'label' });
@@ -231,8 +217,7 @@ mgu.run({
         function drawBest(cv, t) {
             const sp = splits();
             const sh = G.panel(cv, t, 24, 44, 640, 468, 'Best times' + (settings.get('rollout') ? ' (rollout)' : '')), ex = sh.y + sh.h - G.BOTTOM;
-            const cw = buttonW(cv, 200, 40, ['Reset best', 'Yes, clear']);
-            G.button(cv, t, 664 - 20 - cw, 56, cw, 40, clearArmed ? 'Yes, clear' : 'Reset best', act, { key: 'clear', color: clearArmed ? t.crit : null });
+            G.button(cv, t, 664 - 20 - 200, 56, 200, 40, clearArmed ? 'Yes, clear' : 'Reset best', act, { key: 'clear', color: clearArmed ? t.crit : null });
             sp.forEach((s, i) => {
                 // (the page reaching lower on screen: the rows clear of Reset best, the rest of the room spread over the gaps)
                 const y = Math.round(95 + (cv.extra ? 25 : 0) + i * (83 + Math.max(0, ex - 25) / 4)), b = store.best[bestKey(s.key)];
@@ -276,8 +261,7 @@ mgu.run({
         const flip = () => { page = 1 - page; actionLabel(); return render(); };
         ui.onClick('BTN_PAGE', flip);
         ui.onClick('BTN_PREV', flip);
-        // (the tests' fake head unit, tests/diag/fakes.js, has no screen API: there the HMI's bar, as on the old path)
-        if (ctx.onTab) ctx.onTab((i) => i !== page && flip());
+        ctx.onTab((i) => i !== page && flip());
         // Reset run (Drag timer) / Reset best, pressed twice (Best times): on the page, or the bar's button
         function act() {
             if (page === 0) { timer.reset(); peakG = 0; lastNewBest = {}; return render(); }
@@ -292,7 +276,7 @@ mgu.run({
             return render();
         }
         ui.onClick('BTN_ACTION', act);
-        if (ctx.hideButton) ctx.hideButton('BTN_ACTION');
+        ctx.hideButton('BTN_ACTION');
 
         // every screen refresh (60 fps) with the GPU renderer; 8 fps in software (PNG frames)
         ctx.loop('MAIN', 8, render);

@@ -21,21 +21,16 @@
  * slowPoll s while a live page or the widget is shown). Speed, engine, climate and comfort states
  * are eDrive's (sh.live, from SOME/IP).
  *
- * MGU Tools: upstream 2.7.3, with the texts through ui_text.js (the Russian build) and the files written by
- * kit/store.js (atomically; a file that doesn't parse is moved aside). No check is changed and no extra gate is
- * added; the clock is upstream's wall clock (this part shares one live object with main.js).
- *
  *   const lv = require('./live')(ctx, { diag, reader, exclusive, live, page })
  *   lv.PAGES, lv.DIAG (page names), lv.NAMES, lv.draw(name, cv, t) -> data, lv.actionLabel(name)
  *   (the first bar button's name on that page, or null), lv.action(name), lv.climate()
  */
+const fs = require('fs');
 const path = require('path');
 const { Canvas, withAlpha } = require('./kit/canvas');
 const G = require('./kit/gauges');
 const { hex } = require('./kit/diag');
 const { t: translate, plural } = require('./kit/i18n');
-const store = require('./kit/store');
-const { text: uiText, message: uiMessage, isRussian } = require('./ui_text');
 
 const W = 1600, H = 520;
 const GO = '#2fd27a';
@@ -86,9 +81,10 @@ module.exports = function live(ctx, sh) {
 
     /* ---------- persisted: the learned on-board baseline and climate extras ---------- */
     const STATE = path.join(ctx.dataDir, 'live.json');
-    const st = store.load(STATE, { log, fallback: {} }) || {};
+    let st = {};
+    try { st = JSON.parse(fs.readFileSync(STATE, 'utf8')) || {}; } catch (e) { /* first run */ }
     let savedAt = 0, saved = JSON.stringify(st);
-    const save = () => { savedAt = Date.now(); saved = JSON.stringify(st); store.write(STATE, saved, { log }); };
+    const save = () => { savedAt = Date.now(); saved = JSON.stringify(st); try { fs.writeFileSync(STATE, saved); } catch (e) { log.warn('save: ' + e); } };
     // what is measured while driving (use, otherKw) is saved every 5 min (flash), the rest at MainApp's shutdown
     const USE_SAVE_MS = 300000;
     process.on('exit', () => { if (JSON.stringify(st) !== saved) save(); });
@@ -315,7 +311,8 @@ module.exports = function live(ctx, sh) {
     const probe = {};                                   // name -> { raw, t }
     const probeMiss = {}, probeSkipUntil = {};
     const PROBE_FILE = path.join(ctx.dataDir, 'probes.json');
-    let samples = store.load(PROBE_FILE, { log, fallback: [] }) || [];
+    let samples = [];
+    try { samples = JSON.parse(fs.readFileSync(PROBE_FILE, 'utf8')) || []; } catch (e) { /* none yet */ }
     async function readProbes() {
         if (!PROBES.length) return;
         for (const pr of PROBES) {
@@ -339,7 +336,7 @@ module.exports = function live(ctx, sh) {
             PROBES.forEach((pr) => { row[pr.name] = probe[pr.name] ? probe[pr.name].raw : null; });
             samples.push(row);
             if (samples.length > 600) samples = samples.slice(-600);
-            if (samples.length % 6 === 0) store.save(PROBE_FILE, samples, { log });
+            if (samples.length % 6 === 0) { try { fs.writeFileSync(PROBE_FILE, JSON.stringify(samples)); } catch (e) { /* ok */ } }
         }
     }
     /** A probe's value now: { raw, kw (with a known factor) } or null. */
@@ -370,7 +367,7 @@ module.exports = function live(ctx, sh) {
     };
     const scanUnit = () => (SCAN_UNITS[+settings.get('scanUnit')] ? +settings.get('scanUnit') : 7);
     const scanFile = (u, prev) => path.join(ctx.dataDir, 'scan_' + hex(u) + (prev ? '_prev' : '') + '.json');
-    const readScan = (f) => { const o = store.load(f, { log, fallback: null }); return o && o.hits ? o : null; };
+    const readScan = (f) => { try { const o = JSON.parse(fs.readFileSync(f, 'utf8')); return o && o.hits ? o : null; } catch (e) { return null; } };
     const scan = { unit: 0, running: false, done: 0, total: 0, hits: [], noReply: 0, t: 0, prev: null };
     function loadScan() {
         const u = scanUnit();
@@ -391,7 +388,7 @@ module.exports = function live(ctx, sh) {
         if (scan.running || !diag.available || !inUse()) return;
         const u = scanUnit(), unit = SCAN_UNITS[u];
         loadScan();
-        if (scan.t) store.save(scanFile(u, true), { hits: scan.hits, done: scan.done, t: scan.t, noReply: scan.noReply }, { log });
+        if (scan.t) { try { fs.writeFileSync(scanFile(u, true), JSON.stringify({ hits: scan.hits, done: scan.done, t: scan.t, noReply: scan.noReply })); } catch (e) { /* ok */ } }
         scan.prev = scan.t ? { hits: scan.hits, t: scan.t } : scan.prev;
         Object.assign(scan, { unit: u, running: true, done: 0, hits: [], noReply: 0, t: Date.now() });
         log.info('scan: ' + unit.name + ' 0x' + hex(u) + ', ' + scan.total + ' identifiers');
@@ -415,7 +412,7 @@ module.exports = function live(ctx, sh) {
             }
         }
         scan.running = false;
-        store.save(scanFile(u), { hits: scan.hits, done: scan.done, t: scan.t, noReply: scan.noReply }, { log });
+        try { fs.writeFileSync(scanFile(u), JSON.stringify({ hits: scan.hits, done: scan.done, t: scan.t, noReply: scan.noReply })); } catch (e) { log.warn('scan save: ' + e); }
         log.info('scan done: ' + scan.hits.length + ' identifiers answer');
     }
     /* ---------- live comparison after a scan ----------
@@ -448,7 +445,7 @@ module.exports = function live(ctx, sh) {
             });
         }
         cmpState.now = now; cmpState.cycles++;
-        store.save(scanFile(scan.unit).replace('.json', '_live.json'), { t: cmpState.t, base: cmpState.base, now: cmpState.now, flips: cmpState.flips }, { log });
+        try { fs.writeFileSync(scanFile(scan.unit).replace('.json', '_live.json'), JSON.stringify({ t: cmpState.t, base: cmpState.base, now: cmpState.now, flips: cmpState.flips })); } catch (e) { /* ok */ }
         cmpState.busy = false;
     }
     setInterval(() => { watchCycle().catch((e) => { cmpState.busy = false; log.warn('watch: ' + e); }); }, 3000);
@@ -607,19 +604,14 @@ module.exports = function live(ctx, sh) {
         // the scale: every 20 kW marked, labels at the ends and zero
         const ticks = [];
         for (let v = -Math.floor(inMax / 20) * 20; v <= outMax; v += 20) ticks.push(v);
-        // (MGU Tools, Russian build: the units are translated before the kit draws them; zero's label is left out where
-        // the longer Russian charge-limit label would run into it. The scale runs over w - 18, the labels 20 px bold)
-        const left = uiMessage((inLim ? 'REGEN MAX ' : '') + '-' + lbl(inMax)), right = uiMessage(lbl(outMax));
-        const lw = (q) => cv.textWidth(q, 20, { font: 'bold' }), xz = x + (w - 18) * inMax / (inMax + outMax);
-        const zero = !isRussian() || (x + lw(left) + 12 < xz - lw('0') / 2 && xz + lw('0') / 2 + 12 < x + w - 18 - lw(right));
         G.bar(cv, t, x, y, w, head ? 92 : 60, {
             head: !!head, label: head && head.label, unit: 'kW', text: head && head.pw.text, valueColor: head && head.pw.col,
             value: kw, min: -inMax, max: outMax, origin: 0, ramp: 'hot', negColor: GO, smooth: 22, ticks,
             labels: [
-                { value: -inMax, text: left, color: inLim ? GO : null, align: 'left' },
-                zero && { value: 0, text: '0' },
-                { value: outMax, text: right, align: 'right' },
-            ].filter(Boolean),
+                { value: -inMax, text: (inLim ? 'REGEN MAX ' : '') + '-' + lbl(inMax), color: inLim ? GO : null, align: 'left' },
+                { value: 0, text: '0' },
+                { value: outMax, text: lbl(outMax), align: 'right' },
+            ],
         });
     }
 
@@ -641,8 +633,8 @@ module.exports = function live(ctx, sh) {
             cv.fillRect(xa, v > 0 ? y0 - hh : y0, xb - xa, Math.abs(hh), v > 0 ? withAlpha(t.text, 0.75) : withAlpha(GO, 0.85));
         }
         cv.noclip();
-        uiText(cv, secs >= 120 ? Math.round(secs / 60) + ' min ago' : secs + ' s ago', x, y + h + 22, 16, t.dim);
-        uiText(cv, 'now', x + w, y + h + 22, 16, t.dim, { align: 'right' });
+        cv.text(secs >= 120 ? Math.round(secs / 60) + ' min ago' : secs + ' s ago', x, y + h + 22, 16, t.dim);
+        cv.text('now', x + w, y + h + 22, 16, t.dim, { align: 'right' });
     }
 
     /** Demo history: f(demo sample) over the last `secs`, every `step` s. */
@@ -664,12 +656,12 @@ module.exports = function live(ctx, sh) {
         const h0 = h;
         h = G.panel(cv, t, x, y, w, h, 'Live battery usage').h;     // (with the room below the page: a taller trace)
         const ky = y + (big ? 152 : 118);
-        const vw = uiText(cv, pw.text, x + 24, ky, big ? 120 : 84, pw.col, { font: 'num' });
-        uiText(cv, 'kW', x + 34 + vw, ky, big ? 38 : 30, t.dim, { font: 'bold' });
+        const vw = cv.text(pw.text, x + 24, ky, big ? 120 : 84, pw.col, { font: 'num' });
+        cv.text('kW', x + 34 + vw, ky, big ? 38 : 30, t.dim, { font: 'bold' });
         const pcol = pw.what === 'REGEN' || pw.what === 'CHARGING' ? GO : pw.kw === null ? t.dim : t.text;
-        uiText(cv, pw.what, r, y + 72, 26, pcol, { font: 'bold', spacing: 2, align: 'right' });
-        uiText(cv, G.isNum(d.v) ? G.fmt(d.v, 0) + ' V' + (G.isNum(d.a) ? '  ·  ' + G.fmt(-d.a * (cfg.powerSign < 0 ? 1 : -1), 0) + ' A' : '') : 'pack --', r, y + 106, 22, t.dim, { align: 'right' });
-        if (d.engine) uiText(cv, 'ENGINE RUNNING', r, y + 138, 20, t.warn, { font: 'bold', spacing: 1.5, align: 'right' });
+        cv.text(pw.what, r, y + 72, 26, pcol, { font: 'bold', spacing: 2, align: 'right' });
+        cv.text(G.isNum(d.v) ? G.fmt(d.v, 0) + ' V' + (G.isNum(d.a) ? '  ·  ' + G.fmt(-d.a * (cfg.powerSign < 0 ? 1 : -1), 0) + ' A' : '') : 'pack --', r, y + 106, 22, t.dim, { align: 'right' });
+        if (d.engine) cv.text('ENGINE RUNNING', r, y + 138, 20, t.warn, { font: 'bold', spacing: 1.5, align: 'right' });
         const by = ky + 30;
         powerBar(cv, t, x + 24, by, w - 48, pw.kw, lim);
         // (with room: its time labels end G.MARGIN over the panel's bottom, as the other panels' last lines)
@@ -691,9 +683,9 @@ module.exports = function live(ctx, sh) {
         const spread = cvv && G.isNum(cvv.min) && G.isNum(cvv.max) ? (cvv.max - cvv.min) * 1000 : null;
         const scol = !G.isNum(spread) ? t.dim : spread > 100 ? t.crit : spread > 50 ? t.warn : GO;
         const head = (hx, label, v, c, sub) => {
-            uiText(cv, label, hx, 112, 18, t.dim, { font: 'bold', spacing: 1.2 });
-            uiText(cv, v, hx, 148, 32, c, { font: 'bold' });
-            if (sub) uiText(cv, sub, hx, 172, 16, t.dim);
+            cv.text(label, hx, 112, 18, t.dim, { font: 'bold', spacing: 1.2 });
+            cv.text(v, hx, 148, 32, c, { font: 'bold' });
+            if (sub) cv.text(sub, hx, 172, 16, t.dim);
         };
         head(x + 24, 'LOWEST', cvv && G.isNum(cvv.min) ? G.fmt(cvv.min, 3) + ' V' : '--', t.warn, cvv && cvv.minAt ? translate('cell') + ' ' + cvv.minAt : '');
         head(x + 234, 'HIGHEST', cvv && G.isNum(cvv.max) ? G.fmt(cvv.max, 3) + ' V' : '--', t.accent2 || t.text, cvv && cvv.maxAt ? translate('cell') + ' ' + cvv.maxAt : '');
@@ -702,10 +694,10 @@ module.exports = function live(ctx, sh) {
         const ct = cellTemps(d);
         head(x + 654, 'TEMPERATURE', ct ? fmtT(ct.avg) : '--', ct ? tempColor(t, ct.avg) : t.dim,
             ct && G.isNum(ct.min) && G.isNum(ct.max) ? G.fmt(T(ct.min), 0) + ' - ' + G.fmt(T(ct.max), 0) + ' ' + tU() : '');
-        uiText(cv, 'CHARGE', r, 112, 18, t.dim, { font: 'bold', spacing: 1.2, align: 'right' });
-        const pc = uiText(cv, '%', r, 148, 20, t.dim, { font: 'bold', align: 'right' });
-        uiText(cv, G.isNum(d.soc) ? G.fmt(d.soc, 1) : '--', r - pc - 6, 148, 32, d.stale && d.stale.soc ? t.dim : t.text, { font: 'bold', align: 'right' });
-        if (G.isNum(d.soc)) uiText(cv, '~' + G.fmt(d.soc / 100 * settings.get('designKwh'), 1) + ' kWh', r, 172, 16, t.dim, { align: 'right' });
+        cv.text('CHARGE', r, 112, 18, t.dim, { font: 'bold', spacing: 1.2, align: 'right' });
+        const pc = cv.text('%', r, 148, 20, t.dim, { font: 'bold', align: 'right' });
+        cv.text(G.isNum(d.soc) ? G.fmt(d.soc, 1) : '--', r - pc - 6, 148, 32, d.stale && d.stale.soc ? t.dim : t.text, { font: 'bold', align: 'right' });
+        if (G.isNum(d.soc)) cv.text('~' + G.fmt(d.soc / 100 * settings.get('designKwh'), 1) + ' kWh', r, 172, 16, t.dim, { align: 'right' });
         if (cells) {
             // bars: from a floor below the lowest cell, so the differences show
             const x0 = x + 80, bw0 = r - x0, btop = 210, base = 420 + G.toMargin(ex, 70), n = cells.length, bw = bw0 / n;
@@ -713,7 +705,7 @@ module.exports = function live(ctx, sh) {
             const Y = (v) => base - (v - vlo) / (vhi - vlo) * (base - btop);
             [vlo, vhi].forEach((v) => {
                 cv.fillRect(x0, Math.round(Y(v)), bw0, 1, withAlpha(t.tick, 0.35));
-                uiText(cv, G.fmt(v, 3), x0 - 8, Y(v) + 6, 15, t.dim, { align: 'right' });
+                cv.text(G.fmt(v, 3), x0 - 8, Y(v) + 6, 15, t.dim, { align: 'right' });
             });
             cv.fillRect(x0, Math.round(Y(cvv.avg)), bw0, 1, withAlpha(t.text, 0.5));
             cells.forEach((v, i) => {
@@ -721,9 +713,9 @@ module.exports = function live(ctx, sh) {
                 const c = i + 1 === cvv.minAt ? t.warn : i + 1 === cvv.maxAt ? (t.accent2 || t.text) : withAlpha(t.text, 0.7);
                 cv.fillRect(x0 + i * bw + 1, Y(v), Math.max(1, bw - 2), base - Y(v), c);
             });
-            for (let i = 0; i < n; i += 12) uiText(cv, String(i + 1), x0 + i * bw + bw / 2, base + 22, 14, t.dim, { align: 'center' });
-            uiText(cv, String(n), x0 + (n - 1) * bw + bw / 2, base + 22, 14, t.dim, { align: 'center' });
-        } else uiText(cv, settings.get('diagPage') ? 'no reading - see Diagnostics' : 'no reading yet', x + w / 2, 300 + Math.round(ex / 2), 24, t.dim, { align: 'center' });
+            for (let i = 0; i < n; i += 12) cv.text(String(i + 1), x0 + i * bw + bw / 2, base + 22, 14, t.dim, { align: 'center' });
+            cv.text(String(n), x0 + (n - 1) * bw + bw / 2, base + 22, 14, t.dim, { align: 'center' });
+        } else cv.text(settings.get('diagPage') ? 'no reading - see Diagnostics' : 'no reading yet', x + w / 2, 300 + Math.round(ex / 2), 24, t.dim, { align: 'center' });
     }
 
     /** This drive: energy used, regen, net; what it went to (driving vs. climate); in the battery; the foot lines. */
@@ -736,45 +728,45 @@ module.exports = function live(ctx, sh) {
         // room below the page (ex): the parts spread down, the foot at the bottom
         const tp = tripNow(d), r = x + w - 24, e1 = Math.round(ex / 3), e2 = Math.round(ex * 2 / 3);
         const row = (y, label, v, c) => {
-            uiText(cv, label, x + 24, y, 20, t.dim, { font: 'bold', spacing: 1.5 });
-            const kw = uiText(cv, 'kWh', r, y + 44, 22, t.dim, { align: 'right' });
-            uiText(cv, G.fmt(v, v >= 10 ? 1 : 2), r - kw - 8, y + 44, 48, c, { font: 'num', align: 'right' });
+            cv.text(label, x + 24, y, 20, t.dim, { font: 'bold', spacing: 1.5 });
+            const kw = cv.text('kWh', r, y + 44, 22, t.dim, { align: 'right' });
+            cv.text(G.fmt(v, v >= 10 ? 1 : 2), r - kw - 8, y + 44, 48, c, { font: 'num', align: 'right' });
         };
         // used - regen = total, side by side (kWh)
         const cols = [[x + 24, 'USED', tp.out, t.text, 'left'], [x + w / 2, 'REGEN', tp.regen, GO, 'center'],
             [r, 'TOTAL', tp.out - tp.regen, t.text, 'right']];
         cols.forEach(([cx, label, v, c, align]) => {
-            uiText(cv, label, cx, y0 + 84, 20, t.dim, { font: 'bold', spacing: 1.5, align });
-            uiText(cv, G.fmt(v, v >= 10 ? 1 : 2), cx, y0 + 136, 44, c, { font: 'num', align });
-            uiText(cv, 'kWh', cx, y0 + 166, 18, t.dim, { align });
+            cv.text(label, cx, y0 + 84, 20, t.dim, { font: 'bold', spacing: 1.5, align });
+            cv.text(G.fmt(v, v >= 10 ? 1 : 2), cx, y0 + 136, 44, c, { font: 'num', align });
+            cv.text('kWh', cx, y0 + 166, 18, t.dim, { align });
         });
         if (inBattery) {
-            uiText(cv, 'IN BATTERY', x + 24, y0 + 222 + e1, 20, t.dim, { font: 'bold', spacing: 1.5 });
-            const kw2 = uiText(cv, 'kWh', r, y0 + 278 + e1, 22, t.dim, { align: 'right' });
-            const tw = uiText(cv, ' / ' + inBattery[1], r - kw2 - 8, y0 + 278 + e1, 30, t.dim, { font: 'bold', align: 'right' });
-            uiText(cv, inBattery[0], r - kw2 - 8 - tw, y0 + 278 + e1, 48, t.text, { font: 'num', align: 'right' });
+            cv.text('IN BATTERY', x + 24, y0 + 222 + e1, 20, t.dim, { font: 'bold', spacing: 1.5 });
+            const kw2 = cv.text('kWh', r, y0 + 278 + e1, 22, t.dim, { align: 'right' });
+            const tw = cv.text(' / ' + inBattery[1], r - kw2 - 8, y0 + 278 + e1, 30, t.dim, { font: 'bold', align: 'right' });
+            cv.text(inBattery[0], r - kw2 - 8 - tw, y0 + 278 + e1, 48, t.text, { font: 'num', align: 'right' });
         }
         const clim = Math.min(tp.climate || 0, tp.out), drive = Math.max(0, tp.out - clim);
         const cp2 = tp.out > 0.005 ? clim / tp.out : 0, dp = tp.out > 0.005 ? 1 - cp2 : 0;
         const pct = (f) => (tp.out > 0.005 ? Math.round(f * 100) + ' %' : '--'), yb = y0 + 340 + e2, sw = w - 48;
-        uiText(cv, 'DRIVING ' + pct(dp), x + 24, yb, 18, t.text, { font: 'bold', spacing: 1 });
-        uiText(cv, 'CLIMATE ' + pct(cp2), r, yb, 18, t.warn, { font: 'bold', spacing: 1, align: 'right' });
+        cv.text('DRIVING ' + pct(dp), x + 24, yb, 18, t.text, { font: 'bold', spacing: 1 });
+        cv.text('CLIMATE ' + pct(cp2), r, yb, 18, t.warn, { font: 'bold', spacing: 1, align: 'right' });
         // the split as a kit bar (G.bar, as Full and Holds): driving from the left, the climate's share the
         // rest of the track
         const has = tp.out > 0.005;
         G.bar(cv, t, x + 24, yb + 12, sw, 26, {
             head: false, value: has ? dp * 100 : null, max: 100, color: G.mix(t.text, t.bg, 0.25), track: has && cp2 > 0.005 ? 'warn' : null, ticks: [], smooth: false,
         });
-        (foot || []).forEach(([txt, col], i) => uiText(cv, txt, x + 24, y0 + 412 + ex + i * 30, 20, col || t.dim, { font: 'bold', spacing: 1, maxWidth: w - 48 }));
+        (foot || []).forEach(([txt, col], i) => cv.text(txt, x + 24, y0 + 412 + ex + i * 30, 20, col || t.dim, { font: 'bold', spacing: 1 }));
     }
 
     function renderUnit(cv, t, d) {
         G.panel(cv, t, 24, 44, 1552, 468, 'Battery unit (UDS)');
         const link = diag.p ? (diag.available ? 'link up' : 'link down') : 'no link (' + (diag.error || 'not started') + ')';
         const rr = readRate();
-        uiText(cv, 'UDS 22  ·  ' + link + '  ·  power read ' + (rr ? G.fmt(rr.hz, 1) + 'x/s, ' + G.fmt(rr.ms, 0) + ' ms each' : translate('n/a')) + (pMiss ? '  ·  power missed ' + pMiss : '') + (Object.keys(slowFail).length ? '  ·  missed ' + Object.keys(slowFail).map((k) => k + ' ' + slowFail[k]).join(' ') : '') + '  ·  power sign ' + cfg.powerSign + '  ·  baseline ' + G.fmt(baseline(), 2) + ' kW (' + (st.baseN || 0) + ' samples)', 48, 112, 22, t.text, { font: 'label', maxWidth: 1504 });
+        cv.text('UDS 22  ·  ' + link + '  ·  power read ' + (rr ? G.fmt(rr.hz, 1) + 'x/s, ' + G.fmt(rr.ms, 0) + ' ms each' : translate('n/a')) + (pMiss ? '  ·  power missed ' + pMiss : '') + (Object.keys(slowFail).length ? '  ·  missed ' + Object.keys(slowFail).map((k) => k + ' ' + slowFail[k]).join(' ') : '') + '  ·  power sign ' + cfg.powerSign + '  ·  baseline ' + G.fmt(baseline(), 2) + ' kW (' + (st.baseN || 0) + ' samples)', 48, 112, 22, t.text, { font: 'label' });
         const cols = [48, 200, 290, 380, 900, 1290];
-        ['VALUE', 'ECU', 'DID', 'REPLY', 'DECODED', 'STATUS'].forEach((h, i) => uiText(cv, h, cols[i], 156, 20, t.dim, { font: 'bold', spacing: 1 }));
+        ['VALUE', 'ECU', 'DID', 'REPLY', 'DECODED', 'STATUS'].forEach((h, i) => cv.text(h, cols[i], 156, 20, t.dim, { font: 'bold', spacing: 1 }));
         cv.fillRect(48, 168, 1504, 1, t.tick);
         const nRows = Object.keys(Object.assign({}, cfg.fast, cfg.slow)).reduce((a, k) => a + ((cfg.fast[k] || cfg.slow[k]) || []).length, 0);
         const rowH = Math.min(36, Math.floor(270 / Math.max(1, nRows))), fz = rowH >= 30 ? 20 : 16;
@@ -783,19 +775,19 @@ module.exports = function live(ctx, sh) {
         Object.keys(groups).forEach((name) => (groups[name] || []).forEach((c, i) => {
             const p = primary(c), r = reader.raws[reader.key(p)], ecu = c.ecu == null ? cfg.ecu : c.ecu;
             const used = pick[name] === i && r && r.ok;
-            uiText(cv, name + (used ? ' *' : ''), cols[0], y, fz + 2, used ? GO : t.text, { font: 'bold', translate: false });
-            uiText(cv, '0x' + hex(ecu), cols[1], y, fz, t.text, { font: 'label' });
-            uiText(cv, c.did, cols[2], y, fz, t.text, { font: 'label' });
+            cv.text(name + (used ? ' *' : ''), cols[0], y, fz + 2, used ? GO : t.text, { font: 'bold' });
+            cv.text('0x' + hex(ecu), cols[1], y, fz, t.text, { font: 'label' });
+            cv.text(c.did, cols[2], y, fz, t.text, { font: 'label' });
             const b = r ? r.bytes || '-' : '-';
-            uiText(cv, b.length > 46 ? b.slice(0, 45) + '…' : b, cols[3], y, fz - 2, t.dim, { font: 'label' });
+            cv.text(b.length > 46 ? b.slice(0, 45) + '…' : b, cols[3], y, fz - 2, t.dim, { font: 'label' });
             const dec = r && r.fields ? Object.keys(r.fields).map((k) => k + ' ' + (G.isNum(r.fields[k]) ? +r.fields[k].toFixed(3) : translate('n/a'))).join('  ')
                 : r && G.isNum(r.value) ? String(+r.value.toFixed(3)) : '-';
-            uiText(cv, dec.length > 34 ? dec.slice(0, 33) + '…' : dec, cols[4], y, fz - 2, t.text, { font: 'label', translate: false });
+            cv.text(dec.length > 34 ? dec.slice(0, 33) + '…' : dec, cols[4], y, fz - 2, t.text, { font: 'label' });
             const why = r ? (r.ok ? 'OK' : r.why) : 'not read';
-            uiText(cv, why.length > 22 ? why.slice(0, 21) + '…' : why, cols[5], y, fz - 2, r && r.ok ? GO : r ? t.warn : t.dim, { font: 'label' });
+            cv.text(why.length > 22 ? why.slice(0, 21) + '…' : why, cols[5], y, fz - 2, r && r.ok ? GO : r ? t.warn : t.dim, { font: 'label' });
             y += rowH;
         }));
-        uiText(cv, 'A value n/a or wrong? Adjust config.battery in apps/edrive/app.json and rebuild. Regen shown while accelerating: powerSign 1.', 48, 492, 18, t.dim);
+        cv.text('A value n/a or wrong? Adjust config.battery in apps/edrive/app.json and rebuild. Regen shown while accelerating: powerSign 1.', 48, 492, 18, t.dim);
     }
 
     function renderScan(cv, t, d) {
@@ -803,19 +795,19 @@ module.exports = function live(ctx, sh) {
         G.panel(cv, t, 24, 44, 1552, 468, 'Scan: ' + SCAN_UNITS[scan.unit].name + ' 0x' + hex(scan.unit));
         const pct = Math.round(scan.done / scan.total * 100);
         const ago = (ms) => (ms < 90000 ? 'just now' : ms < 5400000 ? Math.round(ms / 60000) + ' min ago' : Math.round(ms / 3600000) + ' h ago');
-        uiText(cv, scan.running ? 'SCANNING  ' + pct + ' %  (' + scan.done + ' / ' + scan.total + ')  -  stay on this page, car in READY'
+        cv.text(scan.running ? 'SCANNING  ' + pct + ' %  (' + scan.done + ' / ' + scan.total + ')  -  stay on this page, car in READY'
             : scan.known ? scan.hits.length + ' ' + plural(scan.hits.length, 'identifiers known for this car', 'identifiers known for this car') + '  ·  Reset = new baseline'
             : scan.t ? 'DONE ' + ago(Date.now() - scan.t) + '  ·  ' + scan.hits.length + ' answer' + (scan.noReply >= 25 && !scan.hits.length ? ' (unit not answering)' : '') + '  ·  Reset = new baseline'
             : diag.available ? 'starting...' : 'no diagnostic link yet', 1552, 80, 20, scan.running ? t.warn : t.dim, { font: 'bold', align: 'right' });
         const cells = [], packs = [], ch = changes();
         if (scan.unit === 7) scan.hits.forEach((h) => guesses(h.bytes).forEach((g) => (g.kind === 'cell' ? cells : packs).push(h.did + '@' + g.at + ' ' + (g.kind === 'cell' ? g.value.toFixed(3) : g.value.toFixed(1)))));
         const block = (y, label, list) => {
-            uiText(cv, label + ' (' + list.length + ')', 48, y, 20, t.dim, { font: 'bold', spacing: 1 });
+            cv.text(label + ' (' + list.length + ')', 48, y, 20, t.dim, { font: 'bold', spacing: 1 });
             const txt = list.join('   ') || '-';
             for (let i = 0, line = 0; i < txt.length && line < 3; line++) {
                 let j = Math.min(txt.length, i + 150);
                 if (j < txt.length) { const k = txt.lastIndexOf('   ', j); if (k > i) j = k; }
-                uiText(cv, txt.slice(i, j).trim(), 48, y + 30 + line * 26, 18, t.text, { font: 'label' });
+                cv.text(txt.slice(i, j).trim(), 48, y + 30 + line * 26, 18, t.text, { font: 'label' });
                 i = j;
             }
         };
@@ -824,16 +816,16 @@ module.exports = function live(ctx, sh) {
             block(236, 'LOOK LIKE PACK VOLTAGE (V)', packs);
         } else {
             block(126, ch ? 'CHANGED SINCE RESET ' + ago(Date.now() - cmpState.t).toUpperCase() + ' (identifier@byte before>now)  ·  live, read ' + cmpState.cycles + 'x' : 'LIVE COMPARISON: starts when the scan is done', ch || []);
-            uiText(cv, 'Climate OFF, press Reset drive totals, then set HI (heater) or LO with A/C: the values that follow it show up here.', 48, 300, 18, t.dim);
+            cv.text('Climate OFF, press Reset drive totals, then set HI (heater) or LO with A/C: the values that follow it show up here.', 48, 300, 18, t.dim);
         }
         cv.fillRect(48, 330, 1504, 1, t.tick);
-        uiText(cv, 'ALL THAT ANSWER (identifier: bytes)', 48, 358, 20, t.dim, { font: 'bold', spacing: 1 });
+        cv.text('ALL THAT ANSWER (identifier: bytes)', 48, 358, 20, t.dim, { font: 'bold', spacing: 1 });
         const all = scan.hits.map((h) => h.did + ':' + (h.bytes.length || (cmpState.now[h.did] || []).length)).join('  ');
         for (let i = 0, line = 0; i < all.length && line < 4; line++) {
-            uiText(cv, all.slice(i, i + 170), 48, 388 + line * 24, 17, t.text, { font: 'label' });
+            cv.text(all.slice(i, i + 170), 48, 388 + line * 24, 17, t.text, { font: 'label' });
             i += 170;
         }
-        uiText(cv, 'Take a photo when it says DONE. Settings > Scan unit picks the unit. Replies are saved in the app\'s data folder (scan_' + hex(scan.unit) + '.json).', 48, 498, 18, t.dim);
+        cv.text('Take a photo when it says DONE. Settings > Scan unit picks the unit. Replies are saved in the app\'s data folder (scan_' + hex(scan.unit) + '.json).', 48, 498, 18, t.dim);
     }
 
     /* ---------- home-screen widget ----------
@@ -876,7 +868,6 @@ module.exports = function live(ctx, sh) {
         };
         const prev = wtext[inst.spawnId] || (wtext[inst.spawnId] = {});
         Object.keys(cells).forEach((k) => {
-            if (cells[k][1] === 'Text') cells[k][0] = uiMessage(cells[k][0]);
             const v = JSON.stringify(cells[k][0]);
             if (prev[k] === v) return;
             prev[k] = v;
@@ -897,22 +888,22 @@ module.exports = function live(ctx, sh) {
         const scol = pw.what === 'REGEN' || pw.what === 'CHARGING' ? GO : pw.kw === null ? t.dim : t.text;
         const x0 = Math.round(w * sx), x1 = w - x0, y0 = Math.round(h * sy), y1 = h - y0, iw = x1 - x0;
         // top row: state left, V / A right
-        uiText(cv, pw.what, x0, y0 + 18, 18, scol, { font: 'bold', spacing: 1.5 });
-        uiText(cv, (G.isNum(d.v) ? G.fmt(d.v, 0) + ' V' : '-- V') + (G.isNum(d.a) ? '   ' + G.fmt(-d.a * (cfg.powerSign < 0 ? 1 : -1), 0) + ' A' : ''),
+        cv.text(pw.what, x0, y0 + 18, 18, scol, { font: 'bold', spacing: 1.5 });
+        cv.text((G.isNum(d.v) ? G.fmt(d.v, 0) + ' V' : '-- V') + (G.isNum(d.a) ? '   ' + G.fmt(-d.a * (cfg.powerSign < 0 ? 1 : -1), 0) + ' A' : ''),
             x1, y0 + 18, 16, t.dim, { align: 'right' });
-        if (d.engine || d.demo) uiText(cv, d.engine ? 'ENGINE ON' : 'DEMO', (x0 + x1) / 2, y0 + 18, 13, t.warn, { font: 'bold', spacing: 1, align: 'center' });
+        if (d.engine || d.demo) cv.text(d.engine ? 'ENGINE ON' : 'DEMO', (x0 + x1) / 2, y0 + 18, 13, t.warn, { font: 'bold', spacing: 1, align: 'center' });
         // power and charge
         const ky = y0 + 92;
-        const vw = uiText(cv, pw.text, x0, ky, 70, pw.col, { font: 'num' });
-        uiText(cv, 'kW', x0 + 8 + vw, ky, 22, t.dim, { font: 'bold' });
-        const pc = uiText(cv, '%', x1, ky, 20, t.dim, { font: 'bold', align: 'right' });
-        uiText(cv, G.isNum(d.soc) ? G.fmt(d.soc, 0) : '--', x1 - pc - 4, ky, 46, G.isNum(d.soc) ? t.text : t.dim, { font: 'num', align: 'right' });
+        const vw = cv.text(pw.text, x0, ky, 70, pw.col, { font: 'num' });
+        cv.text('kW', x0 + 8 + vw, ky, 22, t.dim, { font: 'bold' });
+        const pc = cv.text('%', x1, ky, 20, t.dim, { font: 'bold', align: 'right' });
+        cv.text(G.isNum(d.soc) ? G.fmt(d.soc, 0) : '--', x1 - pc - 4, ky, 46, G.isNum(d.soc) ? t.text : t.dim, { font: 'num', align: 'right' });
         widgetBar(cv, t, x0, ky + 16, iw, 12, pw.kw, lim);
         // bottom row
         const ct = cellTemps(d), tp = d.demo ? { out: 2.84, regen: 0.61 } : trip, yb = y1 - 26;
         const colm = (x, label, v, c, align) => {
-            uiText(cv, label, x, yb, 13, t.dim, { font: 'bold', spacing: 1, align });
-            uiText(cv, v, x, yb + 24, 21, c, { font: 'bold', align });
+            cv.text(label, x, yb, 13, t.dim, { font: 'bold', spacing: 1, align });
+            cv.text(v, x, yb + 24, 21, c, { font: 'bold', align });
         };
         colm(x0, 'CELLS', ct ? fmtT(ct.avg) : '--', ct ? tempColor(t, ct.avg) : t.dim);
         colm((x0 + x1) / 2, 'THIS DRIVE', G.fmt(tp.out - tp.regen, 2) + ' kWh', t.text, 'center');

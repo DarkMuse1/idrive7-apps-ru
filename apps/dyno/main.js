@@ -11,46 +11,35 @@
  * gives the best numbers. Runs are saved in data/dyno_runs.json; one can be
  * pinned as the baseline and is drawn behind every new run.
  */
-const FileStore = require('./kit/store');
-const History = require('./kit/history');
+const fs = require('fs');
 const path = require('path');
 const mgu = require('./kit/mgu');
 const { withAlpha } = require('./kit/canvas');
 const G = require('./kit/gauges');
 const Car = require('./kit/car');
 const Engine = require('./kit/engine');
-const { t: translate } = require('./kit/i18n');
 
 const W = 1600, H = 520;
 const BIN = 100, MIN_SPAN = 1500;
 const CDA = { coupe: 0.62, wagon: 0.72, suv: 0.95 }, RHO = 1.2, CRR = 0.013;
 const GO = '#2fd27a';
-/**
- * Width of a button on the page (G.button: only where the kit runs the screen): upstream's w, or wider where
- * the translated label - or the kit's Confirm of a reset that asks first - needs more, so it stays inside its pill.
- */
-function buttonW(cv, w, h, labels) {
-    if (!cv.own) return w;
-    return Math.max(w, ...labels.map((s) => Math.ceil(cv.textWidth(translate(s).toUpperCase(), h * 0.4, { font: 'bold', spacing: 1.5 }) + h)));
-}
 
 mgu.run({
     async start(ctx) {
         const { ui, settings, log } = ctx;
         // engine profile (diesel / petrol): the graph's rpm axis on Auto
         const engine = new Engine({ settings, dataDir: ctx.dataDir, log });
-        const car = new Car(ctx, ['rpm', 'speed', 'accel', 'torque'], { lateralAccel: false, extra: { [Engine.SIGNAL[0]]: engine.handlers() } });
+        const car = new Car(ctx, ['rpm', 'speed', 'accel', 'torque'], { [Engine.SIGNAL[0]]: engine.handlers() });
         car.setRedline(engine.redline());
         engine.onChange(() => car.setRedline(engine.redline()));
 
         /* ---------- storage ---------- */
         const FILE = path.join(ctx.dataDir, 'dyno_runs.json');
-        // kit/store.js: written atomically; a file that does not parse is moved aside (and logged), not overwritten
-        const saved = Object.assign({ runs: [], baseline: null }, FileStore.load(FILE, { log, fallback: {}, valid: History.dyno }));
+        let saved = { runs: [], baseline: null };
+        try { saved = Object.assign(saved, JSON.parse(fs.readFileSync(FILE, 'utf8'))); } catch (e) { /* first start */ }
         const demoStore = { runs: [], baseline: null };
         const store = () => (car.data().demo ? demoStore : saved);
-        let saveError = false;
-        const save = () => { saveError = !FileStore.save(FILE, saved, { log }); };
+        const save = () => { try { fs.writeFileSync(FILE, JSON.stringify(saved)); } catch (e) { log.warn('save: ' + e); } };
 
         /* ---------- units ---------- */
         const PU = { hp: [745.7, 'hp'], ps: [735.5, 'PS'], kw: [1000, 'kW'] };
@@ -203,8 +192,7 @@ mgu.run({
 
             G.panel(cv, t, 1168, 44, 408, 468, live.state === 'pull' ? 'Recording' : 'Peak');
             // Reset: the power and torque shown go blank until the next pull (saved runs stay)
-            const rw = buttonW(cv, 120, 40, ['Reset', 'Confirm']);
-            if (live.state !== 'pull') G.button(cv, t, 1576 - 20 - rw, 56, rw, 40, 'Reset', () => { cleared = true; lastRun = null; return render(); }, { key: 'reset', busy: !cur, confirm: true });
+            if (live.state !== 'pull') G.button(cv, t, 1576 - 20 - 120, 56, 120, 40, 'Reset', () => { cleared = true; lastRun = null; return render(); }, { key: 'reset', busy: !cur, confirm: true });
             const now = Date.now();
             if (live.state === 'pull') {
                 cv.circle(1540, 84, 9, Math.floor(now / 300) % 2 ? t.crit : withAlpha(t.crit, 0.3));
@@ -252,8 +240,7 @@ mgu.run({
 
         /** G20-style frame: tab bar with the page names along the top. */
         function header(cv, t) {
-            const demo = car.data().demo;
-            G.frame(cv, t, ['Virtual dyno', 'Saved runs'], page, [{ text: 'ESTIMATED', color: 'dim' }, demo && { text: 'DEMO' }, !demo && saveError && { text: 'NOT SAVED', color: 'warn' }]);
+            G.frame(cv, t, ['Virtual dyno', 'Saved runs'], page, [car.data().demo && { text: 'DEMO' }]);
         }
 
         async function render() {
@@ -270,10 +257,9 @@ mgu.run({
         const flip = () => { page = 1 - page; sel = 0; labels(); return render(); };
         ui.onClick('BTN_PAGE', flip);
         ui.onClick('BTN_PREV', flip);
-        // (the tests' fake head unit, tests/diag/fakes.js, has no screen API: there the HMI's bar, as on the old path)
-        if (ctx.onTab) ctx.onTab((i) => i !== page && flip());
+        ctx.onTab((i) => i !== page && flip());
         // the bar's Baseline / Next run: where the HMI draws the bar (the kit's has neither)
-        if (ctx.hideButton) ctx.hideButton('BTN_ACTION');
+        ctx.hideButton('BTN_ACTION');
         ui.onClick('BTN_ACTION', () => {
             const st = store();
             if (page === 1) { if (st.runs.length) sel = (sel + 1) % Math.min(rows, st.runs.length); lastRun = st.runs[sel] || null; return render(); }

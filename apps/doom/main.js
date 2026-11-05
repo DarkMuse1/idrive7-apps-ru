@@ -26,8 +26,7 @@ const mgu = require('./kit/mgu');
 const { Recorder, setImage } = require('./kit/record');
 const { Doom, GS } = require('./doom-core');
 const { Controls } = require('./controls');
-// upstream's kit/runtime/parked.js (origin/main), kept beside the app: no speed = parked, as upstream
-const Parked = require('./parked');
+const Parked = require('./kit/parked');
 
 const W = 1600, H = 520, IMG = 1, VIEW = 2, SIDE = 3, SLOT = 0;
 const DETAIL = { full: [1920, 504], medium: [1440, 378], low: [960, 252] };

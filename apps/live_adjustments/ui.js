@@ -205,9 +205,7 @@ function drawXDrive(cv, G, t, x, act, bottom) {
     cv.text('Experimental · ' + dsc + lmv + (x.onAvailable ? ' · xDrive on restores it, or an ignition cycle' : ' · xDrive returns when the ignition is switched off'), W / 2, ry + 40, 16,
         x.index && !x.tested ? (t.warn || '#d29922') : t.dim, { align: 'center', font: 'label' });
     // front-axle torque from the transfer case (LMV): 0 Nm while driving = xDrive is off
-    // ASCII minus: the kit's baked fonts have no U+2212 (it would be drawn as '?'), and after xDrive off
-    // a small negative front-axle torque (-1.75 Nm on the G01) is the expected reading
-    const nm = (v) => (v < 0 ? '-' : '') + Math.abs(v).toFixed(1) + ' Nm';
+    const nm = (v) => (v < 0 ? '−' : '') + Math.abs(v).toFixed(1) + ' Nm';
     const tq = x.torqueOk === false ? 'Front axle torque · the transfer case does not report it'
         : x.torque ? 'Front axle · requested ' + nm(x.torque.requested) + ' · actual ' + nm(x.torque.actual)
             + (x.peakRequested != null ? ' · peak requested while moving ' + nm(x.peakRequested) : '')

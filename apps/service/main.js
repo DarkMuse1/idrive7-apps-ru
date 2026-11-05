@@ -21,16 +21,6 @@
  * the car's hint, and Reset, then "Confirm reset" within 5 s. Elsewhere: select the item with
  * "Next item", press "Reset service", then "Reset service" again within 5 s to confirm.
  *
- * MGU Tools: upstream idrive7-apps Service 1.4.18 as it is - its reads, checks, reset flow (22 10 02, then
- * 2E 10 01 on the second press within 5 s), timeouts and demo ("Demo data" Auto / Always / Never) unchanged
- * (customer, 2026-11-04: upstream's checks are proven on cars). This project's only: the Russian texts go
- * through the kit's catalog as whole phrases (kit/runtime/i18n.js; templates with {placeholders} where
- * upstream glues English words, the units through it too); the confirmation window and the 60 s re-read on
- * the kit's monotonic clock (kit/clock.js, the due dates on its wall clock); the runtime's DEMO mark
- * (kit/datastate.js) follows the demo; the screen API only where the host has it; and where the kit runs
- * the screen and the list has more items than rows, a "Next (n/N)" button turns its pages (Next item is not
- * in the bar there, so upstream cannot reach those items by touch).
- *
  * Extended from upstream aa7517f42bfb00577dc786723525cc2be10bdc94.
  * Read-only enrichment: KOMBI/DME/DSC CBS records, counters, intervals and raw diagnostics.
  * UDS field interpretations are candidates until verified for this car; native HMI values win.
@@ -44,22 +34,11 @@
 const mgu = require('./kit/mgu');
 const { withAlpha } = require('./kit/canvas');
 const G = require('./kit/gauges');
-const { Diag, hex, NRC, monoNow, replyTo } = require('./kit/diag');
+const { Diag, hex, NRC, replyTo } = require('./kit/diag');
 const { fitText } = require('./kit/text-layout');
 const { cardSheet } = require('./kit/sheet');
 const { t: translate, getLanguage, plural } = require('./kit/i18n');
 const fonts = require('./kit/fonts');
-const clock = require('./kit/clock');
-/** translate() of a text with {name} placeholders, then the values put in (values are not translated) */
-const tf = (s, vars) => Object.keys(vars || {}).reduce((o, k) => o.split('{' + k + '}').join(String(vars[k])), translate(s));
-/** a decoded amount with its unit, in the build's language (upstream's valueText; '--' when there is none) */
-const qty = (v, unit) => (v === null || v === undefined ? '--'
-    : unit === '%' ? v + '%'
-    : unit === 'km' ? v + ' ' + translate('km')
-    : unit === 'days' ? v + ' ' + plural(Math.abs(v), 'day', 'days')
-    : unit === 'months' ? v + ' ' + plural(Math.abs(v), 'month', 'months') : String(v));
-/** a record's status in the build's language */
-const statusText = (r) => (/^Unknown 0x/.test(r.status) ? tf('unknown, 0x{code}', { code: r.status.slice(10) }) : translate(r.status));
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const MONTHS_RU_GENITIVE = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
@@ -71,15 +50,21 @@ const STATUS = ['', 'Due now', 'Due soon', 'OK', 'Due soon'];
 function parseDue(s, now) {
     s = String(s || '').trim();
     let m, d = null, mo, y;
-    if ((m = /^(\d{1,2})[./-](\d{1,2})[./-](\d{4})$/.exec(s))) { d = +m[1]; mo = +m[2]; y = +m[3]; } else if ((m = /^(\d{1,2})[./-](\d{4})$/.exec(s))) { mo = +m[1]; y = +m[2]; } else if ((m = /^(\d{4})[./-](\d{1,2})$/.exec(s))) { y = +m[1]; mo = +m[2]; } else return null;
+    if ((m = /^(\d{4})\s*년\s*(\d{1,2})\s*월(?:\s*(\d{1,2})\s*일)?$/.exec(s))) { y = +m[1]; mo = +m[2]; d = m[3] ? +m[3] : null; }
+    else if ((m = /^(\d{1,2})[./-](\d{1,2})[./-](\d{4})$/.exec(s))) { d = +m[1]; mo = +m[2]; y = +m[3]; } else if ((m = /^(\d{1,2})[./-](\d{4})$/.exec(s))) { mo = +m[1]; y = +m[2]; } else if ((m = /^(\d{4})[./-](\d{1,2})$/.exec(s))) { y = +m[1]; mo = +m[2]; } else return null;
     if (mo < 1 || mo > 12) return null;
-    now = now || new Date(clock.wall());
+    now = now || new Date();
     const months = (y - now.getFullYear()) * 12 + (mo - 1 - now.getMonth());
-    const n = Math.abs(months), time = n + ' ' + plural(n, 'month', 'months');
+    const n = Math.abs(months), unit = ' ' + plural(n, 'month', 'months');
+    if (getLanguage() === 'ko') return {
+        text: y + '년 ' + mo + '월' + (d ? ' ' + d + '일' : ''),
+        left: months > 0 ? n + '개월 후' : months === 0 ? '이번 달' : n + '개월 초과',
+        months,
+    };
     const month = d && getLanguage() === 'ru' ? MONTHS_RU_GENITIVE[mo - 1] : translate(MONTHS[mo - 1]);
     return {
         text: (d ? d + ' ' : '') + month + ' ' + y,
-        left: months > 0 ? tf('in {time}', { time }) : months === 0 ? translate('this month') : tf('{time} overdue', { time }),
+        left: months > 0 ? translate('in') + ' ' + n + unit : months === 0 ? translate('this month') : n + unit + ' ' + translate('overdue'),
         months,
     };
 }
@@ -146,10 +131,15 @@ function preferredRecord(records, id) {
     return matches.find((r) => r.address === owner) || (matches.length === 1 ? matches[0] : null);
 }
 
+const SHOW_UDS_ONLY = false;
+
 function mergeCbs(native, records) {
     const result = native.map((it) => Object.assign({}, it, {
         key: 'hmi:' + it.id, record: preferredRecord(records, it.id), native: true,
     }));
+    // UDS-only records (not a service requirement the HMI lists, e.g. the particulate filter) stay off the
+    // list: their fields aren't verified for the car. They are still on the Diagnostics page.
+    if (!SHOW_UDS_ONLY) return result;
     records.forEach((r) => {
         if (CBS_TECHNICAL_IDS.includes(r.id) || native.some((it) => it.id === r.id)
             || result.some((it) => it.id === r.id && it.record === preferredRecord(records, r.id))) return;
@@ -157,7 +147,7 @@ function mergeCbs(native, records) {
         if (chosen && chosen !== r) return;
         result.push({
             key: recordKey(r), id: r.id, name: cbsName(r.id) + ' [UDS]', colour: 0,
-            way: r.unit === 'km' ? qty(r.remaining, 'km') : '',
+            way: r.unit === 'km' ? valueText(r.remaining, ' km') : '',
             date: r.date, record: r, native: false,
         });
     });
@@ -238,8 +228,7 @@ mgu.run({
         const sig = ctx.signals;
         let list = null, sba = null, rawList = '', rawSba = '';
         let kombi = null, sel = 0, page = 0, msg = '', hint = null, version = 0;
-        let diagInit = null, scanBusy = false, scanAt = null, scanWall = null, diagPage = 0, diagPageCount = 1;
-        let scanState = { text: 'Not read yet' };        // what the Diagnostics page says (a template and its values)
+        let diagInit = null, scanBusy = false, scanAt = null, scanMessage = 'Not read yet', diagPage = 0, diagPageCount = 1;
         const cbsReads = new Map();
         const liveRecords = () => Array.from(cbsReads.values())
             .filter((r) => r.did === 0x1001 && r.state === 'ok').reduce((a, r) => a.concat(r.records), []);
@@ -251,8 +240,6 @@ mgu.run({
         };
         const useDemo = () => settings.get('demo') === 'on'
             || (settings.get('demo') === 'auto' && !list && !sba && !liveRecords().length);
-        // the runtime draws its DEMO mark while this says so (kit/datastate.js); Auto can switch any frame
-        const markDemo = () => require('./kit/datastate').setDemo('service', useDemo());
 
         /* ---------- reading ---------- */
         sig.watch(KOMBI, '1', {
@@ -295,9 +282,7 @@ mgu.run({
             changed();
             try {
                 if (useDemo()) {
-                    // (whole phrases for the catalog: "Service due in X or by Y", "... in X", "... by Y")
-                    hint.text = (it.way ? translate('Service due in') + ' ' + it.way + (it.date ? ' ' + translate('or by') + ' ' + it.date : '')
-                        : translate('Service due by') + ' ' + it.date) + ' ' + translate('(demo)');
+                    hint.text = 'Service due ' + [it.way && translate('in') + ' ' + it.way, it.date && translate('by') + ' ' + it.date].filter(Boolean).join(' ' + translate('or') + ' ') + ' (demo)';
                     changed();
                     return;
                 }
@@ -337,15 +322,15 @@ mgu.run({
         }
         async function refreshCbs() {
             if (scanBusy || reset || settings.get('demo') === 'on') return;
-            scanBusy = true; scanState = { text: 'Reading CBS (read-only)...' }; changed();
+            scanBusy = true; scanMessage = 'Reading CBS (read-only)...'; changed();
             try {
                 const d = await link();
                 for (const source of CBS_SOURCES) {
                     for (const did of source.dids) {
-                        if (settings.get('demo') === 'on') { scanState = { text: 'CBS read stopped (demo enabled)' }; return; }
+                        if (settings.get('demo') === 'on') { scanMessage = 'CBS read stopped (demo enabled)'; return; }
                         const entry = { address: source.address, source: source.name, did, records: [], raw: '', state: 'reading', at: null };
                         cbsReads.set(readKey(source.address, did), entry);
-                        scanState = { text: 'Reading {unit} 22 {did}', vars: { unit: source.name, did: hex(did, 4) } }; changed();
+                        scanMessage = 'Reading ' + source.name + ' 22 ' + hex(did, 4); changed();
                         try {
                             const data = [did >> 8, did & 255];
                             const r = await d.physical(source.address, 0x22, data, 5000, replyTo(0x22, data));
@@ -368,15 +353,13 @@ mgu.run({
                     }
                 }
                 const failed = Array.from(cbsReads.values()).filter((r) => r.state === 'error').length;
-                scanState = failed ? { text: 'CBS read complete - {n} of {all} reads failed; see below', vars: { n: failed, all: cbsReads.size } }
-                    : { text: 'CBS read complete' };
+                scanMessage = 'CBS read complete' + (failed ? ' - ' + failed + ' read(s) failed; see below' : '');
             } catch (e) {
-                const why = e.message || String(e);
-                scanState = { text: 'CBS read failed: {why}', vars: { why }, why };
-                cbsReads.forEach((r) => { r.state = 'error'; r.error = why; });
-                log.warn('CBS read failed: ' + why);
+                scanMessage = 'CBS read failed: ' + (e.message || e);
+                cbsReads.forEach((r) => { r.state = 'error'; r.error = scanMessage; });
+                log.warn(scanMessage);
             } finally {
-                scanAt = monoNow(); scanWall = Date.now(); scanBusy = false; changed();
+                scanAt = Date.now(); scanBusy = false; changed();
             }
         }
         /** the cluster's CBS record: { id: {avail, count} } */
@@ -394,7 +377,7 @@ mgu.run({
             if (useDemo()) return showMsg('No reset in demo mode');
             if (scanBusy) return showMsg('CBS read in progress - wait before resetting');
             if (reset && reset.busy) return;
-            if (reset && reset.item && monoNow() - reset.at < CONFIRM_MS) return doReset();
+            if (reset && reset.item && Date.now() - reset.at < CONFIRM_MS) return doReset();
             const its = items(), cur = its[sel];
             if (!cur || !cur.native || !RESETTABLE[cur.id]) return showMsg('Reset is limited to native brake fluid and vehicle check items');
             reset = { busy: true };
@@ -412,12 +395,11 @@ mgu.run({
                 const id = ok.includes(cur.id) ? cur.id : null;
                 if (id === null) {
                     reset = null;
-                    return showMsg('Select ' + ok.map((x) => RESETTABLE[x]).join(' ' + translate('or') + ' ') + ' with "Next item", then "Reset service"');
+                    return showMsg('Select ' + ok.map((x) => RESETTABLE[x]).join(' or ') + ' with "Next item", then "Reset service"');
                 }
                 const name = (cur && cur.id === id && cur.name) || RESETTABLE[id];
-                reset = { item: { id, name }, at: monoNow(), busy: false };
-                // (whole phrases for the catalog)
-                showMsg('Reset "' + name + '"?  ' + (ctx.display && ctx.display.sheet ? 'Press "Confirm reset" to confirm (5 s)' : 'Press "Reset service" again to confirm (5 s)'));
+                reset = { item: { id, name }, at: Date.now(), busy: false };
+                showMsg('Reset ' + name + '?  Press ' + (ctx.display.sheet ? '"Confirm reset"' : '"Reset service" again') + ' to confirm (5 s)');
             } catch (e) {
                 reset = null;
                 log.warn('reset list: ' + e);
@@ -449,9 +431,6 @@ mgu.run({
         }
 
         /* ---------- an item's card (drawn by the renderer over the page, kit sheet) ---------- */
-        // (a label translated here: the card writes it in capitals, and English in capitals would come out of the
-        // catalog in its own case)
-        const label = (s) => translate(s);
         function openCard(i) {
             const it = items()[i];
             if (!it) return false;
@@ -470,30 +449,30 @@ mgu.run({
                 rows: () => {
                     const item = current(), r = item.record, due = parseDue(item.date);
                     if (cardPage === 1) return [
-                        [label('Service counter*'), r ? String(r.count) : '--'],
-                        [label('Availability*'), r ? qty(r.avail, '%') : '--'],
-                        [label('Source'), r ? r.source + ' 0x' + hex(r.address) : 'Not read / unavailable'],
+                        ['Service counter*', r ? String(r.count) : '--'],
+                        ['Availability*', r ? valueText(r.avail, ' %') : '--'],
+                        ['Source', r ? r.source + ' 0x' + hex(r.address) : 'Not read / unavailable'],
                     ];
                     if (cardPage === 2) return [
-                        [label('Distance interval*'), r ? qty(r.intervalKm, 'km') : '--'],
-                        [label('Time interval*'), r ? qty(r.intervalMonths, 'months') : '--'],
-                        [label('Remaining*'), r ? qty(r.remaining, r.unit) : '--'],
+                        ['Distance interval*', r ? valueText(r.intervalKm, ' km') : '--'],
+                        ['Time interval*', r ? valueText(r.intervalMonths, ' months') : '--'],
+                        ['Remaining*', r ? valueText(r.remaining, r.unit ? ' ' + r.unit : '') : '--'],
                     ];
                     if (cardPage === 3) return [
-                        [label('Record status*'), r ? statusText(r) : '--'],
-                        [label('UDS due date*'), r ? r.date || '--' : '--'],
-                        [label('CBS identifier'), '0x' + hex(item.id)],
+                        ['Record status*', r ? r.status : '--'],
+                        ['UDS due date*', r ? r.date || '--' : '--'],
+                        ['CBS identifier', '0x' + hex(item.id)],
                     ];
                     return [
-                        [label('Due by'), due ? due.text : item.date || '--', due && due.months < 0 ? '#ef2b2d' : null],
-                        due ? [label('Time left'), due.left] : null,
-                        [label('Distance left'), item.way || '--'],
+                        ['Due by', due ? due.text : item.date || '--', due && due.months < 0 ? '#ef2b2d' : null],
+                        due ? ['Time left', due.left] : null,
+                        ['Distance left', item.way || '--'],
                     ];
                 },
                 note: () => msg || (cardPage ? '* Candidate decoding; see Diagnostics for all ECU records and raw bytes.'
                     : (hint && hint.text) || ''),
                 actions: () => [{
-                    label: tf('CBS details {page}/{pages}', { page: cardPage + 1, pages: 4 }),
+                    label: 'CBS details ' + (cardPage + 1) + '/4',
                     run: () => { cardPage = (cardPage + 1) % 4; changed(); return null; },
                 }, {
                     label: scanBusy ? 'Reading...' : 'Read CBS',
@@ -505,7 +484,7 @@ mgu.run({
                 }] : []),
             });
             card.onClose = () => { hint = null; msg = ''; reset = reset && reset.busy ? reset : null; changed(); };
-            if (!ctx.sheet || !ctx.sheet(card)) return false;          // (a host without the screen API: no card)
+            if (!ctx.sheet(card)) return false;
             details();
             return true;
         }
@@ -514,7 +493,6 @@ mgu.run({
         const pages = () => (settings.get('diagPage') ? ['Service', 'Diagnostics'] : ['Service']);
         const COL = (t, c) => [t.dim, t.crit, t.warn, GO, t.warn][c] || t.dim;
         const LBL = ['', 'DUE NOW', 'DUE SOON', 'OK', 'DUE SOON'];
-        const RAW = { translate: false };
 
         function tile(cv, t, x, w, label, value, sub, col) {
             G.panel(cv, t, x, 44, w, 115, label);
@@ -539,16 +517,16 @@ mgu.run({
             // the bottom line: an item's details, or what the last button did (reset)
             // (where the kit runs the screen the item's card shows its hint and the reset's progress)
             const selectedRecord = its[sel] && its[sel].record;
-            const extra = selectedRecord ? tf('UDS candidate: {source}, counter {count}, availability {avail}, interval {km} / {months}', {
-                source: selectedRecord.source, count: selectedRecord.count, avail: qty(selectedRecord.avail, '%'),
-                km: qty(selectedRecord.intervalKm, 'km'), months: qty(selectedRecord.intervalMonths, 'months') }) : '';
-            // (translated here, drawn as it is: a car's name stays as the car sends it)
-            const line = cv.own ? '' : msg ? translate(msg) : hint ? translate(hint.name) + ':  ' + translate(hint.text) : extra;
+            const extra = selectedRecord ? 'UDS candidate: ' + selectedRecord.source + ', counter ' + selectedRecord.count
+                + ', availability ' + valueText(selectedRecord.avail, '%')
+                + ', interval ' + valueText(selectedRecord.intervalKm, ' km')
+                + ' / ' + valueText(selectedRecord.intervalMonths, ' months') : '';
+            const line = cv.own ? '' : msg || (hint ? hint.name + ':  ' + hint.text : extra);
             const per = line ? rows - 1 : rows;                  // the bottom line takes the last row
             G.panel(cv, t, 24, 176, 1552, 336, 'Service requirements' + (its.length > per ? '  ' + (Math.floor(sel / per) + 1) + '/' + Math.ceil(its.length / per) : ''));
             if (line) {
                 cv.roundRect(40, 470 + ex, 1520, 38, 8, withAlpha(t.accent, 0.12));
-                cv.text(fit(cv, line, 22, 1490, RAW), 56, 496 + ex, 22, t.text, RAW);
+                cv.text(fit(cv, line, 22, 1490), 56, 496 + ex, 22, t.text);
             }
             if (!its.length) {
                 cv.text('Waiting for the service data from the instrument cluster (ignition on)...', 800, 369 + Math.round(ex / 2), 28, t.dim, { align: 'center' });
@@ -567,63 +545,49 @@ mgu.run({
                 cv.text(it.date || '--', 1250, y + 32, 28, it.date ? t.text : t.dim, { align: 'right' });
                 if (LBL[it.colour] || !it.native) {
                     cv.roundRect(1310, y + 6, 230, 34, 6, withAlpha(col, 0.22));
-                    cv.text(fit(cv, it.native ? LBL[it.colour] : 'UDS / UNVERIFIED', 20, 222, { font: 'bold', spacing: 0.5 }),
-                        1425, y + 31, 20, col, { align: 'center', font: 'bold', spacing: 0.5 });
+                    cv.text(it.native ? LBL[it.colour] : 'UDS / UNVERIFIED', 1425, y + 31, 20, col, { align: 'center', font: 'bold', spacing: 0.5 });
                 }
             });
-            // where the kit runs the screen Next item is not in the bar: more items than rows get a button that turns
-            // the list's pages (after the last one the first again), in the panel's title row
-            const pageCount = Math.ceil(its.length / per);
-            if (cv.own && pageCount > 1) {
-                G.button(cv, t, 1552 - 210, 184, 210, 38, tf('Next ({page}/{pages})', { page: Math.floor(sel / per) + 1, pages: pageCount }), () => {
-                    sel = first + per < its.length ? first + per : 0;
-                    changed();
-                }, { key: 'list-page' });
-            }
         }
 
         function drawDiag(cv, t) {
             const p = G.panel(cv, t, 24, 44, 1552, 468, 'Diagnostics - read-only CBS');
-            // a read's state: whole phrases (no single words such as "error" in the shared catalog)
-            const READ_STATE = { ok: '{unit} [0x{addr}] 22 {did}: ok', reading: '{unit} [0x{addr}] 22 {did}: reading',
-                error: '{unit} [0x{addr}] 22 {did}: error - {why}' };
             const lines = [
-                'KombiInterface_2: ' + (kombi ? (kombi.error ? tf('error {e}', { e: kombi.error }) : translate(kombi.available ? 'available' : 'not available yet')) : translate('connecting...')),
-                settings.get('demo') === 'on' ? translate('DEMO: diagnostic requests disabled')
-                    : scanState.why !== undefined ? tf(scanState.text, { why: translate(scanState.why) }) : tf(scanState.text, scanState.vars),
-                tf('Last scan: {time}', { time: scanWall === null ? '--' : new Date(scanWall).toISOString() }),
-                translate('UDS candidate decoding: not certified for this car. Native HMI date/distance take precedence.'),
+                'KombiInterface_2: ' + (kombi ? (kombi.error ? 'error ' + kombi.error : kombi.available ? 'available' : 'not available yet') : 'connecting...'),
+                settings.get('demo') === 'on' ? 'DEMO: diagnostic requests disabled' : scanMessage,
+                'Last scan: ' + (scanAt === null ? '--' : new Date(scanAt).toISOString()),
+                'UDS candidate decoding: not certified for this car. Native HMI date/distance take precedence.',
             ];
             CBS_SOURCES.forEach((source) => source.dids.forEach((did) => {
                 const read = cbsReads.get(readKey(source.address, did));
-                lines.push(tf(read ? READ_STATE[read.state] || READ_STATE.error : '{unit} [0x{addr}] 22 {did}: not read',
-                    { unit: source.name, addr: hex(source.address), did: hex(did, 4), why: read && read.error ? translate(read.error) : '' }));
+                const prefix = source.name + ' [0x' + hex(source.address) + '] 22 ' + hex(did, 4);
+                lines.push(prefix + ': ' + (read ? read.state + (read.error ? ' - ' + read.error : '') : 'not read'));
                 if (!read) return;
-                lines.push(tf('Read at: {time}', { time: read.at ? new Date(read.at).toISOString() : '--' }));
+                lines.push('Read at: ' + (read.at ? new Date(read.at).toISOString() : '--'));
                 if (read.state === 'ok' && did === 0x1001) {
-                    if (!read.records.length) lines.push(translate('No CBS records'));
+                    if (!read.records.length) lines.push('No CBS records');
                     read.records.forEach((r) => {
-                        lines.push('0x' + hex(r.id) + ' ' + translate(cbsName(r.id))
-                            + (CBS_TECHNICAL_IDS.includes(r.id) ? ' ' + translate('(technical; not in service list)') : ''));
-                        lines.push(tf('remaining={remaining}; due={due}; status={status}', {
-                            remaining: qty(r.remaining, r.unit), due: r.date || '--', status: statusText(r) }));
-                        lines.push(tf('counter={count}; availability={avail}; interval={km}/{months}', {
-                            count: r.count, avail: qty(r.avail, '%'), km: qty(r.intervalKm, 'km'), months: qty(r.intervalMonths, 'months') }));
-                        lines.push(tf('Record raw: {raw}', { raw: r.raw }));
+                        lines.push('0x' + hex(r.id) + ' ' + cbsName(r.id)
+                            + (CBS_TECHNICAL_IDS.includes(r.id) ? ' (technical; not in service list)' : ''));
+                        lines.push('remaining=' + valueText(r.remaining, r.unit ? ' ' + r.unit : '')
+                            + '; due=' + (r.date || '--') + '; status=' + r.status);
+                        lines.push('counter=' + r.count + '; availability=' + valueText(r.avail, '%')
+                            + '; interval=' + valueText(r.intervalKm, ' km') + '/' + valueText(r.intervalMonths, ' months'));
+                        lines.push('Record raw: ' + r.raw);
                     });
                 }
                 if (read.state === 'ok' && did === 0x1002) {
                     const payload = read.raw.split(' ').slice(3);
                     for (let i = 0; i < payload.length; i += 3) {
-                        lines.push(tf('Reset eligibility (candidate): id=0x{id} reason=0x{reason} reserve=0x{reserve}',
-                            { id: payload[i], reason: payload[i + 1], reserve: payload[i + 2] }));
+                        lines.push('Reset eligibility (candidate): id=0x' + payload[i]
+                            + ' reason=0x' + payload[i + 1] + ' reserve=0x' + payload[i + 2]);
                     }
                 }
-                if (did === 0x1003) lines.push(translate('1003: raw only; layout not verified'));
-                lines.push(tf('Reply raw: {raw}', { raw: read.raw || '--' }));
+                if (did === 0x1003) lines.push('1003: raw only; layout not verified');
+                lines.push('Reply raw: ' + (read.raw || '--'));
             }));
-            lines.push('cbsDataSBA: ' + (rawSba || translate('nothing received')));
-            lines.push('cbsDataServiceList: ' + (rawList || translate('nothing received')));
+            lines.push('cbsDataSBA: ' + (rawSba || 'nothing received'));
+            lines.push('cbsDataServiceList: ' + (rawList || 'nothing received'));
             const wrapped = [];
             lines.forEach((line) => {
                 for (let i = 0; i < line.length; i += 116) wrapped.push(line.slice(i, i + 116));
@@ -634,12 +598,12 @@ mgu.run({
             diagPage = Math.max(0, Math.min(diagPage, count - 1));
             let y = 96;
             wrapped.slice(diagPage * per, (diagPage + 1) * per).forEach((line) => {
-                cv.text(fit(cv, line, 18, 1500, RAW), 48, y, 18, t.text, RAW); y += 26;
+                cv.text(fit(cv, line, 18, 1500), 48, y, 18, t.text); y += 26;
             });
             const by = p.y + p.h - 54;
             const controls = [
-                { x: 48, label: 'Previous page', run: () => { diagPage = Math.max(0, diagPage - 1); changed(); } },
-                { x: 350, label: tf('Next ({page}/{pages})', { page: diagPage + 1, pages: count }), run: () => { diagPage = (diagPage + 1) % count; changed(); } },
+                { x: 48, label: 'Previous', run: () => { diagPage = Math.max(0, diagPage - 1); changed(); } },
+                { x: 350, label: 'Next (' + (diagPage + 1) + '/' + count + ')', run: () => { diagPage = (diagPage + 1) % count; changed(); } },
                 { x: 652, label: scanBusy ? 'Reading...' : 'Read CBS', run: () => { refreshCbs(); } },
             ];
             controls.forEach((button, i) => {
@@ -651,12 +615,11 @@ mgu.run({
 
         let drawn = -1;
         async function render(force) {
-            markDemo();
-            if (reset && !reset.busy && monoNow() - reset.at >= CONFIRM_MS) {
+            if (reset && !reset.busy && Date.now() - reset.at >= CONFIRM_MS) {
                 reset = null; changed();
             }
             if (settings.get('demo') !== 'on' && !scanBusy && !reset
-                && (scanAt === null || monoNow() - scanAt >= CBS_REFRESH_MS)) refreshCbs();
+                && (scanAt === null || Date.now() - scanAt >= CBS_REFRESH_MS)) refreshCbs();
             if (!force && drawn === version) return;
             drawn = version;
             const t = ctx.theme();
@@ -691,9 +654,9 @@ mgu.run({
             resetPress();
         });
         // where the kit runs the screen the rows open their cards (with Reset): none of these in its bar
-        if (ctx.hideButton) ['BTN_SELECT', 'BTN_DETAILS', 'BTN_RESET'].forEach((b) => ctx.hideButton(b));
-        if (ctx.onLayout) ctx.onLayout(changed);           // (it draws only on changes: a new layout is one)
-        if (ctx.onTab) ctx.onTab((i) => {
+        ['BTN_SELECT', 'BTN_DETAILS', 'BTN_RESET'].forEach((b) => ctx.hideButton(b));
+        ctx.onLayout(changed);           // (it draws only on changes: a new layout is one)
+        ctx.onTab((i) => {
             if (i !== page) {
                 page = i; sel = 0; msg = ''; diagPage = 0;
                 reset = reset && reset.busy ? reset : null;
@@ -706,7 +669,7 @@ mgu.run({
         const redraw = () => { changed(); setTimeout(changed, 600); };
         ui.onVisible((name, on) => { if (name === 'MAIN' && on) redraw(); });
         if (ui.onFocus) ui.onFocus((name, on) => { if (name === 'MAIN' && on) redraw(); });
-        settings.onChange(() => { markDemo(); changed(); });
+        settings.onChange(() => changed());
         setInterval(changed, 2000);         // the diagnostics page shows live status
         render(true).then(() => log.info('first frame done')).catch((e) => log.warn('first render: ' + e));
     },

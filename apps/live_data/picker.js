@@ -19,7 +19,6 @@
  */
 const { withAlpha } = require('./kit/canvas');
 const { list, pill, TOP } = require('./kit/sheet');
-const { message: uiMessage } = require('./ui_text');
 const { t: translate } = require('./kit/i18n');
 
 const W = 1600;
@@ -39,7 +38,7 @@ function valueSheet(o) {
         controller: false,
         rows() {
             if (this.open === LAYOUT) return o.layouts.map((l) => ({ label: l.name, kind: 'radio', on: l.id === o.layout }));
-            if (this.open) return this.open.items.map((it) => { const v = it.text(); return { label: it.name, value: uiMessage(v.text), kind: 'radio', on: it.key === o.current }; });
+            if (this.open) return this.open.items.map((it) => { const v = it.text(); return { label: it.name, value: v.text, kind: 'radio', on: it.key === o.current }; });
             return [{ label: 'None (an empty gauge)', kind: 'radio', on: o.current === null }]
                 .concat(groups.map((g, i) => ({ label: g.name, value: i === gi ? translate('now') + ': ' + g.items[ii].name : String(g.items.length), kind: 'more' })))
                 .concat([{ label: 'Screen layout', value: layoutName(), kind: 'more' }],

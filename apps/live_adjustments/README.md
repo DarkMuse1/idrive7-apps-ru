@@ -51,15 +51,6 @@ live_adjustments`) before opening a PR.
 
 ## xDrive (experimental)
 
-MGU Tools snapshot update (0.7.7, upstream 0.7.4-0.7.7 ported): the VIP path for the G05
-hybrid, READY with the engine stopped allowed again on the DBE1 path, "engine off" from the
-ignition state, the `xdrive-diagnostic` log lines, and on the measured DSC_G30N `0F2850`: the write
-with the engine running, **xDrive on** and the mode from the transfer case. The product preserves
-one write per confirmed action: NRC 33 / 7E / 7F or a timeout is reported without an automatic
-session change or write retry - the upstream extended-session retry is deliberately not included.
-The two-press windows run on the kit's monotonic clock. Where the renderer does not run the screen
-(this product's runtime) the page buttons of the tune and xDrive tabs are not drawn (`G.button`).
-
 Switches xDrive off (rear-wheel drive) until the next ignition cycle, using the DSC's own
 diagnostic job `LMV_FUNKTION` (issue #28). The *xDrive (experimental)* setting ships **Off**:
 then no tab appears and nothing is sent. Code: `xdrive.js`.
@@ -71,10 +62,9 @@ then no tab appears and nothing is sent. Code: `xdrive.js`.
   button - the same write with `01`, the same checks and double press. Elsewhere no "on" command
   is sent.
 - The same job is in BMW's descriptions of both G-series DSC families (DSC_G20 and DSC_G30N), so
-  the tab works on any G car whose DSC answers `22 DB E1`. As upstream: a DSC that answers the write
-  with NRC `7E` / `7F` ("not in this session") gets `10 03` (extended session) and the same write
-  once more; any other refusal (NRC `22`, `33`, ...) or no answer is shown as it is, not repeated.
-  (MGU Tools' former DG-19 rule against the session retry was dropped by the customer, 2026-11-03.)
+  the tab works on any G car whose DSC answers `22 DB E1`. If the DSC answers the write with "not
+  in this session" (NRC `7E` / `7F`), the app opens the extended session (`10 03`) and sends the
+  same write once more.
 - The DBE1 path covers DSC_G20, DSC_G30N, DSC_G11, DSC_I1 and IB_G2X (and an unidentified DSC
   that answers the read). A car with another unit at `0x29` and a G VIP (`0x39`, VIP_G05 /
   VIP_G30N) uses the VIP's job instead: `2E DB 2F 00` (`STEUERN_LMV_FUNKTION_QDM`), sent with
@@ -129,8 +119,8 @@ state, ABS / stability control in motion, other DSC variants, prolonged use. Use
 
 Lines prefixed `xdrive-diagnostic ` contain JSON for both DSC and VIP paths, including
 unknown variants. They record identification, blocked/confirmation presses, each existing
-write request (MGU Tools sends no session request), and the raw result (positive, negative,
-pending, unexpected, no response or transport error). Exchange IDs pair requests and results; attempt IDs group
+write and session request, and the raw result (positive, negative, pending, unexpected,
+no response or transport error). Exchange IDs pair requests and results; attempt IDs group
 the two-press action. NRC names describe the response, not a diagnosis of its root cause.
 In particular, `33` alone does not prove that the engine is running or establish the unlock
 required by a particular ECU.
@@ -139,9 +129,8 @@ Snapshots include the app version, route/target, ECU indexes, available vehicle 
 the existing checks and recent read evidence with its age. Missing values are `null`;
 the parking brake and per-signal freshness are explicitly unknown. The SDK does not
 provide per-signal timestamps, so cached vehicle values must not be assumed fresh.
-An accepted write is logged as `physicalEffect: "not_verified"` unless the transfer case's
-DB32 qualifier, read right after it, agrees (`verified_by_lmv`); neither DBE1 nor a zero torque
-sample independently establishes the physical clutch state.
+An accepted write is logged as `physicalEffect: "not_verified"`: neither DBE1 nor a
+zero torque sample independently establishes the physical clutch state.
 
 Successful polling replies are included for 60 seconds after the first confirmation
 press; identification and failed exchanges are always recorded. Only the app's existing
@@ -160,6 +149,5 @@ Review the rest of the app log for personal information before sharing it.
 ```sh
 python3 kit/tools/build.py live_adjustments
 node kit/tools/test_live_adjustments.js     # in-memory DMEs: off / MHD / BM3 / wrong tune / untuned; in-memory DSC: xDrive
-node tests/diag/engine_config_xdrive.test.js   # MGU Tools: the xDrive checks above, incl. the extended-session retry
 node kit/tools/test_bm3_protocol.js         # BM3 protocol and ROM profiles
 ```

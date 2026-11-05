@@ -10,14 +10,12 @@
  * Every stop is saved (data/brake_runs.json). The fade chart compares the
  * last stops: distance growing stop after stop = hot brakes.
  */
-const FileStore = require('./kit/store');
-const History = require('./kit/history');
+const fs = require('fs');
 const path = require('path');
 const mgu = require('./kit/mgu');
 const { withAlpha } = require('./kit/canvas');
 const G = require('./kit/gauges');
 const Car = require('./kit/car');
-const { t: translate } = require('./kit/i18n');
 
 const SPEED_MS = 100;   // speed readout: 10 times a second
 
@@ -28,27 +26,18 @@ const TESTS = {
     kmh: [{ key: '200-0', label: '200-0 km/h', v: 200 }, { key: '100-0', label: '100-0 km/h', v: 100 }],
     mph: [{ key: '100-0mph', label: '100-0 mph', v: 100 * MPH }, { key: '60-0mph', label: '60-0 mph', v: 60 * MPH }],
 };
-/**
- * Width of a button on the page (G.button: only where the kit runs the screen): upstream's w, or wider where
- * the translated label needs more (Russian "ОТМЕНИТЬ ЗАМЕР" in upstream's 170 px), so it stays inside its pill.
- */
-function buttonW(cv, w, h, labels) {
-    if (!cv.own) return w;
-    return Math.max(w, ...labels.map((s) => Math.ceil(cv.textWidth(translate(s).toUpperCase(), h * 0.4, { font: 'bold', spacing: 1.5 }) + h)));
-}
 
 mgu.run({
     async start(ctx) {
         const { ui, settings, log } = ctx;
-        const car = new Car(ctx, ['speed', 'accel'], { lateralAccel: false });
+        const car = new Car(ctx, ['speed', 'accel']);
 
         const FILE = path.join(ctx.dataDir, 'brake_runs.json');
-        // kit/store.js: written atomically; a file that does not parse is moved aside (and logged), not overwritten
-        const saved = Object.assign({ best: {}, runs: [] }, FileStore.load(FILE, { log, fallback: {}, valid: History.brake }));
+        let saved = { best: {}, runs: [] };
+        try { saved = Object.assign(saved, JSON.parse(fs.readFileSync(FILE, 'utf8'))); } catch (e) { /* first start */ }
         const demoStore = { best: {}, runs: [] };
         let store = saved;
-        let saveError = false;
-        const save = () => { if (store === saved) saveError = !FileStore.save(FILE, saved, { log }); };
+        const save = () => { if (store === saved) try { fs.writeFileSync(FILE, JSON.stringify(saved)); } catch (e) { log.warn('save: ' + e); } };
 
         const tests = () => TESTS[settings.get('speedUnit')];
         const mainTest = () => tests()[1];
@@ -113,7 +102,7 @@ mgu.run({
                     tests().forEach((x) => {
                         if (!run.cross[x.key] && prev.v >= x.v && v < x.v) {
                             const f = (prev.v - x.v) / (prev.v - v);
-                            run.cross[x.key] = { t: prev.t + f * (t - prev.t), d: run.dist - (1 - f) * (x.v + v) / 2 / 3.6 * dt };
+                            run.cross[x.key] = { t: prev.t + f * (t - prev.t), d: run.dist - (1 - f) * (prev.v + v) / 2 / 3.6 * dt };
                         }
                     });
                     run.trace.push([run.dist, v, G.isNum(g) ? -g : null]);
@@ -160,8 +149,7 @@ mgu.run({
             // (each panel's last line then ends G.MARGIN over its bottom: dl status, dc chart, df fade)
             const dy = pr.y + pr.h - G.BOTTOM, dl = G.toMargin(dy, 13), dc = G.toMargin(dy, 63), df = G.toMargin(dy, 30);
             // the panel's own button (where the kit runs the screen; else the bar's Cancel run)
-            const cw = buttonW(cv, 170, 40, ['Cancel run']);
-            G.button(cv, t, 494 - 20 - cw, 56, cw, 40, 'Cancel run', act, { key: 'cancel', busy: !run && !last });
+            G.button(cv, t, 494 - 20 - 170, 56, 170, 40, 'Cancel run', act, { key: 'cancel', busy: !run && !last });
             const showKey = last ? (last.result[low.key] ? low.key : Object.keys(last.result)[0]) : low.key;
             const lab = tests().find((x) => x.key === showKey) || low;
             const dist = run ? run.dist : last && last.result[showKey] ? last.result[showKey].m : null;
@@ -236,8 +224,7 @@ mgu.run({
 
         function drawHistory(cv, t) {
             const p = G.panel(cv, t, 24, 44, 1552, 468, 'All stops');
-            const lw = buttonW(cv, 200, 40, ['Clear log', 'Yes, clear']);
-            G.button(cv, t, 1576 - 20 - lw, 56, lw, 40, clearArmed ? 'Yes, clear' : 'Clear log', act, { key: 'clear', color: clearArmed ? t.crit : null, busy: !store.runs.length });
+            G.button(cv, t, 1576 - 20 - 200, 56, 200, 40, clearArmed ? 'Yes, clear' : 'Clear log', act, { key: 'clear', color: clearArmed ? t.crit : null, busy: !store.runs.length });
             const ts = tests();
             const cols = [48, 330, 640, 950, 1180, 1400];
             ['WHEN', ts[1].label.toUpperCase(), ts[0].label.toUpperCase(), 'PEAK DECEL', 'FROM', ''].forEach((h, i) => cv.text(h, cols[i], 127, 22, t.dim, { font: 'bold', spacing: 1 }));
@@ -259,8 +246,7 @@ mgu.run({
 
         /** G20-style frame: tab bar with the page names along the top. */
         function header(cv, t) {
-            const demo = car.data().demo;
-            G.frame(cv, t, ['Brake test', 'History'], page, [demo && { text: 'DEMO' }, !demo && saveError && { text: 'NOT SAVED', color: 'warn' }]);
+            G.frame(cv, t, ['Brake test', 'History'], page, [car.data().demo && { text: 'DEMO' }]);
         }
 
         async function render() {
@@ -276,7 +262,7 @@ mgu.run({
         const flip = () => { page = 1 - page; actionLabel(); return render(); };
         ui.onClick('BTN_PAGE', flip);
         ui.onClick('BTN_PREV', flip);
-        if (ctx.onTab) ctx.onTab((i) => i !== page && flip());
+        ctx.onTab((i) => i !== page && flip());
         // Cancel run (Brake test) / Clear log, pressed twice (History): on the page, or the bar's button
         function act() {
             if (page === 0) { run = null; last = null; state = 'arm'; return render(); }
@@ -286,7 +272,7 @@ mgu.run({
             return render();
         }
         ui.onClick('BTN_ACTION', act);
-        if (ctx.hideButton) ctx.hideButton('BTN_ACTION');
+        ctx.hideButton('BTN_ACTION');
         // every screen refresh (60 fps) with the GPU renderer; 8 fps in software (PNG frames)
         ctx.loop('MAIN', 8, render);
         render().then(() => log.info('first frame done')).catch((e) => log.warn('first render: ' + e));

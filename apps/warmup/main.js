@@ -6,7 +6,7 @@
  *   - warm-up calculator: minutes until oil / coolant are warm,
  *     from the measured warm-up rate (typical rates until enough is measured),
  *     projected on the trend graph; "engine off" when a hybrid drives electric
- *   - estimated rev threshold that climbs with oil temperature (not a factory limit)
+ *   - safe rev limit that climbs from the cold limit to the redline with oil temp
  *   - 20-minute temperature trend
  *   - turbo cool-down: hard driving (high rpm or high power) builds up a cool-down
  *     time (30 s - 3 min) that counts down while driving gently or idling
@@ -30,7 +30,7 @@ mgu.run({
         const { ui, settings } = ctx;
         // engine profile (diesel / petrol): the Auto redline and cold limit
         const engine = new Engine({ settings, dataDir: ctx.dataDir, log: ctx.log });
-        const car = new Car(ctx, ['rpm', 'speed', 'temps', 'torque'], { extra: { [Engine.SIGNAL[0]]: engine.handlers() } });
+        const car = new Car(ctx, ['rpm', 'speed', 'temps', 'torque'], { [Engine.SIGNAL[0]]: engine.handlers() });
         car.setRedline(engine.redline());
         engine.onChange(() => car.setRedline(engine.redline()));
 
@@ -158,16 +158,13 @@ mgu.run({
             let st, col;
             if (!G.isNum(d.oil)) { st = 'NO OIL TEMP'; col = t.dim; }
             else if (hot) { st = 'OIL HOT - EASE OFF'; col = t.crit; }
-            else if (cooling) { st = doneAt ? 'COOL-DOWN EST. DONE' : 'TURBO COOL-DOWN'; col = doneAt ? GO : t.warn; }
+            else if (cooling) { st = doneAt ? 'COOLED - OK TO SWITCH OFF' : 'TURBO COOL-DOWN'; col = doneAt ? GO : t.warn; }
             else if (ready) { st = 'READY'; col = GO; }
             else if (d.oil >= warm - 20) { st = 'WARMING UP'; col = t.warn; }
             else { st = 'COLD'; col = t.cold; }
             cv.roundRect(952, 70, 600, 60, 10, withAlpha(col, 0.22));
             if (st === 'READY') cv.roundRect(952, 70, 600, 60, 10, withAlpha(col, 0.15 + 0.1 * Math.sin(now / 400)));
-            const statusOpts = { align: 'center', font: 'bold', spacing: 3 };
-            let statusSize = st.length > 14 ? 30 : 38;
-            while (statusSize > 22 && cv.textWidth(st, statusSize, statusOpts) > 568) statusSize--;
-            cv.text(st, 1252, 114, statusSize, col, statusOpts);
+            cv.text(st, 1252, 114, st.length > 14 ? 30 : 38, col, { align: 'center', font: 'bold', spacing: 3 });
 
             if (cooling) {
                 // big countdown: gentle driving / idling cools the turbo and oil
@@ -190,9 +187,9 @@ mgu.run({
                 etaRow(cv, t, 255, 'COOLANT READY IN', eta('coolant', d.coolant, warmC, d), warmC);
             }
 
-            // ---- estimated rev threshold (always) + trend
+            // ---- safe rev limit (always) + trend
             const red = engine.redline(), fl = lim ? lim / red : 0;
-            cv.text('EST. REV LIMIT', 952, 350, 22, t.dim, { font: 'bold', spacing: 1.5 });
+            cv.text('SAFE REV LIMIT', 952, 350, 22, t.dim, { font: 'bold', spacing: 1.5 });
             cv.text(lim ? lim + ' rpm' : '---- rpm', 1552, 352, 26, ready ? GO : t.text, { align: 'right', font: 'bold' });
             cv.roundRect(1160, 340, 230, 8, 4, t.track);
             if (fl > 0) cv.roundRect(1160, 340, 230 * fl, 8, 4, ready ? GO : col);
@@ -206,8 +203,7 @@ mgu.run({
             const lo = 0, hi = 140;
             const X = (ts) => nowX - ((now0 - ts) / span) * (gw - 90), Y = (c) => gy + gh - (G.clamp(c, lo, hi) - lo) / (hi - lo) * gh;
             cv.fillRect(gx, gy - 20, 22, 4, t.oil || t.accent); cv.text('OIL', gx + 30, gy - 11, 20, t.dim, { font: 'bold' });
-            const coolantLegend = gx + Math.max(100, 30 + cv.textWidth('OIL', 20, { font: 'bold' }) + 20);
-            cv.fillRect(coolantLegend, gy - 20, 22, 4, t.cold); cv.text('COOLANT', coolantLegend + 30, gy - 11, 20, t.dim, { font: 'bold' });
+            cv.fillRect(gx + 100, gy - 20, 22, 4, t.cold); cv.text('COOLANT', gx + 130, gy - 11, 20, t.dim, { font: 'bold' });
             cv.fillRect(gx, Y(warm), gw, 1, withAlpha(GO, 0.5));
             cv.text(String(Math.round(T(warm))), gx + gw + 4, Y(warm) + 7, 20, GO);
             cv.fillRect(nowX, gy, 1, gh, withAlpha(t.tick, 0.5));       // "now"

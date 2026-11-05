@@ -15,7 +15,6 @@
  *     o.empty    the text when there are no rows
  */
 const { withAlpha } = require('./kit/canvas');
-const { message: uiMessage } = require('./ui_text');
 
 const ROWS = 12, ROW_H = 33, TOP = 108;
 
@@ -27,8 +26,8 @@ function listPanel(cv, t, G, fit, o) {
         const w = 300, x = 1552 - w;
         cv.roundRect(x, 71, w, 8, 4, t.track);
         if (o.progress < 0) { const f = (Date.now() / 1200) % 1; cv.roundRect(x + f * (w - 80), 71, 80, 8, 4, t.accent); } else cv.roundRect(x, 71, Math.max(8, w * o.progress), 8, 4, t.accent);
-        if (o.note) cv.text(fit(cv, uiMessage(o.note), 22, Math.max(200, x - 20 - bx)), x - 20, 88, 22, t.text, { align: 'right' });
-    } else if (o.note) cv.text(fit(cv, uiMessage(o.note), 22, Math.max(200, 1552 - bx - 24)), 1552, 88, 22, o.noteColor || t.dim, { align: 'right' });
+        if (o.note) cv.text(fit(cv, o.note, 22, Math.max(200, x - 20 - bx)), x - 20, 88, 22, t.text, { align: 'right' });
+    } else if (o.note) cv.text(fit(cv, o.note, 22, Math.max(200, 1552 - bx - 24)), 1552, 88, 22, o.noteColor || t.dim, { align: 'right' });
     const rows = o.rows || [];
     if (!rows.length) {
         cv.text(o.empty || 'Nothing to show', 800, Math.round((TOP + p.y + p.h) / 2) + 10, 28, t.dim, { align: 'center' });
@@ -57,7 +56,7 @@ function listPanel(cv, t, G, fit, o) {
         const nameW = o.details && row.source ? 820 : 1060;
         cv.text(fit(cv, row.name, 22, nameW), 74, y + 23, 22, row.dimName ? t.dim : t.text);
         if (o.details && row.source) cv.text(fit(cv, row.source, 18, 300), 910, y + 22, 18, row.sourceWarn ? t.warn : t.dim);
-        cv.text(fit(cv, uiMessage(row.text), 24, 400, { font: 'bold' }), 1544, y + 23, 24, row.warn ? t.warn : row.dim ? t.dim : t.text, { align: 'right', font: 'bold' });
+        cv.text(fit(cv, row.text, 24, 400, { font: 'bold' }), 1544, y + 23, 24, row.warn ? t.warn : row.dim ? t.dim : t.text, { align: 'right', font: 'bold' });
         if (i < rows.length - 1 && !rows[i + 1].header) cv.fillRect(48, y + ROW_H - 2, 1504, 1, withAlpha(t.tick, 0.18));
     });
     if (o.scroll) {

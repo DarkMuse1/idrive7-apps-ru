@@ -14,15 +14,6 @@
  * Signals come straight from the car over SOME/IP (see app.json "signals").
  * With no car attached (the VM, or the unit on the bench) demo data can drive
  * the gauges; a DEMO badge is drawn whenever it does.
- *
- * MGU Tools: upstream idrive7-apps M Vitals 2.24.1 as it is - its readings, checks, timeouts and demo
- * ("Demo data" Auto / Always / Never) unchanged (customer, 2026-11-04: upstream's checks are proven on cars).
- * Only these are this project's: the Russian texts go through the kit's catalog (kit/runtime/i18n.js) and a
- * tile's last line is cut to the tile (kit text-layout fitText: Russian lines are longer); the standstill
- * (g-force zero), the demo's 5 s start window and the outside air pressure's minute use the kit's monotonic
- * clock (kit/clock.js: the head unit sets its wall clock after start-up); seen.json and awd.json are written
- * atomically (kit/store.js); the runtime's DEMO mark (kit/datastate.js) follows the demo; ctx.onTab only
- * where the host has the renderer 2.x screen API.
  */
 const fs = require('fs');
 const path = require('path');
@@ -34,9 +25,6 @@ const Engine = require('./kit/engine');
 const { GearGuess, selectionOf } = require('./kit/car');
 const { Diag } = require('./kit/diag');
 const { DidReader } = require('./kit/dids');
-const clock = require('./kit/clock');
-const FileStore = require('./kit/store');
-const { fitText } = require('./kit/text-layout');
 
 const W = 1600, H = 520;
 const PAGES = ['engine', 'thermal', 'fuel', 'chassis'];
@@ -152,7 +140,7 @@ mgu.run({
         const G0 = 9.80665, G_ZERO_MAX = 1;
         const gZero = { gLong: { z: 0, n: 0 }, gLat: { z: 0, n: 0 } };
         let stillSince = 0;
-        const standing = () => stillSince > 0 && clock.now() - stillSince > 2000;      // (monotonic)
+        const standing = () => stillSince > 0 && Date.now() - stillSince > 2000;
         const putG = (k, raw) => {
             const a = sc('accel', raw);
             if (a === null) return;
@@ -184,7 +172,7 @@ mgu.run({
         const markAwd = () => {
             if (awdSeen) return;
             awdSeen = true; log.info('all-wheel drive detected');
-            FileStore.save(AWD_FILE, { seen: true }, { log });          // atomic (kit/store.js); a failure is logged there
+            try { fs.writeFileSync(AWD_FILE, JSON.stringify({ seen: true })); } catch (e) { log.warn('awd save: ' + e); }
         };
         // which groups / sources this car has sent real data for (see MOVE, GROUP)
         const SEEN_FILE = path.join(ctx.dataDir, 'seen.json');
@@ -195,7 +183,7 @@ mgu.run({
             if (!add.length) return;
             add.forEach((x) => { seen[x] = true; });
             log.info('real data from the car: ' + add.join(', '));
-            FileStore.save(SEEN_FILE, seen, { log });
+            try { fs.writeFileSync(SEEN_FILE, JSON.stringify(seen)); } catch (e) { log.warn('seen save: ' + e); }
         };
         const bad = {}, first = {}, moved = {};
         /** A MOVE value counts once it changed this session or the car is known to send it. */
@@ -250,7 +238,7 @@ mgu.run({
                 // fallback when the car sends no sport-display power: crankshaft torque x speed (engine only)
                 if (G.isNum(live.torque) && G.isNum(live.rpm)) live.powerCalc = Math.max(0, live.torque * live.rpm / 9549);
             }
-            if (k === 'speed') stillSince = v < 0.5 ? stillSince || clock.now() : 0;
+            if (k === 'speed') stillSince = v < 0.5 ? stillSince || Date.now() : 0;
             if ((k === 'rpm' || k === 'speed') && G.isNum(live.rpm) && G.isNum(live.speed)) {
                 const g = guess.feed(live.rpm, live.speed);
                 // nothing at a standstill: the guess can't tell P, N or D there (it showed "N" in park / in D)
@@ -367,7 +355,7 @@ mgu.run({
         ];
         log.info('subscribing signals');
         // tyre values: also read every 10 s - BMW's own x_call only ever reads them, so a car may not notify them
-        const subs = [], startT = clock.now();
+        const subs = [], startT = Date.now();
         Promise.all(watches.map(([iface, h]) => ctx.signals.watch(iface, '1', h, log, /\.TPMS$/.test(iface) ? { pollMs: 10000 } : undefined)
             .then((s) => { subs.push(s); return s; })))
             .then((all) => log.info('signals: ' + all.map((s) => s.iface.split('.').pop() + (s.error ? '(err)' : '')).join(' ')));
@@ -377,9 +365,7 @@ mgu.run({
         engine.onChange(() => demo.setRedline(engine.redline()));
         // Auto: demo only until the car answers - a parked car sends nothing new for minutes, which is not "no car"
         const carPresent = () => lastCar > 0 || subs.some((s) => s.available);
-        const usingDemo = () => settings.get('demo') === 'on' || (settings.get('demo') === 'auto' && !carPresent() && clock.now() - startT > 5000);
-        // the runtime draws its DEMO mark while this says so (kit/datastate.js); Auto can switch any frame
-        const markDemo = () => require('./kit/datastate').setDemo('car_vitals', usingDemo());
+        const usingDemo = () => settings.get('demo') === 'on' || (settings.get('demo') === 'auto' && !carPresent() && Date.now() - startT > 5000);
         /**
          * What the screen shows: the car's values, with doubtful ones (MOVE) left out until they
          * have proven real; demo data as it is.
@@ -425,7 +411,7 @@ mgu.run({
         let chassisSeen = 0, lmvAt = 0;
         const fuelT = {}, fuelFail = {}, fuelTry = {};
         let fuelSeen = 0, engineSeen = 0, fuelTimer = null, fuelBusy = false, fuelLast = 0;
-        let baro = 101.3, baroT = null;                                    // outside air pressure, kPa (baroT: monotonic, null: not read yet)
+        let baro = 101.3, baroT = 0;                                       // outside air pressure, kPa
         /*
          * Misfires per cylinder (OBD service 06 monitor results, MIDs A2.. = cylinder 1..; test
          * config.dme.misfire.tid, default 0C = this driving cycle). misMode: which request this engine
@@ -469,7 +455,7 @@ mgu.run({
         }
         /** Outside air pressure (kPa), read again once a minute: boost = absolute pressure minus it. */
         async function freshBaro() {
-            if (baroT === null || clock.now() - baroT > 60000) { baroT = clock.now(); const b = await rd.value('baro', dme.baro); if (b !== null) baro = b; }
+            if (Date.now() - baroT > 60000) { baroT = Date.now(); const b = await rd.value('baro', dme.baro); if (b !== null) baro = b; }
         }
         /**
          * A target-vs-actual pair (PAIR): { target, actual }, or null while the target doesn't answer.
@@ -730,9 +716,7 @@ mgu.run({
             grid(tiles.length).forEach((b, i) => {
                 const g = tiles[i];
                 if (g.draw) g.draw(cv, t, b.x, b.y, b.w, b.h);
-                // (the last line cut to the tile: a Russian one would run into the next tile)
-                else G.stat(cv, t, b.x, b.y, b.w, b.h, Object.assign({ size: b.h > 200 ? 100 : 64 }, g,
-                    g.sub ? { sub: fitText(cv, g.sub, 22, b.w - 36, { spacing: 0.5 }) } : {}));
+                else G.stat(cv, t, b.x, b.y, b.w, b.h, Object.assign({ size: b.h > 200 ? 100 : 64 }, g));
             });
         }
 
@@ -804,7 +788,7 @@ mgu.run({
                 : !judged ? 'on target' + (G.isNum(gap) ? ' (idle)' : '')
                     : Math.abs(gap) < g.tol ? 'on target  ·  ' + (gap >= 0 ? '+' : '') + G.fmt(gap, g.decimals) + ' ' + g.unit
                         : (gap > 0 ? '+' : '') + G.fmt(gap, g.decimals) + ' ' + g.unit + (gap > 0 ? ' over target' : ' under target');
-            cv.text(fitText(cv, sub, 22, w - 36, { spacing: 0.5 }), x + 18, yb - G.MARGIN, 22, judged && Math.abs(gap) >= g.tol ? col : t.dim, { spacing: 0.5 });
+            cv.text(sub, x + 18, yb - G.MARGIN, 22, judged && Math.abs(gap) >= g.tol ? col : t.dim, { spacing: 0.5 });
         }
 
         function drawFuel(cv, t, d) {
@@ -913,7 +897,6 @@ mgu.run({
         }
 
         async function render() {
-            markDemo();
             const t = ctx.theme(), d = data();
             const cv = ctx.canvas(W, H).clear(t.bg);
             [drawEngine, drawThermal, drawFuel, drawChassis][page](cv, t, d);
@@ -924,11 +907,10 @@ mgu.run({
 
         ui.onClick('BTN_PAGE', () => { page = (page + 1) % PAGES.length; return render(); });
         ui.onClick('BTN_PREV', () => { page = (page + PAGES.length - 1) % PAGES.length; return render(); });
-        if (ctx.onTab) ctx.onTab((i) => { page = i; return render(); });          // (a host without the screen API: none)
+        ctx.onTab((i) => { page = i; return render(); });
         // every screen refresh (60 fps) with the GPU renderer; 10 fps in software (PNG frames)
         ctx.loop('MAIN', 10, render);
         settings.onChange((k) => {
-            if (k === 'demo') markDemo();
             if (k === 'maxPower' || k === 'powerSource') { delete peak.power; delete demoPeak.power; }
             if (k === 'boostSource') { delete peak.boost; updBoost(); }
             if (k === 'page') page = Math.max(0, PAGES.indexOf(settings.get('page')));

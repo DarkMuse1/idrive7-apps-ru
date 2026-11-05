@@ -39,7 +39,7 @@ class Controls {
     /** game: Doom (key, turn); opts: { log, run(): bool, aim(): 'slow'|..., reversed(): bool, now() } */
     constructor(game, opts) {
         this.game = game; this.o = opts; this.log = opts.log;
-        this.now = opts.now || (() => { const t = process.hrtime(); return t[0] * 1000 + t[1] / 1e6; });
+        this.now = opts.now || Date.now;
         this.live = false;              // controller data arriving
         this.pos = null;                // knob counter
         this.push = null;               // 'N' 'E' 'S' 'W' or null

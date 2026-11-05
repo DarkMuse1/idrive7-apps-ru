@@ -35,12 +35,8 @@
  * unit's diagnostic link (kit/diag.js); the DIDs and scalings live in app.json
  * "config.battery" so they can be adjusted per model. Outside temperature,
  * speed and climate control on / off come over SOME/IP.
- *
- * MGU Tools: upstream 2.7.3, with the texts through ui_text.js (the Russian build) and the files written by
- * kit/store.js (atomically; a file that doesn't parse is moved aside rather than overwritten). No check is
- * changed and no extra gate is added; the clock is upstream's wall clock (the charge log is dated and the
- * "car was off" detection needs wall time, and this file shares one live object with live.js).
  */
+const fs = require('fs');
 const path = require('path');
 const mgu = require('./kit/mgu');
 const { withAlpha } = require('./kit/canvas');
@@ -48,8 +44,6 @@ const G = require('./kit/gauges');
 const { Diag, hex } = require('./kit/diag');
 const { DidReader } = require('./kit/dids');
 const { t: translate, plural } = require('./kit/i18n');
-const store = require('./kit/store');
-const { text: uiText, message: uiMessage, isRussian } = require('./ui_text');
 const { RangeModel } = require('./range');
 const startLive = require('./live');
 
@@ -134,7 +128,8 @@ mgu.run({
 
         /* ---------- persisted state: SOH, the last charge reading and the last charge session ---------- */
         const STATE = path.join(ctx.dataDir, 'battery.json');
-        const st = store.load(STATE, { log, fallback: {} }) || {};
+        let st = {};
+        try { st = JSON.parse(fs.readFileSync(STATE, 'utf8')) || {}; } catch (e) { /* first run */ }
         if (st.lastCharge && !st.log) st.log = [st.lastCharge];      // saved by v1.1 (no log yet)
         // learned before 1.8 the use per km also held the climate draw: keep it, but light, so it relearns soon
         if (st.learn && st.rangeV !== 2) { const f = Math.min(1, 10 / st.learn.km); st.learn.km *= f; st.learn.pct *= f; }
@@ -143,7 +138,7 @@ mgu.run({
         let savedAt = 0, saved = JSON.stringify(st);
         const save = () => {
             savedAt = Date.now(); saved = JSON.stringify(st);
-            store.write(STATE, saved, { log });
+            try { fs.writeFileSync(STATE, saved); } catch (e) { log.warn('save: ' + e); }
         };
         // MainApp's shutdown: what changed since the last save (the last charge reading, learning) goes with it
         process.on('exit', () => { if (JSON.stringify(st) !== saved) save(); });
@@ -612,23 +607,21 @@ mgu.run({
         let actionText = 'Read now';
         const actionLabel = () => {
             const p = pages()[page], txt = (isLive(p) && lv.actionLabel(p)) || 'Read now';
-            if (txt !== actionText) { actionText = txt; ui.text('BTN_READ', uiMessage(txt)); }
+            if (txt !== actionText) { actionText = txt; ui.text('BTN_READ', txt); }
         };
         const turn = (n) => { page = n; actionLabel(); return render(); };
         ui.onClick('BTN_PAGE', () => turn((page + 1) % pages().length));
         ui.onClick('BTN_PREV', () => { const n = pages().length; return turn((page + n - 1) % n); });
-        // the renderer 2.x screen API: the real kit always provides it (kit/runtime/mgu.js); the `if` is only for a
-        // host without it (as apps/live_adjustments, apps/live_data do) - a capability guard, not a check
-        if (ctx.onTab) ctx.onTab((i) => turn(i));
+        ctx.onTab((i) => turn(i));
         ui.onClick('BTN_READ', () => {
             const p = pages()[page];
             if (isLive(p) && lv.actionLabel(p)) { lv.action(p); return render(); }
             return poll(true).then(render);
         });
         // where the kit runs the screen the values are read on their own (poll) and the resets are on the page
-        if (ctx.hideButton) ctx.hideButton('BTN_READ');
+        ctx.hideButton('BTN_READ');
         const diagScroll = { y: 0, max: 0 };
-        if (ctx.onScroll) ctx.onScroll((dy) => {
+        ctx.onScroll((dy) => {
             if (pages()[page] !== 'diag') return false;
             const y = G.clamp(diagScroll.y + dy, 0, diagScroll.max), moved = y !== diagScroll.y;
             diagScroll.y = y;
@@ -670,13 +663,13 @@ mgu.run({
                 zones: [{ from: 0, to: 12.2, color: 'crit' }, { from: 12.2, to: 12.4, color: 'warn' }],
                 sub: 'last hour  ·  healthy at rest: 12.4-12.8 V',
             });
-            uiText(cv, state, 1040, 114, 24, col, { font: 'bold', spacing: 1, align: 'right' });
+            cv.text(state, 1040, 114, 24, col, { font: 'bold', spacing: 1, align: 'right' });
             G.panel(cv, t, 1088, 44, 488, 225, 'Outside');
-            uiText(cv, G.isNum(d.ambient) ? G.fmt(T(d.ambient), 1) : '--', 1112, 199, 96, G.isNum(d.ambient) ? t.text : t.dim, { font: 'num' });
-            uiText(cv, tU(), 1552, 199, 32, t.dim, { align: 'right' });
+            cv.text(G.isNum(d.ambient) ? G.fmt(T(d.ambient), 1) : '--', 1112, 199, 96, G.isNum(d.ambient) ? t.text : t.dim, { font: 'num' });
+            cv.text(tU(), 1552, 199, 32, t.dim, { align: 'right' });
             G.panel(cv, t, 1088, 287, 488, 225, 'No hybrid system');
             ['No high-voltage battery answered, so', 'eDrive shows the 12 V battery only.', 'Hybrid car? Settings > Hybrid system > Yes'].forEach((l, i) =>
-                uiText(cv, l, 1112, 376 + Math.round(ex / 2) + i * 34, 22, i === 2 ? t.dim : t.text));
+                cv.text(l, 1112, 376 + Math.round(ex / 2) + i * 34, 22, i === 2 ? t.dim : t.text));
         }
 
         function renderMain(cv, t, d) {
@@ -688,31 +681,31 @@ mgu.run({
             const ex = G.panel(cv, t, 24, 44, 720, 468, 'Real electric range').h - 468, ey = Math.round(ex / 2);
             const hold = has && d.soc <= HOLD_TOP + 0.5;       // low-battery hybrid zone
             if (hold) {
-                uiText(cv, 'HYBRID', 48, 196, 96, t.warn, { font: 'bold' });
-                uiText(cv, translate('battery held at') + ' 5-' + HOLD_TOP + ' %', 720, 196, 26, t.dim, { align: 'right' });
+                cv.text('HYBRID', 48, 196, 96, t.warn, { font: 'bold' });
+                cv.text(translate('battery held at') + ' 5-' + HOLD_TOP + ' %', 720, 196, 26, t.dim, { align: 'right' });
             } else {
                 // (the tabs' big value alike: 120 on y 196, the unit 38 beside it, as Energy and Battery)
-                const rw = uiText(cv, has ? String(Math.round(D(e.mid))) : '--', 48, 196, 120, has ? t.text : t.dim, { font: 'num' });
-                uiText(cv, dU(), 58 + rw, 196, 38, t.dim, { font: 'bold' });
-                if (has) uiText(cv, Math.round(D(e.lo)) + ' - ' + Math.round(D(e.hi)) + ' ' + dU(), 720, 150, 30, t.text, { font: 'bold', align: 'right' });
-                uiText(cv, 'engine starts at ' + G.fmt(e.res, 0) + ' %', 720, 196, 26, t.dim, { align: 'right' });
-                uiText(cv, e.learned ? 'learned from ' + Math.round(D(st.learn.km)) + ' ' + dU() : 'Learns while driving', 720, 236, 22, t.dim, { align: 'right' });
+                const rw = cv.text(has ? String(Math.round(D(e.mid))) : '--', 48, 196, 120, has ? t.text : t.dim, { font: 'num' });
+                cv.text(dU(), 58 + rw, 196, 38, t.dim, { font: 'bold' });
+                if (has) cv.text(Math.round(D(e.lo)) + ' - ' + Math.round(D(e.hi)) + ' ' + dU(), 720, 150, 30, t.text, { font: 'bold', align: 'right' });
+                cv.text('engine starts at ' + G.fmt(e.res, 0) + ' %', 720, 196, 26, t.dim, { align: 'right' });
+                cv.text(e.learned ? 'learned from ' + Math.round(D(st.learn.km)) + ' ' + dU() : 'Learns while driving', 720, 236, 22, t.dim, { align: 'right' });
             }
             // one status line under the number: low battery / engine on, else a missing or old charge reading
             const eu = d.engine ? model.enginePctPerKm(d.speed) : null;
             if (hold) {
                 // low battery: the car drives as a hybrid and keeps the charge at 5-11 %
-                uiText(cv, 'Low battery: electric up to ' + Math.round(D(62)) + ' ' + (MI() ? 'mph' : 'km/h') + ', light throttle', 48, 250, 22, t.warn, { font: 'bold' });
+                cv.text('Low battery: electric up to ' + Math.round(D(62)) + ' ' + (MI() ? 'mph' : 'km/h') + ', light throttle', 48, 250, 22, t.warn, { font: 'bold' });
             } else if (d.engine) {
                 // engine running: what the battery does meanwhile (learned with the engine on), per 10 km / mi
                 const per10 = G.isNum(eu) ? (MI() ? eu / KM_MI : eu) * 10 : null, u10 = MI() ? '10 mi' : '10 km';
-                uiText(cv, 'ENGINE ON  ·  ' + (!G.isNum(per10) ? 'learning' : per10 < -0.05 ? 'charging +' + G.fmt(-per10, 1) + ' % per ' + u10
+                cv.text('ENGINE ON  ·  ' + (!G.isNum(per10) ? 'learning' : per10 < -0.05 ? 'charging +' + G.fmt(-per10, 1) + ' % per ' + u10
                     : 'battery helps -' + G.fmt(per10, 1) + ' % per ' + u10), 48, 250, 22, t.warn, { font: 'bold' });
-            } else if (!has) uiText(cv, diagHint('no charge reading yet'), 48, 250, 24, t.dim);
-            else if (d.stale) uiText(cv, 'charge read ' + ago(d.socAge), 48, 250, 24, t.warn);
+            } else if (!has) cv.text(diagHint('no charge reading yet'), 48, 250, 24, t.dim);
+            else if (d.stale) cv.text('charge read ' + ago(d.socAge), 48, 250, 24, t.warn);
             // the range on a bar (full charge at the end)
             G.bar(cv, t, 48, 262 + ey, 672, 92, {
-                label: uiMessage('Full: ' + Math.round(D(e.full)) + ' ' + dU()), value: has ? D(e.mid) : null, unit: dU(), max: D(e.full), niceMax: true, ramp: 'hot',
+                label: 'Full: ' + Math.round(D(e.full)) + ' ' + dU(), value: has ? D(e.mid) : null, unit: dU(), max: D(e.full), niceMax: true, ramp: 'hot',
             });
             // the battery's power now: regen to the left, use to the right (live.js), as the Full bar above it
             // (its scale ends G.MARGIN over the panel's bottom)
@@ -731,28 +724,28 @@ mgu.run({
             G.panel(cv, t, 768, 44, 380, 468, 'Charge');
             battery(cv, t, 796, 101, 300, 106, d.soc);
             const ss = G.isNum(d.soc) ? G.fmt(d.soc, 0) : '--';
-            const sw = uiText(cv, ss, 940, 296, 92, G.isNum(d.soc) ? t.text : t.dim, { font: 'num', align: 'center' });
-            uiText(cv, '%', 950 + sw / 2, 296, 34, t.dim, { font: 'bold' });
+            const sw = cv.text(ss, 940, 296, 92, G.isNum(d.soc) ? t.text : t.dim, { font: 'num', align: 'center' });
+            cv.text('%', 950 + sw / 2, 296, 34, t.dim, { font: 'bold' });
             // 12 V battery: resting ~12.4-12.8 V, 13.5-14.8 V while the DC/DC or alternator charges it
             const v = d.v12, vcol = !G.isNum(v) ? t.dim : v < 11.8 ? t.crit : v < 12.2 || v > 15.2 ? t.warn : t.text;
-            const vw = uiText(cv, G.isNum(v) ? v.toFixed(2) + ' V' : '--', 1124, 340 + ey, 28, vcol, { font: 'bold', align: 'right' });
-            uiText(cv, '12 V', 792, 340 + ey, 22, t.dim, { font: 'bold', spacing: 1.5 });
+            const vw = cv.text(G.isNum(v) ? v.toFixed(2) + ' V' : '--', 1124, 340 + ey, 28, vcol, { font: 'bold', align: 'right' });
+            cv.text('12 V', 792, 340 + ey, 22, t.dim, { font: 'bold', spacing: 1.5 });
             void vw;
             cv.fillRect(792, 357 + ey, 332, 1, t.tick);
             // (the last charge's lines end G.MARGIN over the panel's bottom)
             const c = d.charge, lc = G.toMargin(ex, 18);
-            uiText(cv, c && c.open ? 'CHARGING' : 'LAST CHARGE', 792, 393 + lc, 22, c && c.open ? GO : t.dim, { font: 'bold', spacing: 1.5 });
+            cv.text(c && c.open ? 'CHARGING' : 'LAST CHARGE', 792, 393 + lc, 22, c && c.open ? GO : t.dim, { font: 'bold', spacing: 1.5 });
             if (c) {
                 const add = c.to - c.from;
-                const aw = uiText(cv, '+' + add.toFixed(0) + ' %', 792, 446 + lc, 44, GO, { font: 'bold' });
-                uiText(cv, '+' + Math.round(D(kmOf(add))) + ' ' + dU(), 806 + aw, 444 + lc, 28, t.text, { font: 'bold' });
+                const aw = cv.text('+' + add.toFixed(0) + ' %', 792, 446 + lc, 44, GO, { font: 'bold' });
+                cv.text('+' + Math.round(D(kmOf(add))) + ' ' + dU(), 806 + aw, 444 + lc, 28, t.text, { font: 'bold' });
                 // from -> to: the arrow drawn ('→' isn't in the baked fonts), as the text's colour and weight
-                const ly = 489 + lc, fw = uiText(cv, String(Math.round(c.from)), 792, ly, 24, t.dim), ax = 792 + fw + 9, ay = ly - 8;
+                const ly = 489 + lc, fw = cv.text(String(Math.round(c.from)), 792, ly, 24, t.dim), ax = 792 + fw + 9, ay = ly - 8;
                 cv.line(ax, ay, ax + 18, ay, 2, t.dim);
                 cv.polyline([[ax + 12, ay - 5], [ax + 18, ay], [ax + 12, ay + 5]], 2, t.dim);
-                uiText(cv, Math.round(c.to) + ' %  ·  ' + (c.open ? 'now' : ago(Date.now() - c.toT)), ax + 27, ly, 24, t.dim);
+                cv.text(Math.round(c.to) + ' %  ·  ' + (c.open ? 'now' : ago(Date.now() - c.toT)), ax + 27, ly, 24, t.dim);
             } else {
-                uiText(cv, 'none yet', 792, 446 + lc, 28, t.dim);
+                cv.text('none yet', 792, 446 + lc, 28, t.dim);
             }
 
             // ---- this drive (from the battery's own power readings, live.js)
@@ -811,26 +804,26 @@ mgu.run({
             if (h >= 300) {
                 // the full layout: health, how much a full charge holds (bar against new), in it now, temperature
                 // (the tabs' big value alike: 120 on y + 152, the unit 38 beside it, as Range and Energy)
-                const hw = uiText(cv, G.isNum(soh) ? G.fmt(soh, 0) : '--', x + 24, y + 152, 120, hc, { font: 'num' });
-                uiText(cv, '%', x + 34 + hw, y + 152, 38, t.dim, { font: 'bold' });
-                if (!G.isNum(soh)) uiText(cv, diagHint('not read yet'), x + 24, y + 170, 22, t.dim);
+                const hw = cv.text(G.isNum(soh) ? G.fmt(soh, 0) : '--', x + 24, y + 152, 120, hc, { font: 'num' });
+                cv.text('%', x + 34 + hw, y + 152, 38, t.dim, { font: 'bold' });
+                if (!G.isNum(soh)) cv.text(diagHint('not read yet'), x + 24, y + 170, 22, t.dim);
                 G.bar(cv, t, x + 24, y + 178 + dh, w - 48, 92, {
                     label: 'Holds', value: cap, unit: 'kWh', decimals: 1, max: kwh, step: kwh / 4, scaleDecimals: kwh % 4 ? 1 : 0, ramp: 'hot',
                     zones: [{ from: 0, to: kwh * 0.7, color: 'crit' }, { from: kwh * 0.7, to: kwh * 0.8, color: 'warn' }],
                 });
                 cv.fillRect(x + 24, y + 304 + dy, w - 48, 1, t.panelEdge);
-                uiText(cv, 'IN THE BATTERY NOW', x + 24, y + 342 + dy, 22, t.dim, { font: 'bold', spacing: 1.5 });
-                const ew = uiText(cv, G.isNum(now) ? G.fmt(now, 1) : '--', x + 24, y + 418 + dy, 72, G.isNum(now) ? t.text : t.dim, { font: 'num' });
-                uiText(cv, 'kWh', x + 34 + ew, y + 418 + dy, 28, t.dim);
+                cv.text('IN THE BATTERY NOW', x + 24, y + 342 + dy, 22, t.dim, { font: 'bold', spacing: 1.5 });
+                const ew = cv.text(G.isNum(now) ? G.fmt(now, 1) : '--', x + 24, y + 418 + dy, 72, G.isNum(now) ? t.text : t.dim, { font: 'num' });
+                cv.text('kWh', x + 34 + ew, y + 418 + dy, 28, t.dim);
                 // (the temperature: the Cells panel's, from the battery unit)
                 return;
             }
             const tall = false, hy = y + 118;
-            const hw = uiText(cv, G.isNum(soh) ? G.fmt(soh, 0) : '--', x + 24, hy, 64, hc, { font: 'num' });
-            uiText(cv, G.isNum(soh) ? '%' : diagHint('not read yet'), x + 32 + hw, hy, G.isNum(soh) ? 26 : 18, t.dim, { font: 'bold' });
+            const hw = cv.text(G.isNum(soh) ? G.fmt(soh, 0) : '--', x + 24, hy, 64, hc, { font: 'num' });
+            cv.text(G.isNum(soh) ? '%' : diagHint('not read yet'), x + 32 + hw, hy, G.isNum(soh) ? 26 : 18, t.dim, { font: 'bold' });
             const r = x + w - 24, line = (yy, label, val, c) => {
-                const vw2 = uiText(cv, val, r, yy, 22, c || t.text, { font: 'bold', align: 'right' });
-                uiText(cv, label, r - vw2 - 14, yy, 18, t.dim, { font: 'bold', spacing: 1.2, align: 'right' });
+                const vw2 = cv.text(val, r, yy, 22, c || t.text, { font: 'bold', align: 'right' });
+                cv.text(label, r - vw2 - 14, yy, 18, t.dim, { font: 'bold', spacing: 1.2, align: 'right' });
             };
             const ly = tall ? [y + 340, y + 382, y + 424] : [y + 78, y + 108, y + 138];
             line(ly[0], 'HOLDS', G.isNum(cap) ? G.fmt(cap, 1) + ' kWh' : '--');
@@ -852,25 +845,25 @@ mgu.run({
             // room below the page: another row where a whole one fits, the rest spread over the rows
             const nRows = 8 + Math.floor(ex / 43), rowP = 43 + (ex - (nRows - 8) * 43) / nRows;
             const cols = [48, 230, 380, 590, 760, 920];
-            ['DATE', 'ADDED', 'FROM - TO', 'ENERGY', 'RANGE', price() > 0 ? 'COST' : ''].forEach((h, i) => uiText(cv, h, cols[i], 121, 22, t.dim, { font: 'bold', spacing: 1 }));
+            ['DATE', 'ADDED', 'FROM - TO', 'ENERGY', 'RANGE', price() > 0 ? 'COST' : ''].forEach((h, i) => cv.text(h, cols[i], 121, 22, t.dim, { font: 'bold', spacing: 1 }));
             cv.fillRect(48, 133, 992, 1, t.panelEdge);
             if (!all.length) {
                 const ny = Math.round(ex / 2);
-                uiText(cv, 'No charges logged yet.', 544, 284 + ny, 32, t.dim, { align: 'center', font: 'bold' });
-                uiText(cv, 'Every charge of ' + cfg.chargeMinPct + ' % or more shows up here,', 544, 330 + ny, 26, t.dim, { align: 'center' });
-                uiText(cv, 'also overnight charges.', 544, 366 + ny, 26, t.dim, { align: 'center' });
+                cv.text('No charges logged yet.', 544, 284 + ny, 32, t.dim, { align: 'center', font: 'bold' });
+                cv.text('Every charge of ' + cfg.chargeMinPct + ' % or more shows up here,', 544, 330 + ny, 26, t.dim, { align: 'center' });
+                cv.text('also overnight charges.', 544, 366 + ny, 26, t.dim, { align: 'center' });
             }
             all.slice(-nRows).reverse().forEach((c, i) => {
                 const y = Math.round(174 + i * rowP);
                 if (i % 2 === 0) cv.roundRect(40, y - 28, 1008, 38, 8, withAlpha(t.track, 0.55));
                 const add = c.to - c.from;
-                uiText(cv, dateOf(c.toT), cols[0], y, 24, t.text, { font: 'label' });
-                uiText(cv, '+' + add.toFixed(0) + ' %', cols[1], y, 26, GO, { font: 'bold' });
-                uiText(cv, Math.round(c.from) + ' - ' + Math.round(c.to) + ' %', cols[2], y, 24, t.dim, { font: 'label' });
-                uiText(cv, G.isNum(c.kwh) ? c.kwh.toFixed(1) + ' kWh' : '-', cols[3], y, 24, t.text, { font: 'label' });
-                uiText(cv, '+' + Math.round(D(kmOf(add))) + ' ' + dU(), cols[4], y, 24, t.text, { font: 'label' });
+                cv.text(dateOf(c.toT), cols[0], y, 24, t.text, { font: 'label' });
+                cv.text('+' + add.toFixed(0) + ' %', cols[1], y, 26, GO, { font: 'bold' });
+                cv.text(Math.round(c.from) + ' - ' + Math.round(c.to) + ' %', cols[2], y, 24, t.dim, { font: 'label' });
+                cv.text(G.isNum(c.kwh) ? c.kwh.toFixed(1) + ' kWh' : '-', cols[3], y, 24, t.text, { font: 'label' });
+                cv.text('+' + Math.round(D(kmOf(add))) + ' ' + dU(), cols[4], y, 24, t.text, { font: 'label' });
                 const m = money(c.kwh);
-                if (m) uiText(cv, m, cols[5], y, 24, t.text, { font: 'label' });
+                if (m) cv.text(m, cols[5], y, 24, t.text, { font: 'label' });
             });
 
             // ---- totals + 14-day chart
@@ -879,12 +872,12 @@ mgu.run({
             const month = all.filter((c) => c.toT >= monthStart);
             const sum = (list) => list.reduce((a, c) => a + kwhOf(c), 0);
             const block = (y, label, list) => {
-                uiText(cv, label, 1112, y, 22, t.dim, { font: 'bold', spacing: 1 });
-                const kw = uiText(cv, sum(list).toFixed(1), 1112, y + 52, 48, t.text, { font: 'num' });
-                uiText(cv, 'kWh', 1120 + kw, y + 52, 24, t.dim);
+                cv.text(label, 1112, y, 22, t.dim, { font: 'bold', spacing: 1 });
+                const kw = cv.text(sum(list).toFixed(1), 1112, y + 52, 48, t.text, { font: 'num' });
+                cv.text('kWh', 1120 + kw, y + 52, 24, t.dim);
                 const m = money(sum(list));
-                if (m) uiText(cv, m, 1552, y + 52, 30, t.text, { align: 'right', font: 'bold' });
-                uiText(cv, list.length + ' ' + plural(list.length, 'charge', 'charges') + '  ·  +' + Math.round(D(kmOf(list.reduce((a, c) => a + (c.to - c.from), 0)))) + ' ' + dU(), 1552, y, 22, t.dim, { align: 'right' });
+                if (m) cv.text(m, 1552, y + 52, 30, t.text, { align: 'right', font: 'bold' });
+                cv.text(list.length + ' ' + plural(list.length, 'charge', 'charges') + '  ·  +' + Math.round(D(kmOf(list.reduce((a, c) => a + (c.to - c.from), 0)))) + ' ' + dU(), 1552, y, 22, t.dim, { align: 'right' });
             };
             block(116, 'THIS MONTH', month);
             block(208, 'ALL TIME', all);
@@ -895,23 +888,23 @@ mgu.run({
             const top = Math.max(4, Math.max.apply(null, days));
             // (taller into the room below the page; its label then ends G.MARGIN over the panel's bottom, as the list's rows)
             const dg = G.toMargin(ex, 9), gx = 1112, gy = 470 + dg, gh = 132 + dg, bw = 440 / 14;
-            uiText(cv, 'KWH PER DAY, 14 DAYS', gx, 318, 22, t.dim, { font: 'bold', spacing: 1 });
+            cv.text('KWH PER DAY, 14 DAYS', gx, 318, 22, t.dim, { font: 'bold', spacing: 1 });
             days.forEach((v, i) => {
                 const h = v > 0 ? Math.max(6, v / top * gh) : 0;
                 cv.roundRect(gx + i * bw + 3, gy - gh, bw - 6, gh, 4, withAlpha(t.track, 0.6));
                 if (h) cv.rampRect(gx + i * bw + 3, gy - h, bw - 6, h, 4, t.ramp || [t.accent]);
             });
-            uiText(cv, 'today', gx + 440, gy + 28, 22, t.dim, { align: 'right' });
+            cv.text('today', gx + 440, gy + 28, 22, t.dim, { align: 'right' });
         }
 
         function renderDiag(cv, t, d) {
             G.panel(cv, t, 24, 44, 1552, 468, 'Battery diagnostics');
             const link = diag.p ? (diag.available ? 'link up' : 'link down') : 'no link (' + (diag.error || 'not started') + ')';
-            uiText(cv, 'UDS 22 ReadDataByIdentifier / OBD 01  ·  ' + link + '  ·  ' + translate('ambient') + ' ' + (G.isNum(live.ambient) ? G.fmt(live.ambient, 1) + ' °C' : translate('n/a'))
+            cv.text('UDS 22 ReadDataByIdentifier / OBD 01  ·  ' + link + '  ·  ' + translate('ambient') + ' ' + (G.isNum(live.ambient) ? G.fmt(live.ambient, 1) + ' °C' : translate('n/a'))
                 + '  ·  ' + translate('speed') + ' ' + (G.isNum(live.speed) ? G.fmt(G.hold('speed', live.speed), 0) + ' km/h' : translate('n/a'))
                 + '  ·  ' + translate('climate') + ' ' + (live.climate === null ? translate('n/a') : translate(live.climate ? 'on' : 'off')) + (live.ac ? ' (A/C)' : ''), 48, 121, 24, t.text, { font: 'label' });
             const cols = [48, 160, 260, 380, 820, 1000, 1290];
-            ['VALUE', 'ECU', 'DID', 'REPLY', 'DECODED', 'STATUS', 'READ'].forEach((h, i) => uiText(cv, h, cols[i], 167, 22, t.dim, { font: 'bold', spacing: 1 }));
+            ['VALUE', 'ECU', 'DID', 'REPLY', 'DECODED', 'STATUS', 'READ'].forEach((h, i) => cv.text(h, cols[i], 167, 22, t.dim, { font: 'bold', spacing: 1 }));
             cv.fillRect(48, 178, 1504, 1, t.tick);
             // every candidate gets a row: the rows shrink to fit between the header and the note at the bottom
             const n = VALUES.reduce((a, key) => a + (cfg[key] || []).length, 0);
@@ -920,19 +913,19 @@ mgu.run({
             VALUES.forEach((key) => (cfg[key] || []).forEach((c, i) => {
                 const ecu = c.ecu == null ? cfg.ecu : c.ecu, r = raws[reader.key(c)];
                 const used = pick[key] === i && r && r.ok;
-                uiText(cv, key.toUpperCase() + (used ? ' *' : ''), cols[0], y, fs, used ? GO : t.text, { font: 'bold' });
-                uiText(cv, '0x' + hex(ecu), cols[1], y, fs, t.text, { font: 'label' });
-                uiText(cv, DidReader.label(c), cols[2], y, fs, t.text, { font: 'label' });
+                cv.text(key.toUpperCase() + (used ? ' *' : ''), cols[0], y, fs, used ? GO : t.text, { font: 'bold' });
+                cv.text('0x' + hex(ecu), cols[1], y, fs, t.text, { font: 'label' });
+                cv.text(DidReader.label(c), cols[2], y, fs, t.text, { font: 'label' });
                 const bytes = r ? r.bytes || '-' : '-';
-                uiText(cv, bytes.length > 36 ? bytes.slice(0, 35) + '…' : bytes, cols[3], y, fsS, t.dim, { font: 'label' });
-                uiText(cv, r && G.isNum(r.value) ? G.fmt(r.value, key === 'v12' ? 2 : 1) : '-', cols[4], y, fs, t.text, { font: 'label' });
+                cv.text(bytes.length > 36 ? bytes.slice(0, 35) + '…' : bytes, cols[3], y, fsS, t.dim, { font: 'label' });
+                cv.text(r && G.isNum(r.value) ? G.fmt(r.value, key === 'v12' ? 2 : 1) : '-', cols[4], y, fs, t.text, { font: 'label' });
                 const why = r ? (r.ok ? 'OK' : r.why) : 'not read';
-                uiText(cv, why.length > 24 ? why.slice(0, 23) + '…' : why, cols[5], y, fsS, r && r.ok ? GO : r ? t.warn : t.dim, { font: 'label' });
-                uiText(cv, r ? ago(Date.now() - r.t) : '-', cols[6], y, fsS, t.dim, { font: 'label' });
+                cv.text(why.length > 24 ? why.slice(0, 23) + '…' : why, cols[5], y, fsS, r && r.ok ? GO : r ? t.warn : t.dim, { font: 'label' });
+                cv.text(r ? ago(Date.now() - r.t) : '-', cols[6], y, fsS, t.dim, { font: 'label' });
                 y += rowH;
             }));
-            uiText(cv, 'A value n/a or wrong? Adjust config.battery in apps/edrive/app.json and rebuild.', 48, 488, 20, t.dim);
-            if (d.demo) uiText(cv, 'Main page: demo data until the link answers', 1552, 488, 20, t.warn, { align: 'right' });
+            cv.text('A value n/a or wrong? Adjust config.battery in apps/edrive/app.json and rebuild.', 48, 488, 20, t.dim);
+            if (d.demo) cv.text('Main page: demo data until the link answers', 1552, 488, 20, t.warn, { align: 'right' });
         }
 
         /** The car's signals as received (climate, comfort, power figures), one per line - for checking scalings. */
@@ -940,7 +933,7 @@ mgu.run({
             G.panel(cv, t, 24, 44, 1552, 468, 'Car signals');
             const seatTxt = Object.keys(live.seats).map((k) => k + ' ' + (live.seats[k] === null ? '?' : live.seats[k])).join(' ') || translate('n/a');
             const bt = live.batt;
-            uiText(cv, 'climate ' + (live.climate === null ? translate('n/a') : live.climate === 'ac' ? translate('on') + ' (A/C)' : translate(live.climate ? 'on' : 'off'))
+            cv.text('climate ' + (live.climate === null ? translate('n/a') : live.climate === 'ac' ? translate('on') + ' (A/C)' : translate(live.climate ? 'on' : 'off'))
                 + '  ·  blower ' + (G.isNum(live.blower) ? live.blower + ' / ' + live.blowerTop : translate('n/a')) + '  ·  seats ' + seatTxt
                 + '  ·  wheel ' + (live.wheel === null ? translate('n/a') : translate(live.wheel ? 'on' : 'off')) + '  ·  pace ' + (G.isNum(paceNow()) ? Math.round(paceNow()) + ' km/h' : translate('n/a'))
                 + '  ·  battery ' + (bt && G.isNum(bt.avg) ? bt.avg + ' °C (' + bt.min + '..' + bt.max + ')' : translate('n/a'))
@@ -953,12 +946,12 @@ mgu.run({
             let y = 154;
             rows.forEach(([k, v]) => {
                 if (y > 470) return;
-                uiText(cv, k, 48, y, fz + 1, t.dim, { font: 'bold' });
+                cv.text(k, 48, y, fz + 1, t.dim, { font: 'bold' });
                 const txt = v || '-';
-                uiText(cv, txt.length > 160 ? txt.slice(0, 159) + '…' : txt, 230, y, fz, v ? t.text : t.dim, { font: 'label', translate: false });
+                cv.text(txt.length > 160 ? txt.slice(0, 159) + '…' : txt, 230, y, fz, v ? t.text : t.dim, { font: 'label' });
                 y += step;
             });
-            uiText(cv, 'Raw values as the car sends them - for checking the scalings (config.scaling in app.json).', 48, 498, 18, t.dim);
+            cv.text('Raw values as the car sends them - for checking the scalings (config.scaling in app.json).', 48, 498, 18, t.dim);
         }
 
         /** Energy: use per speed band, where the power goes now, the car's own figures, battery temperature. */
@@ -1005,13 +998,13 @@ mgu.run({
                 ['Steering wheel', wheelKw, has ? share(wheelKw) : null, d.wheel === null || d.wheel === undefined ? translate('n/a') : d.wheel ? 'on (est.)' : 'off'],
                 ['On-board electrics', base, null, 'screens, units, pumps'],
             ];
-            ['', 'KW', isRussian() ? '- КМ' : 'RANGE', ''].forEach((h, i) => uiText(cv, h, [x0 + 24, x0 + 400, x0 + 500, 0][i], 116, 20, t.dim, { font: 'bold', spacing: 1, align: 'right' }));
+            ['', 'KW', 'RANGE', ''].forEach((h, i) => cv.text(h, [x0 + 24, x0 + 400, x0 + 500, 0][i], 116, 20, t.dim, { font: 'bold', spacing: 1, align: 'right' }));
             rows.forEach(([name, kw, km, note], i) => {
                 const y = Math.round(160 + i * (52 + ex / 5));
-                uiText(cv, name, x0 + 24, y, 24, t.text, { font: 'bold' });
-                uiText(cv, G.isNum(kw) ? G.fmt(kw, kw < 1 ? 2 : 1) : '-', x0 + 400, y, 24, G.isNum(kw) && kw >= 1.5 ? t.warn : t.text, { font: 'bold', align: 'right' });
-                uiText(cv, G.isNum(km) && km >= 0.5 ? '-' + Math.round(D(km)) + ' ' + dU() : '', x0 + 500, y, 22, t.text, { align: 'right' });
-                uiText(cv, !isRussian() && note.length > 30 ? note.slice(0, 29) + '…' : note, x0 + 520, y, 19, t.dim, { maxWidth: w0 - 544 });
+                cv.text(name, x0 + 24, y, 24, t.text, { font: 'bold' });
+                cv.text(G.isNum(kw) ? G.fmt(kw, kw < 1 ? 2 : 1) : '-', x0 + 400, y, 24, G.isNum(kw) && kw >= 1.5 ? t.warn : t.text, { font: 'bold', align: 'right' });
+                cv.text(G.isNum(km) && km >= 0.5 ? '-' + Math.round(D(km)) + ' ' + dU() : '', x0 + 500, y, 22, t.text, { align: 'right' });
+                cv.text(note.length > 30 ? note.slice(0, 29) + '…' : note, x0 + 520, y, 19, t.dim);
             });
             // the car's own "power distribution" display (scaling not known yet: shown as sent)
             // (255 = the car doesn't send that value: left out; nothing at all: the line is left out)
@@ -1022,8 +1015,8 @@ mgu.run({
             void sent;
             // learned range vs. the range at the rate measured lately
             const kmTxt = (km) => (G.isNum(km) && has ? Math.round(D(km)) + ' ' + dU() : '--');
-            uiText(cv, 'RANGE AT THIS RATE', x0 + 24, 486 + ex, 22, t.dim, { font: 'bold', spacing: 1.5 });
-            uiText(cv, kmTxt(rr), x0 + w0 - 24, 490 + ex, 40, measured ? t.text : t.dim, { font: 'bold', align: 'right' });
+            cv.text('RANGE AT THIS RATE', x0 + 24, 486 + ex, 22, t.dim, { font: 'bold', spacing: 1.5 });
+            cv.text(kmTxt(rr), x0 + w0 - 24, 490 + ex, 40, measured ? t.text : t.dim, { font: 'bold', align: 'right' });
         }
 
         function render() {

@@ -14,18 +14,8 @@
  * screen, all the faults are on one page and each list scrolls (a finger, or the controller turned on it).
  * Fault codes are BMW hex codes (as BMW's diagnostic tools show them); the head unit has no
  * text database for them, so look them up by code + control unit.
- *
- * MGU Tools port of upstream idrive7-apps 2.9.4 (5389acc): its checks and conditions as they are, plus
- *   - the Russian package through the kit's catalog (kit/runtime/i18n.js, locales/ru.json): the page's
- *     dynamic messages through ui_text.js, descriptions whole through diagnostic-text.js (our catalog first,
- *     then upstream's Russian descriptions, diagnostic_i18n.pack)
- *   - the list's glide on the monotonic clock (kit/runtime/clock.js); last_scan.json and ecu_ids.json saved
- *     atomically, one that does not parse moved aside (kit/runtime/store.js)
- *   - a scan saved by MGU Tools 2.7 (last_scan.json "v": 2) read as upstream's
- *   - where the kit does not run the screen, the Control units page is paged (25 a page, "+ N more on the
- *     next page", Next page) instead of showing the first 25 only
- *   - the demo state told to the kit (kit/runtime/datastate.js), which draws its DEMO mark on every frame
  */
+const fs = require('fs');
 const path = require('path');
 const mgu = require('./kit/mgu');
 const { withAlpha } = require('./kit/canvas');
@@ -34,16 +24,10 @@ const { fitText } = require('./kit/text-layout');
 const { diagnosticText } = require('./diagnostic-text');
 const { t: translateUI, plural } = require('./kit/i18n');
 const { Diag, parseDtcReply, statusInfo, hex, NRC } = require('./kit/diag');
-const clock = require('./kit/clock');
-const store = require('./kit/store');
-const datastate = require('./kit/datastate');
-const { message: uiMessage, tf } = require('./ui_text');
 const DEMO = require('./demo');
 
 const W = 1600, H = 520, PER_PAGE = 6;
 const GO = '#2fd27a';
-// descriptions and fault codes drawn as they are (translated whole before, never the UI's word substitution)
-const RAW = { translate: false, literal: true };
 
 // diagnostic addresses -> control unit (unknown ones show as "ECU 0x..")
 const { ECU } = require('./kit/ecus');
@@ -64,6 +48,7 @@ const { ECU } = require('./kit/ecus');
 // The build packs dtc_db/ into one compressed file, dtc_db.pack (kit/runtime/pack.js): ~19 MB of
 // texts take ~3.5 MB, and a lookup inflates only the few KB that hold its code.
 const DB = require('./kit/pack').open(path.join(__dirname, 'dtc_db'));
+const readJson = (f) => { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch (e) { return {}; } };
 const req = (m) => { try { return require(m); } catch (e) { return {}; } };
 const OWN = Object.assign({}, req('./known_texts'), req('./dtc_texts'));
 const text = (key) => OWN[key] || DB.get('dtc_texts.json', key);
@@ -108,51 +93,6 @@ const ecuName = (a) => {
     return (v && UNIT_NAMES[v] && ascii(UNIT_NAMES[v])) || ECU[a] || v || ('ECU 0x' + hex(a));
 };
 
-/**
- * data/last_scan.json -> the scan as upstream keeps it: { at, demo, ecus: [{ addr, dtcs: [{code,status,mem}], nrc }],
- * infoFailed }. Also one MGU Tools 2.7 saved ("v": 2: units read / not read, their entries split into faults and
- * the others): read as upstream's, every entry of a unit, its refusal (nrc). null when it holds no scan.
- */
-function fromSaved(o) {
-    if (!o || typeof o !== 'object') return null;
-    const entry = (d) => d && typeof d.code === 'string' && typeof d.status === 'number';
-    const dtc = (d) => ({ code: d.code, status: d.status, mem: d.mem === 'info' ? 'info' : 'fault' });
-    if (o.v === 2 && Array.isArray(o.units)) {
-        return {
-            at: o.at, demo: false, infoFailed: o.info === false,
-            ecus: o.units.filter((u) => u && typeof u.addr === 'number').map((u) => ({
-                addr: u.addr, nrc: typeof u.nrc === 'number' ? u.nrc : null,
-                dtcs: [].concat(u.dtcs || [], u.other || []).filter(entry).map(dtc),
-            })),
-        };
-    }
-    if (!Array.isArray(o.ecus)) return null;
-    o.ecus = o.ecus.filter((e) => e && typeof e.addr === 'number');
-    o.ecus.forEach((e) => { e.dtcs = (Array.isArray(e.dtcs) ? e.dtcs : []).filter(entry); });
-    return o;
-}
-
-/**
- * Value of `key` gliding towards `target`: kit/runtime/gauges.js smooth() (a critically damped spring, w =
- * response 1/s), on the monotonic clock (kit/runtime/clock.js, RT-12). smooth() reads the wall clock, which the
- * head unit sets after start-up: after a step back it draws the list where it was before (one frame).
- */
-const springs = new Map();
-function glide(key, target, w) {
-    const now = clock.now();
-    const s = springs.get(key);
-    if (!s || !(now >= s.t) || now - s.t > 500) { springs.set(key, { x: target, v: 0, t: now }); return target; }
-    let dt = (now - s.t) / 1000;
-    s.t = now;
-    while (dt > 0) {
-        const h = Math.min(dt, 0.008), a = w * w * (target - s.x) - 2 * w * s.v;
-        s.v += a * h; s.x += s.v * h;
-        dt -= h;
-    }
-    if (Math.abs(target - s.x) < 1e-6 * (Math.abs(target) + 1) && Math.abs(s.v) < 1e-4) s.x = target;
-    return s.x;
-}
-
 mgu.run({
     async start(ctx) {
         const { ui, settings, log } = ctx;
@@ -160,17 +100,13 @@ mgu.run({
 
         /* ---------- state ---------- */
         const FILE = path.join(ctx.dataDir, 'last_scan.json');
-        const isObject = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
-        let scan = fromSaved(store.load(FILE, { log, fallback: null, valid: isObject }));   // { at, demo, ecus: [{ addr, dtcs: [{code,status,mem}], nrc }] }
+        let scan = null;              // { at, demo, ecus: [{ addr, dtcs: [{code,status,mem}], nrc }] }
+        try { scan = JSON.parse(fs.readFileSync(FILE, 'utf8')); } catch (e) { /* none yet */ }
         const IDS = path.join(ctx.dataDir, 'ecu_ids.json');
-        ids = store.load(IDS, { log, fallback: {}, valid: isObject });
+        ids = readJson(IDS);
         let phase = 'idle', msg = '', replies = 0, busy = false, version = 0;
         const changed = () => { version++; loop && loop.kick(); };
         const useDemo = () => settings.get('demo') === 'on' || (settings.get('demo') === 'auto' && !diag.available);
-        // the kit draws its DEMO mark while demo data is shown: when upstream's DEMO badge (header) is up
-        const markDemo = () => datastate.setDemo('dtc_scanner', !!(scan && scan.demo) || (!scan && useDemo()));
-        markDemo();
-        diag.on('available', () => { markDemo(); changed(); });
 
         /* ---------- Check Control ---------- */
         const cc = new Map();          // ccmId -> { ecu, reason }
@@ -226,10 +162,9 @@ mgu.run({
                         try { await read([0x17, mask, 0x01], 'info'); } catch (e) { infoFailed = true; log.warn('info memory: ' + e); }
                     }
                     scan = { at: Date.now(), demo: false, ecus: Array.from(byEcu.values()), infoFailed };
-                    store.save(FILE, scan, { log });
+                    try { fs.writeFileSync(FILE, JSON.stringify(scan)); } catch (e) { log.warn('save scan: ' + e); }
                     await identify(scan.ecus.map((e) => e.addr));
                 }
-                markDemo();
                 scan.ecus.sort((a, b) => b.dtcs.length - a.dtcs.length || a.addr - b.addr);
                 const n = scan.ecus.reduce((s, e) => s + e.dtcs.length, 0);
                 log.info('scan: ' + scan.ecus.length + ' control units, ' + n + ' faults');
@@ -263,7 +198,7 @@ mgu.run({
                     log.info('unit ' + hex(a) + ': SGBD index ' + (ids[hex(a)] || 'none') + (variant(a) ? ' -> ' + variant(a) : ''));
                 } catch (e) { log.warn('identify ' + hex(a) + ': ' + e); }
             }
-            store.save(IDS, ids, { log });
+            try { fs.writeFileSync(IDS, JSON.stringify(ids)); } catch (e) { log.warn('save ids: ' + e); }
             msg = '';
         }
 
@@ -302,8 +237,7 @@ mgu.run({
             if (!targets.length) { msg = scan ? 'Nothing to clear' : 'Scan first, then clear'; changed(); return; }
             if (!clearArmed) {
                 clearArmed = setTimeout(() => { clearArmed = null; clearLabel(); }, 5000);
-                // (English here: the Russian package words the whole message, ui_text.js)
-                msg = 'Clears ' + targets.length + ' control unit(s) - press again within 5 s'; changed();
+                msg = 'Clears ' + targets.length + ' ' + plural(targets.length, 'control unit(s) - press again within 5 s', 'control unit(s) - press again within 5 s'); changed();
                 return clearLabel();
             }
             clearTimeout(clearArmed); clearArmed = null; clearLabel();
@@ -331,7 +265,7 @@ mgu.run({
             log.info('cleared ' + ok + '/' + targets.length + (failed.length ? ' - not: ' + failed.join('; ') : ''));
             if (scan.demo) DEMO.ecus.forEach((e) => { e.dtcs = e.dtcs.filter((d) => d.mem !== 'fault' || (d.status & 1)); });
             busy = false;
-            msg = 'Cleared ' + ok + ' of ' + targets.length + ' control unit(s) - scanning again';
+            msg = 'Cleared ' + ok + ' of ' + targets.length + ' ' + plural(targets.length, 'control unit(s) - scanning again', 'control unit(s) - scanning again');
             changed();
             await new Promise((r) => setTimeout(r, 1500));
             const keep = msg;
@@ -411,10 +345,10 @@ mgu.run({
                 cv.roundRect(x, 195, w, 8, 4, t.track);
                 cv.roundRect(x + f * (w - 80), 195, 80, 8, 4, t.accent);
                 if (!msg) right = phase === 'scanning' ? 'Asking every control unit...' : '';
-                cv.text(uiMessage(right), x - 20, 212, 22, t.text, { align: 'right' });
+                cv.text(right, x - 20, 212, 22, t.text, { align: 'right' });
             } else if (right) {
                 // (cut to the room the title and its buttons leave; the log has it whole)
-                cv.text(fit(cv, uiMessage(right), 22, Math.max(240, 1552 - bx - 24)), 1552, 212, 22, phase === 'error' || /^Not cleared/.test(right) ? t.crit : t.dim, { align: 'right' });
+                cv.text(fit(cv, right, 22, Math.max(240, 1552 - bx - 24)), 1552, 212, 22, phase === 'error' || /^Not cleared/.test(right) ? t.crit : t.dim, { align: 'right' });
             }
             return p;
         }
@@ -430,7 +364,7 @@ mgu.run({
             const end = p.y + p.h - 12;                  // the list's last row ends 12 over the panel's bottom
             s.max = Math.max(0, top + bottom - end);
             s.y = G.clamp(s.y, 0, s.max);
-            const sy = glide(key, s.y, 22);
+            const sy = G.smooth('dtcScroll:' + key, s.y, 22);
             if (sy !== s.y) gliding = true;
             cv.clip(p.x, clipTop, p.w, p.y + p.h - 4 - clipTop);
             draw(sy, clipTop, p.y + p.h - 4);
@@ -470,13 +404,14 @@ mgu.run({
                 const s = statusInfo(d.status), col = t[s.sev] || t.dim;
                 cv.roundRect(48, y, 170, 34, 6, withAlpha(col, 0.22));
                 cv.text(s.label, 133, y + 25, 20, col, { align: 'center', font: 'bold', spacing: 0.5 });
-                cv.text(d.code, 246, y + 28, 32, t.text, { font: 'bold', spacing: 1, translate: false, literal: true });
+                cv.text(d.code, 246, y + 28, 32, t.text, { font: 'bold', spacing: 1 });
                 cv.text(fit(cv, ecuName(d.addr), 26, 680 - 420 - 16), 420, y + 27, 26, t.text);
                 // the fault's text when known (cut to fit)
                 const desc = describe(d.addr, d.code);
-                const txt = desc ? (d.mem === 'info' ? tf('INFO: {text}', { text: diagnosticText(desc) }) : diagnosticText(desc)) : d.mem === 'info' ? translateUI('INFO MEMORY') : '';
+                const txt = desc ? (d.mem === 'info' ? translateUI('INFO: ') : '') + diagnosticText(desc) : d.mem === 'info' ? translateUI('INFO MEMORY') : '';
                 // Resolve diagnosis before layout; never reapply UI word substitution.
-                if (txt) cv.text(fit(cv, txt, 22, 1552 - 680, RAW), 680, y + 27, 22, t.dim, RAW);
+                const diagnosticOptions = { literal: true };
+                if (txt) cv.text(fit(cv, txt, 22, 1552 - 680, diagnosticOptions), 680, y + 27, 22, t.dim, diagnosticOptions);
                 if (i < rows.length - 1) cv.fillRect(48, y + 40, 1504, 1, withAlpha(t.tick, 0.25));
             }));
         }
@@ -491,11 +426,11 @@ mgu.run({
                 const y = 231 + i * 47 - sy;
                 if (y + 41 < from || y > to) return;
                 cv.circle(66, y + 18, 9, COL[m.color] || t.dim);
-                cv.text(m.name ? diagnosticText(m.name) : tf('Message {id}', { id: m.id }), 92, y + 27, 28, t.text, { font: 'bold', translate: false, literal: true });
+                cv.text(m.name ? diagnosticText(m.name) : translateUI('Message ') + m.id, 92, y + 27, 28, t.text, { font: 'bold', literal: true });
                 if (m.ecu !== undefined) cv.text(fit(cv, ecuName(m.ecu), 22, 420), 1552, y + 27, 22, t.dim, { align: 'right' });
                 if (i < rows.length - 1) cv.fillRect(48, y + 40, 1504, 1, withAlpha(t.tick, 0.25));
             }));
-            if (l.length > rows.length) cv.text(uiMessage('+ ' + (l.length - rows.length) + ' more'), 1552, 506 + dy, 22, t.dim, { align: 'right' });
+            if (l.length > rows.length) cv.text('+ ' + (l.length - rows.length) + ' more', 1552, 506 + dy, 22, t.dim, { align: 'right' });
         }
 
         function drawEcus(cv, t) {
@@ -572,7 +507,7 @@ mgu.run({
         ui.onVisible((name, on) => { if (name === 'MAIN' && on) { maybeAuto(); redraw(); } });
         if (ui.onFocus) ui.onFocus((name, on) => { if (name === 'MAIN' && on) redraw(); });
         if (ui.isVisible('MAIN')) maybeAuto();
-        settings.onChange(() => { markDemo(); changed(); });
+        settings.onChange(() => changed());
         if (scan) ui.text('BTN_SCAN', 'Scan again');
         render(true).then(() => log.info('first frame done')).catch((e) => log.warn('first render: ' + e));
     },

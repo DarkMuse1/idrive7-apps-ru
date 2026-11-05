@@ -23,7 +23,6 @@ const { Controller, REFRESH_KEYS } = require('./controller');
 const { TuneControl } = require('./tune');
 const { XDriveControl } = require('./xdrive');
 const Car = require('./kit/car');
-const clock = require('./kit/clock');
 
 /** The tabs this car gets: Exhaust Flap always, the picked tune's pages, xDrive when switched on. */
 function pagesFor(f, xdrive) {
@@ -48,9 +47,7 @@ mgu.run({
         // xDrive (experimental) also wants speed and the selector: live values only as well
         const car = new Car(ctx, ['rpm', 'speed', 'gear', 'condition']);
         const tune = new TuneControl(ctx, { rpm: () => { const d = car.data(); return d.demo ? null : d.rpm; } });
-        // monotonic time (docs/architecture.md 2 rule 7, RT-12): the two-press windows of the xDrive off / on
-        // writes and the diagnostic trace window must not move with the head unit's wall clock
-        const xdrive = new XDriveControl(ctx, car, clock.now);
+        const xdrive = new XDriveControl(ctx, car);
         let angle = 0.18;
         let page = 'Exhaust Flap';          // by name: the tune's tabs come and go with the setting
 

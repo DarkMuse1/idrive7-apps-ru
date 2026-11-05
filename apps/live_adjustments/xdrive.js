@@ -13,12 +13,11 @@
  * brake applied and the car stationary; with the engine running it answers an NRC. After the
  * engine is started in the SAME ignition cycle DBE1 stays 0 and the cluster shows an
  * informational all-wheel-drive notice. A full ignition cycle (terminal 15 off and on) brings
- * xDrive back - so the app sends no "on" command, except on the DSC variant where 2E DB E1 01 was
- * measured to bring xDrive back (ON_INDEX, below): elsewhere DBE1 = 01 has no tested basis on G
- * cars and the known re-enable is a DSC reset, which this app will not send.
+ * xDrive back - so the app sends no "on" command at all: DBE1 = 01 has no tested basis on G
+ * cars and the known re-enable elsewhere is a DSC reset, which this app will not send.
  * The same job (DBE1, "current terminal-15 cycle") is in BMW's DSC_G20 and DSC_G30N descriptions,
- * so it is tried on every G car whose DSC answers the read. MGU Tools sends a confirmed write
- * once only: a refusal or timeout is shown, without session changes or an automatic write retry.
+ * so it is tried on every G car whose DSC answers the read. A DSC that answers the write with
+ * "not in this session" (NRC 7E / 7F) gets 10 03 (extended session) and the same write once more.
  * The DBE1 path is for the DSC variants the research names: DSC_G20, DSC_G30N, DSC_G11, DSC_I1
  * and IB_G2X (and any unidentified DSC that answers the read, as before). Other units at 0x29 with
  * a G VIP (0x39, VIP_G05 / VIP_G30N) take the VIP path instead: VIP job STEUERN_LMV_FUNKTION_QDM,
@@ -486,7 +485,6 @@ class XDriveControl {
             let r = await this._write(on);
             // Some software versions take the write only in the extended diagnostic session:
             // open it (10 03) and send the same write once more. Nothing else is sent.
-            // (as upstream; MGU Tools' former DG-19 rule against it was dropped by the customer, 2026-11-03)
             if (r && r[0] === 0x7F && SESSION_NRC.indexOf(r[2]) >= 0) {
                 this.log.info('UDS -> ' + name + ' 10 03 (extended session, the ' + name + ' asked for it)');
                 const ses = await this._exchange(ecu, 0x10, [0x03], 3000,
