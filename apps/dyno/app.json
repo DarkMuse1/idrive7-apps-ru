@@ -1,6 +1,6 @@
 {
   "id": "dyno",
-  "title": "Virtual Dyno",
+  "title": "Виртуальный стенд",
   "description": "Power and torque curves from a full-throttle pull, saved and compared",
   "version": "1.5.2",
   "vendor": "custom",
