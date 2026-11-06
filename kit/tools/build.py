@@ -619,6 +619,10 @@ def stage_app(spec, app_id, language, stage, sdk, mode):
             'userLoginRequired': False, 'backgroundPriority': 200, 'someipManifest': 'manifest.json',
         },
     }
+    # per-app internet egress: mgu-uplink lets this app's uid out when package.json has
+    # mguInternet (mgu-deploy then writes apps.d/<id>). Opt-in via app.json "internet": true.
+    if spec.get('internet'):
+        pkg['mguInternet'] = True
     write_json(os.path.join(src, 'package.json'), pkg, indent=2)
     write_json(os.path.join(src, 'manifest.json'), manifest, indent=2)
     shutil.copy(os.path.join(KIT, 'platform', 'permissions.json'), os.path.join(src, 'permissions.json'))

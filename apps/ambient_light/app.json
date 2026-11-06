@@ -1,5 +1,5 @@
 {
-  "id": "ambient_light", "title": "Подсветка", "version": "0.2.4",
+  "id": "ambient_light", "title": "Подсветка", "version": "0.2.5", "internet": true,
   "description": "Проверка штатной подсветки через MGU Tools на компьютере", "vendor": "custom",
   "loggingId": "OALP", "iconGlyph": "AL",
   "signals": {"de.bmw.infotainment.misc.ComfortFunctionIuK": {
