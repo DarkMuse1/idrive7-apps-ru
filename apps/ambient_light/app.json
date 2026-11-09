@@ -1,14 +1,95 @@
 {
-  "id": "ambient_light", "title": "Подсветка", "version": "0.2.5", "internet": true,
-  "description": "Проверка штатной подсветки через MGU Tools на компьютере", "vendor": "custom",
-  "loggingId": "OALP", "iconGlyph": "AL",
-  "signals": {"de.bmw.infotainment.misc.ComfortFunctionIuK": {
-    "_instances": "1", "statusAmbientLightInteriorColour": "rs", "ambientLightInteriorColour": "w"
-  }},
-  "screens": [{"name":"MAIN","kind":"canvas","title":"Подсветка","buttons":[["BTN_SETTINGS","Настройки"]]}],
+  "id": "ambient_light",
+  "title": "Подсветка",
+  "version": "0.3.1",
+  "internet": true,
+  "description": "Произвольный RGB-цвет подсветки, реальные зоны, яркость и сохранённые цвета. Закрытый модуль загружается после ввода пароля.",
+  "vendor": "custom",
+  "loggingId": "OALP",
+  "iconGlyph": "AL",
+  "signals": {},
+  "screens": [
+    {
+      "name": "MAIN",
+      "kind": "canvas",
+      "title": "Подсветка",
+      "buttons": [
+        [
+          "BTN_PREV",
+          "Назад по меню"
+        ],
+        [
+          "BTN_NEXT",
+          "Далее"
+        ],
+        [
+          "BTN_SELECT",
+          "Выбрать"
+        ],
+        [
+          "BTN_BACK",
+          "Назад"
+        ],
+        [
+          "BTN_SETTINGS",
+          "Настройки"
+        ]
+      ]
+    }
+  ],
   "settings": [
-    {"key":"theme","label":"Оформление","type":"choice","default":"mgu_tools","options":[["mgu_tools","MGU Tools"],["m_tricolour","M Tricolour"]]},
-    {"key":"layout","label":"Компоновка","type":"choice","default":"full","options":[["full","Полный экран"],["standard","Стандартный"]]},
-    {"key":"renderer","label":"Отрисовка","type":"choice","default":"auto","options":[["auto","Автоматически"],["software","Программная"]]}
-  ]
+    {
+      "key": "theme",
+      "label": "Оформление",
+      "type": "choice",
+      "default": "mgu_tools",
+      "options": [
+        [
+          "mgu_tools",
+          "MGU Tools"
+        ],
+        [
+          "m_tricolour",
+          "M Tricolour"
+        ]
+      ]
+    },
+    {
+      "key": "layout",
+      "label": "Компоновка",
+      "type": "choice",
+      "default": "full",
+      "options": [
+        [
+          "full",
+          "Полный экран"
+        ],
+        [
+          "standard",
+          "Стандартный"
+        ]
+      ]
+    },
+    {
+      "key": "renderer",
+      "label": "Отрисовка",
+      "type": "choice",
+      "default": "auto",
+      "options": [
+        [
+          "auto",
+          "Автоматически"
+        ],
+        [
+          "software",
+          "Программная"
+        ]
+      ]
+    }
+  ],
+  "requires": {
+    "idrive7-renderd": "2.1.10",
+    "mgu-inputgate": "1.0.0",
+    "mgu-ambient-rgb": "0.1.1"
+  }
 }

@@ -1,0 +1,21 @@
+[Unit]
+Description=MGU Tools protected RGB loader
+After=vsomeipd.service
+
+[Service]
+Type=simple
+User=root
+RuntimeDirectory=mgu-ambient-rgb
+RuntimeDirectoryMode=0755
+WorkingDirectory=/var/opt/mgu-ambient-rgb
+ExecStart=/usr/bin/node /var/opt/mgu-ambient-rgb/current/native-loader.js
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+StandardOutput=journal
+StandardError=journal
+UMask=0077
+NoNewPrivileges=true
+
+[Install]
+WantedBy=oapcontroller.service

@@ -4,15 +4,29 @@
     "path": "apps/*",
     "manifest": "app.json",
     "icon": "icon.png",
-    "mguHmi": ["ID7"],
-    "requires": { "idrive7-renderd": "2.1.10", "mgu-inputgate": "1.0.0" },
+    "mguHmi": [
+      "ID7"
+    ],
+    "requires": {
+      "idrive7-renderd": "2.1.10",
+      "mgu-inputgate": "1.0.0"
+    },
     "build": {
       "python": "kit/tools/build.py",
-      "args": ["{id}", "--language", "ru"],
+      "args": [
+        "{id}",
+        "--language",
+        "ru"
+      ],
       "sdk": "oap-sdk",
       "output": "dist/{id}@{version}.tgz",
-      "network": ["doom"]
-    }
+      "network": [
+        "doom"
+      ]
+    },
+    "exclude": [
+      "ambient_light"
+    ]
   },
   "tools": [
     {
@@ -21,7 +35,9 @@
       "title": "GPU renderer",
       "description": "The apps' own GPU renderer (mgu-render): draws them at 60 fps, beside the MGU Store's Renderer; installed with the apps",
       "provides": "renderer",
-      "mguHmi": ["ID7"]
+      "mguHmi": [
+        "ID7"
+      ]
     },
     {
       "id": "mgu-inputgate",
@@ -29,9 +45,13 @@
       "version": "1.0.0",
       "title": "Controller gate",
       "description": "Lets the apps have the iDrive controller (tabs, page buttons, settings, Doom); loads into the HMI at the next start",
-      "needs": ["renderer"],
+      "needs": [
+        "renderer"
+      ],
       "optional": false,
-      "mguHmi": ["ID7"],
+      "mguHmi": [
+        "ID7"
+      ],
       "preload": {
         "library": "mgu-inputgate.so",
         "unit": "hmi.service",
@@ -40,6 +60,40 @@
         "checkAfterSeconds": 120,
         "healthySeconds": 60
       }
+    },
+    {
+      "id": "mgu-ambient-rgb",
+      "path": "tools/mgu-ambient-rgb"
+    }
+  ],
+  "components": [
+    {
+      "manifest": "app.json",
+      "icon": "icon.png",
+      "mguHmi": [
+        "ID7"
+      ],
+      "requires": {
+        "idrive7-renderd": "2.1.10",
+        "mgu-inputgate": "1.0.0",
+        "mgu-ambient-rgb": "0.1.1"
+      },
+      "build": {
+        "python": "kit/tools/build.py",
+        "args": [
+          "{id}",
+          "--language",
+          "ru"
+        ],
+        "sdk": "oap-sdk",
+        "output": "dist/{id}@{version}.tgz",
+        "network": [
+          "doom"
+        ]
+      },
+      "id": "ambient_light",
+      "kind": "app",
+      "path": "apps/ambient_light"
     }
   ]
 }
