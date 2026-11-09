@@ -619,6 +619,10 @@ def stage_app(spec, app_id, language, stage, sdk, mode):
             'userLoginRequired': False, 'backgroundPriority': 200, 'someipManifest': 'manifest.json',
         },
     }
+    # app.json "autostart": the platform starts the app by itself (the Store's deploy tool lists it so); its
+    # impl.background runs then, without screens
+    if spec.get('autostart'):
+        pkg['mguAppStartType'] = 'autostart'
     # per-app internet egress: mgu-uplink lets this app's uid out when package.json has
     # mguInternet (mgu-deploy then writes apps.d/<id>). Opt-in via app.json "internet": true.
     if spec.get('internet'):
@@ -666,6 +670,12 @@ def stage_app(spec, app_id, language, stage, sdk, mode):
             shutil.copytree(p, os.path.join(src, 'javascript', 'kit', f))
         else:
             shutil.copy(p, os.path.join(src, 'javascript', 'kit', f))
+    if app_id != 'redline':
+        # Barlow is only the gear on Redline's HUD layouts: other apps don't carry its atlas
+        for name in ('gear_barlow.json', 'OFL-Barlow.txt'):
+            p = os.path.join(src, 'javascript', 'kit', 'fonts', name)
+            if os.path.exists(p):
+                os.remove(p)
     # signals the head unit does not offer, left out of this app's manifest by the desktop installer: it
     # writes apps/<id>/missing-interfaces.json into its own staged copy of the sources only
     # (desktop/engine/engine.py adapt_read_signals). The app logs them when it starts (kit/runtime/mgu.js).

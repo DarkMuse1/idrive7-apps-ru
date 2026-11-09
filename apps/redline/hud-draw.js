@@ -15,8 +15,14 @@
  *               and rpm digits
  *     vfd       the same as a teal vacuum-fluorescent display, unlit segments always faintly lit
  *     vector    the standard layout in outline only (rings, outlined segments, outlined digits)
+ *     arc       after the F80/F82 M3/M4's HUD: 8 curved lights over a curved band, the gear under it
+ *     ramp      after the G80/G82 M3/M4's: a band climbing then flat, fields going yellow then red
+ *     dial      after the E60 M5's: a 3/4 dial round the gear, green / orange / red
+ *               (these three: hud-m.js, in the originals' colours)
  *   Palettes (setting "hudPalette"): colour (green / yellow / red), amber (night), ice (white / blue);
- *   vfd has its own.
+ *   vfd and the M layouts have their own.
+ *   Gear font (setting "hudGearFont"): Ubuntu, or Barlow (Auto: Barlow on the M layouts); a font whose
+ *   atlas is missing falls back to Ubuntu.
  *   Effects: the shift grade as a "burst" (pops, a ring grows, fades), the redline shake (on the
  *   limiter the whole image jitters a few px).
  *
@@ -25,6 +31,8 @@
  * Everything here draws on canvas.js Canvas; drawDown() also on the screen's Recorder (quads only).
  */
 const { Canvas, withAlpha } = require('./kit/canvas');
+const fonts = require('./kit/fonts');
+const M = require('./hud-m');
 
 const IW = 400, IH = 130;
 const TEMP_X = 150;          // the readouts start here: BMW draws its assistance graphic under the left of the bar
@@ -38,9 +46,9 @@ const PALETTES = {
     vfd: { low: '#3ef0d0', mid: '#a8fff0', high: '#ff6a3a', flash: '#ff6a3a', limit: '#ff4a2a', text: '#5ff6dc', cold: '#46b4ff', warm: '#ffd34a', hot: '#ff5a3a', arrow: '#5ff6dc', peak: '#d8fff8' },
     ice: { low: '#8fcfff', mid: '#e6f4ff', high: '#ff3a3a', flash: '#ff3a3a', limit: '#ff3a3a', text: '#ffffff', cold: '#5aa8ff', warm: '#e6f4ff', hot: '#ff3a3a', arrow: '#8fcfff', peak: '#ffffff' },
 };
-const VERDICT = { 'SPOT ON': 'low', EARLY: 'mid', LATE: 'high', LIMITER: 'limit', 'COLD REV': 'cold' };
+const VERDICT = { 'SPOT ON': 'low', EARLY: 'mid', LATE: 'high', LIMITER: 'limit', 'COLD REV': 'cold', KNOCK: 'limit' };
 const palette = (name) => PALETTES[name] || PALETTES.colour;
-const VERDICT_TEXT = { 'SPOT ON': 'PERFECT SHIFT', EARLY: 'EARLY', LATE: 'LATE', LIMITER: 'LIMITER', 'COLD REV': 'COLD REV' };
+const VERDICT_TEXT = { 'SPOT ON': 'PERFECT SHIFT', EARLY: 'EARLY', LATE: 'LATE', LIMITER: 'LIMITER', 'COLD REV': 'COLD REV', KNOCK: 'KNOCK' };
 
 /*
  * 7-segment characters: segments a (top), b (top right), c (bottom right), d (bottom), e (bottom
@@ -81,6 +89,18 @@ function gearText(d) {
     return st === 'P' || st === 'R' || st === 'N' ? st : g === -1 ? 'R' : isNum(g) && g > 0 ? String(g) : st === 'D' ? 'D' : g === 0 ? 'N' : '-';
 }
 
+const RACE_BLUE = '#2a7dff';
+/** The gear's font family: the option's, or Ubuntu's ('gear') when that atlas isn't in the app. */
+const gearFont = (o) => (o.gearFont && o.gearFont !== 'gear' && fonts.has(o.gearFont) ? o.gearFont : 'gear');
+/**
+ * A shift light's colour at f (0 first .. 1 last) for the app's "Shift light style" (setting "lights"),
+ * as the app's own lights: m green / yellow / red, f1 (Race) green / red / blue, mono one colour.
+ */
+function lightCol(style, P, f) {
+    if (style === 'mono') return P.text;
+    if (style === 'f1') return f < 0.42 ? P.low : f < 0.84 ? P.high : RACE_BLUE;
+    return f < 0.34 ? P.low : f < 0.67 ? P.mid : P.high;
+}
 /**
  * Shift lights at the points pts ([[x, y]]), radius rad. pos[i]: the step light i belongs to (0 lights
  * first); steps: how many steps. They count from cue.from to cue.at (the last step lights only with
@@ -89,14 +109,10 @@ function gearText(d) {
 function drawLights(cv, pts, pos, steps, rad, s) {
     const bg = s.layer !== 'fg', fg = s.layer !== 'bg', P = s.P, cue = s.cue;
     const flash = cue.shift || cue.limiter;
-    const flashCol = cue.limiter ? P.limit : s.style === 'f1' ? '#2a7dff' : P.flash;
+    const flashCol = cue.limiter ? P.limit : s.style === 'f1' ? RACE_BLUE : P.flash;
     const count = isNum(s.rpm) ? clamp((s.rpm - cue.from) / (cue.at - cue.from), 0, 1) : 0;
     const lit = Math.ceil(count * (steps - 1));
-    const col = (k) => {
-        if (s.style === 'mono') return P.text;
-        const f = k / (steps - 1);
-        return f < 0.34 ? P.low : f < 0.67 ? P.mid : P.high;
-    };
+    const col = (k) => lightCol(s.style, P, k / (steps - 1));
     // shape: 'dot' (filled), 'rect' (an LCD block), 'ring' (vector: outline, lit ones with a core)
     const shape = s.shape || 'dot';
     const put = (p, c, lit) => {
@@ -196,12 +212,19 @@ function drawDown(cv, cx, y, n, k, col) {
  * 'hot'), as many columns as items (4 at most: hud.js keeps it there), slightly smaller beyond 3. Labels
  * are bg, values fg.
  */
-function drawReadouts(cv, x0, x1, y, items, P, layer) {
+function drawReadouts(cv, x0, x1, y, items, P, layer, clear) {
     if (!items.length) return;
     const n = items.length, colw = (x1 - x0) / Math.max(3, n), k = Math.min(1, colw / 70);
     items.forEach((it, i) => {
         const cx = x0 + colw * (i + 0.5);
-        if (layer !== 'fg') cv.text(it.label, cx, y + 12, 12 * k, withAlpha(P.text, 0.75), { align: 'center', font: 'bold', spacing: 1.2 * k });
+        // labels: Normal 14 px nearly full brightness, Clearer 18 px full (12 px at 75 % read as specks on the
+        // glass); either made smaller to fit its column, so four readouts never run into each other
+        if (layer !== 'fg') {
+            const lo = { align: 'center', font: 'bold', spacing: (clear ? 1.5 : 1.2) * k };
+            let s = (clear ? 18 : 14) * k;
+            if (cv.textWidth) { const w = cv.textWidth(it.label, s, lo); if (w > colw - 14) s = Math.max(8, s * (colw - 14) / w); }
+            cv.text(it.label, cx, y + (clear ? 15 : 13), s, clear ? P.text : withAlpha(P.text, 0.9), lo);
+        }
         if (layer !== 'bg') cv.text(it.value, cx, y + 40, 26 * Math.max(0.8, k), P[it.tone] || P.text, { align: 'center', font: 'bold' });
     });
 }
@@ -212,8 +235,9 @@ function drawReadouts(cv, x0, x1, y, items, P, layer) {
  * and fades, and the word fades over the last 300 ms of its 1.5 s.
  */
 function drawChip(cv, x0, x1, y, chip, P) {
-    const c = P[VERDICT[chip.verdict] || 'text'] || P.text, cx = (x0 + x1) / 2;
-    if (!chip.burst) { cv.text(chip.verdict, cx, y + 36, 28, c, { align: 'center', font: 'bold', spacing: 2 }); return; }
+    // a chip may carry its own text and colour (the launch time: { text, tone }); the grades go by the verdict
+    const c = P[chip.tone || VERDICT[chip.verdict] || 'text'] || P.text, cx = (x0 + x1) / 2;
+    if (!chip.burst) { cv.text(chip.text || chip.verdict, cx, y + 36, 28, c, { align: 'center', font: 'bold', spacing: 2 }); return; }
     const a = chip.age || 0;
     const size = a < 150 ? 34 - 8 * (a / 150) : 26, alpha = a > 1200 ? clamp(1 - (a - 1200) / 300, 0, 1) : 1;
     if (a < 500) {
@@ -221,7 +245,7 @@ function drawChip(cv, x0, x1, y, chip, P) {
         const rr = Math.min(30 + 36 * (a / 500), IH - (y + 26) - 2);
         cv.arc(cx, y + 26, rr - 2, rr, 0, 360, withAlpha(c, 0.8 * (1 - a / 500)));
     }
-    if (alpha > 0) cv.text(VERDICT_TEXT[chip.verdict] || chip.verdict, cx, y + 36, size, withAlpha(c, alpha), { align: 'center', font: 'bold', spacing: 1.5 });
+    if (alpha > 0) cv.text(chip.text || VERDICT_TEXT[chip.verdict] || chip.verdict, cx, y + 36, size, withAlpha(c, alpha), { align: 'center', font: 'bold', spacing: 1.5 });
 }
 
 /** The parts every layout draws the same way. */
@@ -238,13 +262,19 @@ function lightsRow(x, y, w, d) {
  */
 function drawLayer(cv, f, layer) {
     const o = f.opts, d = f.d, P = palette(o.style === 'vfd' ? 'vfd' : o.palette), cue = f.cue;
+    if (o.style === 'arc' || o.style === 'ramp' || o.style === 'dial') {
+        M.drawM(cv, f, layer, { P: P, gearText: gearText, drawDown: drawDown, lightCol: lightCol, RACE_BLUE: RACE_BLUE, gearFont: gearFont });
+        return;
+    }
     // the gearbox mode (D / S / M) as a small letter by the gear
     if (layer !== 'bg' && f.mode && o.gear) {
         const at = o.style === 'wings' ? [IW / 2 + 34, 24] : o.style === 'digital' || o.style === 'vfd' ? [58, 22] : [56, 24];
         cv.text(f.mode, at[0], at[1], 18, withAlpha(P.text, 0.85), { font: 'bold' });
     }
     const s = { rpm: d.rpm, cue: cue, shift: f.shift, redline: f.redline, max: f.max, blink: f.blink, dim: o.dim, style: o.lightStyle, P: P, layer: layer, peak: f.peak };
-    const gearCol = cue.limiter && f.blink ? P.limit : P.text;
+    // knock on the layouts with no place for the warning (Minimal, Split wings): the gear goes red as well
+    const knock = f.chip && f.chip.verdict === 'KNOCK';
+    const gearCol = (cue.limiter && f.blink) || (knock && (o.style === 'minimal' || o.style === 'wings')) ? P.limit : P.text;
     const fg = layer !== 'bg';
 
     if (o.style === 'digital' || o.style === 'vfd') {
@@ -261,7 +291,7 @@ function drawLayer(cv, f, layer) {
         if (fg) drawDown(cv, 29, 106, f.down || 0, 1, P.arrow);
         const rpmTxt = isNum(d.rpm) && d.rpm < 9995 ? String(Math.max(0, Math.round(d.rpm / 10) * 10)).padStart(4, ' ') : '----';
         if (o.rpm !== false) seg7text(cv, rpmTxt, 76, 64, 16, 30, 4, 5, P.text, ghost, false, layer);
-        if (f.chip) { if (fg) drawChip(cv, 166, IW, 62, f.chip, P); } else drawReadouts(cv, 166, IW, 62, f.readouts || [], P, layer);
+        if (f.chip) { if (fg) drawChip(cv, 166, IW, 62, f.chip, P); } else drawReadouts(cv, 166, IW, 62, f.readouts || [], P, layer, o.clearLabels);
         return;
     }
 
@@ -275,7 +305,7 @@ function drawLayer(cv, f, layer) {
         }
         if (o.bar !== false) drawBar(cv, 0, 84, IW, 40, s);
         if (fg) {
-            if (o.gear) cv.text(gearText(d), IW / 2, 70, 72, gearCol, { align: 'center', font: 'gear' });
+            if (o.gear) cv.text(gearText(d), IW / 2, 70, 72, gearCol, { align: 'center', font: gearFont(o) });
             drawDown(cv, IW / 2 + 52, 34, f.down || 0, 1, P.arrow);
         }
         return;
@@ -288,7 +318,7 @@ function drawLayer(cv, f, layer) {
         if (o.gear) seg7(cv, gearText(d).slice(0, 1), 8, 12, 44, 72, 8, gearCol, withAlpha(P.text, 0.12), true, layer);
         if (fg) drawDown(cv, 30, 92, f.down || 0, 1, P.arrow);
     } else if (fg && o.gear) {
-        cv.text(gearText(d), 30, 78, 72, gearCol, { align: 'center', font: 'gear' });
+        cv.text(gearText(d), 30, 78, 72, gearCol, { align: 'center', font: gearFont(o) });
         drawDown(cv, 30, 90, f.down || 0, 1, P.arrow);
     }
     if (o.style === 'minimal') {
@@ -297,6 +327,8 @@ function drawLayer(cv, f, layer) {
             const r = lightsRow(tx, 26, tw, 22);
             drawLights(cv, r.pts, r.pts.map((p, i) => (o.gt3 ? Math.min(i, 11 - i) : i)), o.gt3 ? 6 : 12, r.rad, s);
         }
+        // the knock warning in the room under the lights (Minimal shows no grades)
+        if (fg && knock) cv.text('KNOCK', tx + tw / 2, 100, 26, P.limit, { align: 'center', font: 'bold', spacing: 2 });
         return;
     }
 
@@ -306,13 +338,13 @@ function drawLayer(cv, f, layer) {
         drawLights(cv, r.pts, r.pts.map((p, i) => (o.gt3 ? Math.min(i, 11 - i) : i)), o.gt3 ? 6 : 12, r.rad, s);
     }
     if (o.bar !== false) drawBar(cv, tx, o.lights ? 20 : 2, tw, o.lights ? 38 : 56, s);
-    if (f.chip) { if (fg) drawChip(cv, TEMP_X, IW, 66, f.chip, P); } else drawReadouts(cv, TEMP_X, IW, 66, f.readouts || [], P, layer);
+    if (f.chip) { if (fg) drawChip(cv, TEMP_X, IW, 66, f.chip, P); } else drawReadouts(cv, TEMP_X, IW, 66, f.readouts || [], P, layer, o.clearLabels);
 }
 
 /** The key of the static ('bg') layer: what it depends on. */
 function bgKey(f) {
     const o = f.opts, c = f.cue;
-    return [o.style, o.style === 'vfd' ? 'vfd' : o.palette, o.gear, o.rpm, o.bar, o.lights, o.gt3, o.dim, o.lightStyle, f.redline, f.max, c.shift || c.limiter, c.limiter,
+    return [o.style, o.style === 'vfd' ? 'vfd' : o.palette, o.gear, o.rpm, o.bar, o.lights, o.gt3, o.dim, o.lightStyle, o.clearLabels, f.redline, f.max, c.shift || c.limiter, c.limiter,
         f.chip ? 'chip' : (f.readouts || []).map((r) => r.label).join(',')].join('|');
 }
 
@@ -351,7 +383,8 @@ function scaled(r, k, ox, oy) {
         polyline: (pts, w, c) => r.polyline(P(pts), w * k, c),
         line: (xa, ya, xb, yb, w, c) => r.line(X(xa), Y(ya), X(xb), Y(yb), w * k, c),
         text: (s, x, y, size, c, o) => r.text(s, X(x), Y(y), size * k, c, o && o.spacing ? Object.assign({}, o, { spacing: o.spacing * k }) : o),
+        textWidth: (s, size, o) => r.textWidth(s, size * k, o && o.spacing ? Object.assign({}, o, { spacing: o.spacing * k }) : o) / k,
     };
 }
 
-module.exports = { scaled, drawHud, drawLayer, drawLights, drawBar, drawGraph, drawDown, drawReadouts, drawChip, seg7, gearText, PALETTES, IW, IH, TEMP_X };
+module.exports = { scaled, lightCol, gearFont, drawHud, drawLayer, drawLights, drawBar, drawGraph, drawDown, drawReadouts, drawChip, seg7, gearText, PALETTES, IW, IH, TEMP_X };

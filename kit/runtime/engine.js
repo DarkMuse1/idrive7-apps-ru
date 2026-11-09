@@ -16,6 +16,13 @@
 const fs = require('fs');
 const path = require('path');
 
+/** Write a file whole or not at all: a temp file renamed over it (a reader or a power cut never sees half). */
+function writeWhole(file, text) {
+    const tmp = file + '.' + process.pid + '.tmp';
+    fs.writeFileSync(tmp, text);
+    fs.renameSync(tmp, file);
+}
+
 const PROFILES = { diesel: { scaleMax: 6000, redline: 5000 }, petrol: { scaleMax: 8000, redline: 7000 } };
 // VehicleTypes.TypeEngine, by name or wire number; 0 (no information) / 15 (invalid) = unknown
 const TYPES = {
@@ -41,7 +48,7 @@ class Engine {
         if (!this.logged) { this.logged = true; if (this.log) this.log.info('engine type: ' + JSON.stringify(raw) + ' -> ' + (t || 'unknown')); }
         if (!t || t === this.type) return;
         this.type = t;
-        try { fs.writeFileSync(this.file, JSON.stringify({ type: t })); } catch (e) { if (this.log) this.log.warn('engine save: ' + e); }
+        try { writeWhole(this.file, JSON.stringify({ type: t })); } catch (e) { if (this.log) this.log.warn('engine save: ' + e); }
         this._changed(false);
     }
     handlers() { return { statusVehiclePartType: (v) => this.feed(v) }; }
