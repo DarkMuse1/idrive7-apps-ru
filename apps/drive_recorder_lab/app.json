@@ -1,0 +1,82 @@
+{
+  "id": "drive_recorder_lab",
+  "title": "Видеорегистратор",
+  "version": "0.4.2",
+  "vendor": "custom",
+  "loggingId": "ODR2",
+  "iconGlyph": "DR",
+  "description": "Drive Recorder: экспериментальная запись ICAM, архив и просмотр на стоянке. Доступ по паролю.",
+  "signals": {
+    "de.bmw.infotainment.video.cameraproxy.ICAM2Proxy": {
+      "_instances": "1",
+      "_methods": [
+        "changeState"
+      ],
+      "currentState": "r"
+    },
+    "de.bmw.infotainment.video.cameraproxy.CameraProxy": {
+      "_instances": "1",
+      "_methods": [
+        "clientAttach",
+        "clientDetach"
+      ]
+    },
+    "de.bmw.infotainment.video.videobuffer.VideoBuffer": {
+      "_instances": "VideoBuffer",
+      "_methods": [
+        "startRecording",
+        "storeVideo"
+      ],
+      "currentStatus": "r",
+      "currentConfiguration": "r"
+    },
+    "de.bmw.infotainment.vehicle.Vehicle2": {
+      "statusCarSpeed2": "rs"
+    },
+    "de.bmw.infrastructure.VehicleInformation": {
+      "statusGearboxDrive": "s",
+      "DataPowerTrain2": "s"
+    },
+    "de.bmw.infotainment.telematic.provisioning.Provisioning": {
+      "_instances": "1",
+      "_broadcasts": [
+        "provisioningDataJSON"
+      ],
+      "_methods": [
+        "getValue",
+        "getValueJSON",
+        "setFilterForProvisioningData"
+      ],
+      "provisioningDataState": "r"
+    }
+  },
+  "screens": [
+    {
+      "name": "MAIN",
+      "kind": "canvas",
+      "title": "Видеорегистратор",
+      "chrome": false,
+      "buttons": [
+        [
+          "PREV",
+          "Назад по пунктам"
+        ],
+        [
+          "NEXT",
+          "Далее"
+        ],
+        [
+          "ENTER",
+          "Выбрать"
+        ],
+        [
+          "HOME",
+          "Запись"
+        ]
+      ]
+    }
+  ],
+  "settings": [],
+  "maxDiskUsage": 134217728,
+  "internet": true
+}
