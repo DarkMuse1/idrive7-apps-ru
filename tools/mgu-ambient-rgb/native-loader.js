@@ -4,8 +4,9 @@
 // Node 8 / stock HU Node, launched by the existing root systemd component.
 const fs = require('fs'), path = require('path'), net = require('net');
 const crypto = require('crypto'), cp = require('child_process');
-const IMAGE_SHA256 = 'da060af61a966c37dcdb7daa10947c496376ba8a4b712fcbcf3ffa86e48f51fc';
-const IMAGE_SIZE = 284832;
+const IMAGE_SHA256 = '057bf1d9642c49a280814c55c77c288e4af5f9b03777067d21e9f0ba455d0a72';
+const IMAGE_SIZE = 288928;
+const AUTH_SHA256 = '025d48c1f719080b61cbc981b5d0fcc55251b749c507644bc30ca5e736c964dd';
 const digest = data => crypto.createHash('sha256').update(data).digest('hex');
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -26,7 +27,7 @@ async function run(options) {
     const image = path.join(store, 'rgb-' + IMAGE_SHA256);
     const address = path.join(runtime, 'provision.sock');
     const control = path.join(runtime, 'control.sock');
-    let child = null, stopping = false, retry = null, lastError = '', tail = '';
+    let child = null, stopping = false, retry = null, lastError = '', tail = '',authorization=null;
     const peers = new Set();
     function verified() {
         try {
@@ -60,7 +61,7 @@ async function run(options) {
             const finish = result => { if (done) return; done = true; clearTimeout(timer); socket.destroy(); resolve(result); };
             const timer = setTimeout(() => finish(false), 500);
             socket.on('error', () => finish(false));
-            socket.on('connect', () => socket.write('{"id":1,"op":"state"}\n'));
+            socket.on('connect', () => socket.write(JSON.stringify({id:1,op:'state',auth:authorization})+'\n'));
             socket.on('data', data => {
                 input += data;
                 if (input.length > 262144) return finish(false);
@@ -81,10 +82,13 @@ async function run(options) {
         throw Error(lastError || 'RGB process did not open its local control socket');
     }
     async function request(data) {
-        if (!data || Object.keys(data).sort().join(',') !== 'image,op' || data.op !== 'install' || typeof data.image !== 'string') throw Error('Only installation of the pinned RGB module is supported');
+        if(data&&data.op==='install'&&typeof data.auth!=='string')throw Error('Обновите приложение «Подсветка» вместе с компонентом RGB в Магазине');
+        if (!data || Object.keys(data).sort().join(',') !== 'auth,image,op' || data.op !== 'install' || typeof data.image !== 'string') throw Error('Only installation of the pinned RGB module is supported');
+        if(typeof data.auth!=='string'||data.auth.length!==64||!crypto.timingSafeEqual(Buffer.from(digest(data.auth),'hex'),Buffer.from(AUTH_SHA256,'hex')))throw Error('RGB activation is not authorized');
         if (data.image.length !== 4 * Math.ceil(IMAGE_SIZE / 3) || !/^[A-Za-z0-9+/]+={0,2}$/.test(data.image)) throw Error('Invalid private module encoding');
         const bytes = Buffer.from(data.image, 'base64');
         if (bytes.length !== IMAGE_SIZE || digest(bytes) !== IMAGE_SHA256) throw Error('Private module checksum does not match this release');
+        authorization=data.auth;
         if (!verified()) {
             const temporary = path.join(store, '.rgb-' + crypto.randomBytes(8).toString('hex'));
             const fd = fs.openSync(temporary, 'wx', 0o700);
@@ -116,7 +120,7 @@ async function run(options) {
         socket.on('data', chunk => {
             if (handled) return;
             input += chunk;
-            if (input.length > 400000) return socket.destroy();
+            if (input.length > 4*Math.ceil(IMAGE_SIZE/3)+4096) return socket.destroy();
             const end = input.indexOf('\n'); if (end < 0) return;
             handled = true;
             Promise.resolve().then(() => request(JSON.parse(input.slice(0, end))))

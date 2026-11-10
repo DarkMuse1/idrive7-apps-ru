@@ -1,1 +1,3 @@
-FFmpeg is a separate unmodified GPLv3 executable. See the private source tree for exact provenance, hashes and notice. Original distribution: @ffmpeg-installer/linux-x64 4.1.0, https://johnvansickle.com/ffmpeg/ . Application and receiver are private; these .pack assets are encrypted.
+FFmpeg 6.1.6 (FFmpeg developers), distributed under GNU GPL version 3 or later.
+Source: https://ffmpeg.org/releases/ffmpeg-6.1.6.tar.xz
+Includes libx264 (VideoLAN, GPL): https://code.videolan.org/videolan/x264

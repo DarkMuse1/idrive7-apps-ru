@@ -617,7 +617,8 @@ async function runInner(impl) {
     const active = () => Promise.resolve().then(() => app.registerActive())
         .then(() => log.info('registered active')).catch((e) => log.warn('registerActive: ' + e));
     app.on('appStatusProxyReady', active);
-    app.on('shutdown', () => { log.info('shutdown requested by MainApp'); setTimeout(() => process.exit(0), 200); });
+    const shutdown=new (require('./lifecycle'))({log});
+    app.on('shutdown', () => { log.info('shutdown requested by MainApp'); shutdown.run(); });
     // home-screen widget: MainApp hands it over (now or whenever one is placed)
     const widget = new Widget(SPEC.startWidget);
     if (SPEC.startWidget) {
@@ -705,6 +706,7 @@ async function runInner(impl) {
          * layout setting): an app that draws only when its data changes draws again then.
          */
         onLayout(fn) { display.onLayout(fn); },
+        onShutdown(fn) { shutdown.add(fn); },
         /** Actual input capability, for an app's local diagnostic report. */
         inputInfo() {
             const gpu=display.gpu;
