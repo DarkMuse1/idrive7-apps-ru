@@ -118,6 +118,10 @@ class Settings {
         this.listeners = [];
         for (const s of this.schema) this.values[s.key] = s.default;
         Object.assign(this.values, this._read());
+        // Values renamed by an app keep their saved meaning after an update.
+        for (const s of this.schema) {
+            if (s.aliases && Object.prototype.hasOwnProperty.call(s.aliases, this.values[s.key])) this.values[s.key] = s.aliases[this.values[s.key]];
+        }
         // one-time move of saved settings to the new default theme (M Tricolour); later choices are kept.
         // A fresh install starts on the default anyway: it only gets the mark, saved with its first setting -
         // without it the first theme picked was moved back to the default at the next start (upstream e70df86)
@@ -161,6 +165,11 @@ class Settings {
     }
     onChange(fn) { this.listeners.push(fn); }
     item(key) { return this.schema.find((s) => s.key === key); }
+    /** Visibility follows the app schema; hiding a setting preserves its saved value. */
+    shown(s) {
+        if (!s || s.hidden) return false;
+        return !s.when || Object.keys(s.when).every((k) => [].concat(s.when[k]).indexOf(this.values[k]) >= 0);
+    }
     /** Human text for the current value of a setting. */
     display(key) {
         const s = this.item(key), v = this.values[key];
