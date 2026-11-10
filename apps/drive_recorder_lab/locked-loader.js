@@ -186,9 +186,16 @@ function start(ctx, config, dependencies) {
             // subscriptions/commands after an exception in its own start().
             if (phase === 'starting') {
                 phase = 'failed-start'; headline = 'Не удалось запустить Видеорегистратор';
-                message = 'Перезапустите приложение. Подробности ошибки сохранены в журнале.';
+                const reason = String(error && error.message || error);
+                message = 'Причина: ' + reason.slice(0, 230) + '. Перезапустите приложение. Файл: startup_error.json';
+                try {
+                    fs.writeFileSync(path.join(ctx.dataDir, 'startup_error.json'), JSON.stringify({
+                        app: config.app, version: config.version, at: new Date().toISOString(),
+                        message: reason, stack: String(error && error.stack || reason),
+                    }, null, 2) + '\n', {mode: 0o600});
+                } catch (writeError) { ctx.log.warn('Не удалось сохранить ошибку запуска: ' + writeError.message); }
                 ctx.loop('MAIN', 1, paint);
-                ctx.log.error('Видеорегистратор: ошибка запуска: ' + String(error && error.message || error));
+                ctx.log.error('Видеорегистратор: ошибка запуска: ' + String(error && error.stack || reason));
                 return;
             }
             phase = 'error'; headline = 'Не удалось открыть видеорегистратор';

@@ -26,7 +26,8 @@
     },
     "exclude": [
       "ambient_light",
-      "light_show"
+      "light_show",
+      "drive_recorder_lab"
     ]
   },
   "tools": [
@@ -95,6 +96,28 @@
       "id": "ambient_light",
       "kind": "app",
       "path": "apps/ambient_light"
+    },
+    {
+      "manifest": "app.json",
+      "icon": "icon.png",
+      "mguHmi": [
+        "ID7"
+      ],
+      "requires": {
+        "idrive7-renderd": "2.1.10",
+        "mgu-inputgate": "1.0.0"
+      },
+      "build": {
+        "python": "tools/build_drive_recorder.py",
+        "args": [
+          "{id}"
+        ],
+        "sdk": "oap-sdk",
+        "output": "dist/{id}@{version}.tgz"
+      },
+      "id": "drive_recorder_lab",
+      "kind": "app",
+      "path": "apps/drive_recorder_lab"
     },
     {
       "id": "light_show",
