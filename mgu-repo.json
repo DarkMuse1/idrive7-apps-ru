@@ -25,7 +25,8 @@
       ]
     },
     "exclude": [
-      "ambient_light"
+      "ambient_light",
+      "light_show"
     ]
   },
   "tools": [
@@ -94,6 +95,29 @@
       "id": "ambient_light",
       "kind": "app",
       "path": "apps/ambient_light"
+    },
+    {
+      "id": "light_show",
+      "kind": "app",
+      "path": "apps/light_show",
+      "manifest": "app.json",
+      "icon": "icon.png",
+      "mguHmi": [
+        "ID7",
+        "ID8"
+      ],
+      "uninstallable": true,
+      "requires": {
+        "mgu-deploy": "0.7.5"
+      },
+      "build": {
+        "python": "tools/build_light_show.py",
+        "args": [
+          "{id}"
+        ],
+        "sdk": "oap-sdk",
+        "output": "dist/{id}@{version}.tgz"
+      }
     }
   ]
 }

@@ -1,0 +1,189 @@
+{
+  "id": "light_show",
+  "title": "Световое шоу",
+  "description": "Light Show: управление наружным светом на стоянке. Экспериментальная версия по паролю.",
+  "version": "0.4.2",
+  "vendor": "custom",
+  "loggingId": "OAL9",
+  "iconGlyph": "LS",
+  "signals": {
+    "com.harman.infotainment.systemfunctions.tasu.tasu.InternalTasu": {
+      "_instances": "SystemFunctionsInternalTasuInst1",
+      "_methods": [
+        "sendTasuRequest"
+      ],
+      "_broadcasts": [
+        "sendTasuResponse"
+      ],
+      "tasuModeStatus": "r"
+    },
+    "de.bmw.infotainment.vehicle.Vehicle2": {
+      "statusCarSpeed2": "rs"
+    },
+    "de.bmw.infrastructure.VehicleInformation": {
+      "statusGearboxDrive": "s",
+      "DataPowerTrain2": "s"
+    }
+  },
+  "screens": [
+    {
+      "name": "MAIN",
+      "kind": "canvas",
+      "title": "Световое шоу",
+      "chrome": false,
+      "buttons": [
+        [
+          "STOP",
+          "Стоп"
+        ],
+        [
+          "PREV",
+          "Назад по пунктам"
+        ],
+        [
+          "NEXT",
+          "Далее"
+        ],
+        [
+          "ENTER",
+          "Выбрать"
+        ],
+        [
+          "HOME",
+          "Главная"
+        ]
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "key": "pattern",
+      "label": "Рисунок",
+      "type": "choice",
+      "default": "double",
+      "options": [
+        [
+          "alternate",
+          "Попеременно"
+        ],
+        [
+          "double",
+          "Двойная вспышка"
+        ],
+        [
+          "triple",
+          "Тройная вспышка"
+        ],
+        [
+          "together",
+          "Одновременно"
+        ],
+        [
+          "cross",
+          "Перекрёстный импульс"
+        ],
+        [
+          "wave",
+          "Волна"
+        ]
+      ]
+    },
+    {
+      "key": "tempo",
+      "label": "Шаг",
+      "type": "choice",
+      "default": "150",
+      "options": [
+        [
+          "100",
+          "100 ms"
+        ],
+        [
+          "150",
+          "150 ms"
+        ],
+        [
+          "200",
+          "200 ms"
+        ],
+        [
+          "300",
+          "300 ms"
+        ],
+        [
+          "500",
+          "500 ms"
+        ]
+      ]
+    },
+    {
+      "key": "duration",
+      "label": "Длительность",
+      "type": "choice",
+      "default": "15",
+      "options": [
+        [
+          "5",
+          "5 seconds"
+        ],
+        [
+          "15",
+          "15 seconds"
+        ],
+        [
+          "30",
+          "30 seconds"
+        ],
+        [
+          "60",
+          "60 seconds"
+        ]
+      ]
+    },
+    {
+      "key": "theme",
+      "label": "Цвет предпросмотра",
+      "type": "choice",
+      "default": "m_tricolour",
+      "options": [
+        [
+          "m_tricolour",
+          "M Tricolour"
+        ],
+        [
+          "ice",
+          "Ice White"
+        ],
+        [
+          "amber",
+          "Night Amber"
+        ]
+      ]
+    },
+    {
+      "key": "renderer",
+      "label": "Отрисовка",
+      "type": "choice",
+      "default": "auto",
+      "options": [
+        [
+          "auto",
+          "Automatic"
+        ],
+        [
+          "software",
+          "Software"
+        ]
+      ]
+    }
+  ],
+  "mguHmi": [
+    "ID7",
+    "ID8"
+  ],
+  "internet": true,
+  "uninstallable": true,
+  "requires": {
+    "mgu-deploy": "0.7.5"
+  }
+}
