@@ -1,1 +1,1 @@
-module.exports={"app":"ambient_light","key":"ambient_light_v0_3_2","version":"0.3.2","releaseSha256":"f3d72151060961c477a069ed82254bbbea287075d226eaba6f90535e2dc3aa07"};
+module.exports={"app":"ambient_light","key":"ambient_light_v0_3_3","version":"0.3.3","releaseSha256":"ef7001098a0f49729535e6ce75cbd3e4b6c6924f124dd868a2ba1005c543115d"};

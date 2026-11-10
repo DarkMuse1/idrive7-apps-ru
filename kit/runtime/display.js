@@ -642,7 +642,7 @@ class Display {
      *  take their place), so none shows around an HMI popup; shown for every other path. */
     _hmiBar() {
         if (!this.screen) return;
-        const hide = this.ownable() && !this.blocked;
+        const hide = this.screen.hmiBar === false || (this.ownable() && !this.blocked);
         if (this.hmiBarHidden === hide) return;
         this.hmiBarHidden = hide;
         (this.screen.buttons || []).forEach((b) => { if (this.ui.visible) Promise.resolve(this.ui.visible(b[0], !hide)).catch(() => {}); });
@@ -1046,7 +1046,7 @@ class Display {
      * bar buttons still exist in the HMI under the surface, for focus and taps, but aren't drawn).
      */
     barH() {
-        if (this.screen && (this.screen.bar === false || this.screen.chrome === false)) return 0;
+        if (this.screen && (this.screen.hmiBar === false || this.screen.bar === false || this.screen.chrome === false)) return 0;
         // the kit's bar with nothing left on it (its buttons on the page, Settings a tab): no bar
         return this.ownable() && !this.buttons().length ? 0 : FULL.barH;
     }
@@ -1064,6 +1064,7 @@ class Display {
      * with the controller, turn the pages); they stay in the HMI's bar for the other paths.
      */
     buttons() {
+        if (this.screen && this.screen.hmiBar === false) return [];
         const own = this.ownable();
         if (this._btns && this._btnsOwn === own) return this._btns;
         this._btnsOwn = own;

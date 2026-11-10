@@ -1,2 +1,2 @@
 'use strict';
-module.exports={"app":"drive_recorder_lab","key":"drive_recorder_lab_v0_4_3","version":"0.4.3","releaseSha256":"42438999708ed6e0ec9f1f421816b0f678cc2d8cb187fec659f291ba0cddee01"};
+module.exports={"app":"drive_recorder_lab","key":"drive_recorder_lab_v0_4_4","version":"0.4.4","releaseSha256":"b12620216aec416b51dd17cfc6513bb288e81508ca0ef38d6eb9d1212b3a8dc5"};

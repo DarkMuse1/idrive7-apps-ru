@@ -419,8 +419,11 @@ def build_ui(spec, language='en'):
             groups.append(('List', items))
             bar = []
             for b in scr.get('buttons', []):
-                bid, bx, bc = comp('barbutton', b[0], rows=[text_row(b[0], b[1])])
-                bar.append((bid, bx, bc))
+                hidden = scr.get('hmiBar') is False
+                bid, bx, bc = comp('barbutton', b[0], rows=[text_row(b[0], b[1])], extra_props={2: 0, 3: 0} if hidden else None)
+                # Keep action IDs for existing handlers, but generate no Bar
+                # layout and no visible/focusable fallback buttons when disabled.
+                (items if hidden else bar).append((bid, bx, bc))
             if bar:
                 groups.append(('Bar', bar))
         elif kind == 'settings':

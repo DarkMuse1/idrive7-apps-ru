@@ -1,7 +1,7 @@
 {
   "id": "ambient_light",
   "title": "Подсветка",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "internet": true,
   "description": "Произвольный RGB-цвет подсветки, реальные зоны, яркость и сохранённые цвета. Закрытый модуль загружается после ввода пароля.",
   "vendor": "custom",
@@ -35,7 +35,8 @@
           "Настройки"
         ]
       ],
-      "bar": false
+      "bar": false,
+      "hmiBar": false
     }
   ],
   "settings": [

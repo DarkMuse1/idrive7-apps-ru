@@ -2,7 +2,7 @@
   "id": "light_show",
   "title": "Световое шоу",
   "description": "Light Show: управление наружным светом на стоянке. Экспериментальная версия по паролю.",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "vendor": "custom",
   "loggingId": "OAL9",
   "iconGlyph": "LS",
@@ -52,7 +52,9 @@
           "HOME",
           "Главная"
         ]
-      ]
+      ],
+      "bar": false,
+      "hmiBar": false
     }
   ],
   "settings": [

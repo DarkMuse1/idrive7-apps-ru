@@ -1,7 +1,7 @@
 {
   "id": "drive_recorder_lab",
   "title": "Видеорегистратор",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "vendor": "custom",
   "loggingId": "ODR2",
   "iconGlyph": "DR",
@@ -73,7 +73,9 @@
           "HOME",
           "Запись"
         ]
-      ]
+      ],
+      "bar": false,
+      "hmiBar": false
     }
   ],
   "settings": [],
