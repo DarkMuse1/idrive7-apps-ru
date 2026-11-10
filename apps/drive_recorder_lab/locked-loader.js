@@ -114,10 +114,9 @@ function prepare(bundle, config, dataDir, installedDir) {
     fs.mkdirSync(stage, 0o700);
     try {
         names(release.files).forEach(name => fs.writeFileSync(path.join(stage, name), bundle.files[name], 'utf8'));
-        names(release.resources).forEach(name => {
-            const from = path.join(installedDir, name), to = path.join(stage, name);
-            try { fs.linkSync(from, to); } catch (_) { fs.writeFileSync(to, fs.readFileSync(from)); }
-        });
+        const resourcePaths={};
+        names(release.resources).forEach(name=>{resourcePaths[name]=path.join(installedDir,name);});
+        fs.writeFileSync(path.join(stage,'resource-paths.js'),"'use strict';\nmodule.exports="+JSON.stringify(resourcePaths)+';\n');
         kitProxies(path.join(installedDir, 'kit'), path.join(stage, 'kit'));
         fs.renameSync(stage, dest); // publish only a complete generation
     } catch (error) { if (fs.existsSync(stage)) remove(stage); throw error; }
@@ -199,8 +198,8 @@ function start(ctx, config, dependencies) {
                 return;
             }
             phase = 'error'; headline = 'Не удалось открыть видеорегистратор';
-            message = String(error && error.message || error);
-            ctx.log.warn('Видеорегистратор: ' + message);
+            message = error && (error.code === 'EDQUOT' || error.errno === -122 || /system error -122/.test(error.message || '')) ? 'Превышена дисковая квота приложения (EDQUOT, -122). Обновите Видеорегистратор и повторите открытие.' : String(error && error.message || error);
+            ctx.log.warn('Видеорегистратор: ' + message + '; ' + String(error && error.stack || error));
         }
     }
     function request() { attempt().catch(() => {}); }

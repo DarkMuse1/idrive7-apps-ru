@@ -536,14 +536,30 @@ class Display {
      * running the screen also on a bar button (pressed), a sheet's targets, or the page (ctx.onTap).
      */
     _touch(phase, x, y) {
+        if(phase===1)this.rangeTouch=null;
+        if(this.rangeTouch&&!this.own()){this.rangeTouch=null;return;}
         const inside = (r) => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h;
         if (this.own()) {
+            if(this.rangeTouch){
+                const captured=(this.pageTargets||[]).find(t=>t.key===this.rangeTouch);
+                if(phase===3||phase!==2)this.rangeTouch=null;
+                if(captured&&typeof captured.drag==='function'&&(phase===2||phase===3)){
+                    try{Promise.resolve(captured.drag(x,y,phase)).catch(e=>this.log.error('range',e));}catch(e){this.log.error('range',e);}
+                }
+                return;
+            }
             const pl = this.place, sx = x * pl.scale + pl.ox, sy = y * pl.scale + pl.oy;
             const bar = sy >= pl.h - this.barH() ? this.buttons().find((b) => sx >= b.x - this.barOff - pl.x && sx < b.x - this.barOff - pl.x + b.w) : null;
             // the header's tabs (Settings among them) work over a sheet too
             const tab = !bar && (this.tabs || []).find(inside);
             const tgt = !bar && !tab && !this.sheet ? (this.pageTargets || []).find(inside) : null;
             const key = bar ? 'bar:' + bar.id : tab ? 'tab:' + tab.i : tgt ? 'tgt:' + tgt.key : this.sheet ? 'sheet:' + (this.sheetTargets || []).findIndex(inside) : null;
+            if(phase===1&&tgt&&typeof tgt.drag==='function'){
+                this.rangeTouch=tgt.key;this.ownDown=null;this.downAt=null;this.dragging=false;
+                this._focus({k:key,tgt});
+                try{Promise.resolve(tgt.drag(x,y,phase)).catch(e=>this.log.error('range',e));}catch(e){this.log.error('range',e);}
+                return;
+            }
             if (phase === 3 && this.dragging && !this.sheet) { this.dragging = false; this.ownDown = null; return; }
             if (phase === 3 && !this.dragging && key && key === this.ownDown && (tab || tgt)) {
                 this.ownDown = null;

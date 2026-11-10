@@ -114,7 +114,11 @@ class Recorder {
      * (software path, standard layout, an older renderer) it is only recorded: nothing acts on it, and the
      * recording itself is the same with or without it.
      */
-    target(x, y, w, h, run, key, r) { this.targets.push({ x, y, w, h, run, key: String(key), r }); return this; }
+    target(x, y, w, h, run, key, r, options) {
+        const target={x,y,w,h,run,key:String(key),r};
+        if(options&&typeof options.drag==='function')target.drag=options.drag;
+        this.targets.push(target);return this;
+    }
     _grow(k) {
         if (this.n + k <= this.u.length) return;
         let len = this.u.length * 2;

@@ -705,6 +705,12 @@ async function runInner(impl) {
          * layout setting): an app that draws only when its data changes draws again then.
          */
         onLayout(fn) { display.onLayout(fn); },
+        /** Actual input capability, for an app's local diagnostic report. */
+        inputInfo() {
+            const gpu=display.gpu;
+            return {rendererReady:!!(gpu&&gpu.ready),native:!!(gpu&&gpu.native),pageTouch:display.own(),layout:display.layout(),
+                width:gpu&&gpu.screen?gpu.screen.w:null,height:gpu&&gpu.screen?gpu.screen.h:null};
+        },
         /** The surface to draw one frame on (record.js Recorder, reused): pass it to ui.image. */
         canvas(w, h) { return display.canvas(w, h); },
         /**

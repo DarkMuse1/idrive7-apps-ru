@@ -1,7 +1,7 @@
 {
   "id": "drive_recorder_lab",
   "title": "Видеорегистратор",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "vendor": "custom",
   "loggingId": "ODR2",
   "iconGlyph": "DR",
@@ -79,6 +79,6 @@
     }
   ],
   "settings": [],
-  "maxDiskUsage": 134217728,
+  "maxDiskUsage": 268435456,
   "internet": true
 }
