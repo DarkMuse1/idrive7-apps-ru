@@ -1,1 +1,1 @@
-module.exports={"app":"light_show","key":"light_show_v0_4_2","version":"0.4.2","releaseSha256":"f807e2d0c9cff85ba16e98f0570fa57a80a9ab5e463f9de696fd9d3dd9c0ff68"};
+module.exports={"app":"light_show","key":"light_show_v0_4_3","version":"0.4.3","releaseSha256":"4001f1ed43f49970c5124b19ae6f3f7c96c23be495c16c076ba81683e57e66d7"};
