@@ -12,27 +12,11 @@
  *   });
  *
  * ctx = { app, ui, settings, log, theme(), signals, spec, dataDir }
- * (also controller, canvas(), loop(), widget, display, and the screen API of the renderer 2.x kit:
- * onTab, onTap, sheet, hideButton, onScroll, onLayout - see runInner and display.js)
  *
  * The screens / component names come from the app's app.json (see
  * kit/tools/build.py, which generates the RHMI layout from it). Every screen
  * is a real RHMI state rendered by the head unit's own HMI; graphics are PNGs
  * the app draws (canvas.js) and hands to the HMI as resources.
- *
- * While an app's screen is hidden (RT-21) ctx.loop stops calling it and the GPU renderer hides its
- * surface. Still running then, on purpose or as idle timers:
- *   - the app's SOME/IP subscriptions (signals.js, car.js): sessions, peaks and records keep counting
- *     in the background; a field read with opts.pollMs (parked.js: every 2 s) is re-read while its
- *     provider is there
- *   - car.js's simulator, only while the setting "demo" is "on"
- *   - the home-screen widget loop: draws at the app's widget rate while a widget is placed (the home
- *     screen shows it while the app's screen is hidden), else one idle tick a second
- *   - display.js: a 500 ms keepalive timer that sends nothing while hidden, and a 5 s check for the
- *     renderer's socket until it appears
- *   - the app's own timers (each app documents them)
- * The DEMO mark on screens and widgets is drawn by the runtime (display.js, Widget below), from
- * kit/datastate.js, so an app cannot leave it out.
  */
 const fs = require('fs');
 const path = require('path');
@@ -40,9 +24,6 @@ const { OnlineApp, logging } = require('oap-sdk');
 const themes = require('./themes');
 const { Display } = require('./display');
 const { HmiText } = require('./hmi-text');
-const { Canvas } = require('./canvas');
-const datastate = require('./datastate');
-const demomark = require('./demomark');
 const { listSheet } = require('./sheet');
 
 const sdkLog = logging.getSDKLogger();
@@ -77,7 +58,7 @@ function fileLog(level, msg) {
     };
 });
 // ...and the SDK's info lines that say why it did not create the app's screens (a CONFIG_STATE start, a
-// resource error, or a newer SDK's "conditionalLoading rhmiLoadingEnabled skipping loading": upstream #39)
+// resource error, or a newer SDK's "conditionalLoading rhmiLoadingEnabled skipping loading": issue #39)
 {
     const original = sdkLog.info;
     sdkLog.info = (...args) => {
@@ -117,21 +98,19 @@ class Settings {
         this.values = {};
         this.listeners = [];
         for (const s of this.schema) this.values[s.key] = s.default;
-        Object.assign(this.values, this._read());
-        // Values renamed by an app keep their saved meaning after an update.
+        try { Object.assign(this.values, JSON.parse(fs.readFileSync(this.file, 'utf8'))); } catch (e) {}
+        // "aliases": { old value: new value } - a value saved before the setting's values were renamed
         for (const s of this.schema) {
             if (s.aliases && Object.prototype.hasOwnProperty.call(s.aliases, this.values[s.key])) this.values[s.key] = s.aliases[this.values[s.key]];
         }
-        // one-time move of saved settings to the new default theme (M Tricolour); later choices are kept.
-        // A fresh install starts on the default anyway: it only gets the mark, saved with its first setting -
-        // without it the first theme picked was moved back to the default at the next start (upstream e70df86)
+        // one-time move of saved settings to the new default theme (M Tricolour); later choices are kept
         const th = this.item('theme');
         if (th && this.values._themeV !== 2) {
             const saved = fs.existsSync(this.file);
-            this.values._themeV = 2;
+            this.values._themeV = 2;            // (a fresh install has the default: the mark is saved with its first setting)
             if (saved) {
                 this.values.theme = th.default;
-                this._write();
+                try { Settings.writeWhole(this.file, JSON.stringify(this.values, null, 1)); } catch (e) { /* read-only */ }
             }
         }
         // a setting with "reset": n in app.json goes back to its default once when n changes
@@ -141,31 +120,21 @@ class Settings {
             const mark = '_reset_' + it.key;
             if (it.reset && this.values[mark] !== it.reset) { this.values[it.key] = it.default; this.values[mark] = it.reset; changed = true; }
         }
-        if (changed && fs.existsSync(this.file)) this._write();
-    }
-    /**
-     * settings.json goes through kit/store.js (Settings.io): saved atomically, and a corrupt file is
-     * moved aside and logged instead of being replaced silently (RT-06). Plain file calls only where
-     * this class runs on its own (the PC preview, kit/tools/preview.js).
-     */
-    _read() {
-        if (Settings.io) return Settings.io.load(this.file, { log, fallback: {}, valid: (v) => !!v && typeof v === 'object' && !Array.isArray(v) });
-        try { return JSON.parse(fs.readFileSync(this.file, 'utf8')); } catch (e) { return {}; }
-    }
-    _write() {
-        const text = JSON.stringify(this.values, null, 1);
-        if (Settings.io) return Settings.io.write(this.file, text, { log });
-        try { Settings.writeWhole(this.file, text); return true; } catch (e) { log.warn('settings save: ' + e); return false; }
+        if (changed && fs.existsSync(this.file)) try { Settings.writeWhole(this.file, JSON.stringify(this.values, null, 1)); } catch (e) { /* read-only */ }
     }
     get(key) { return this.values[key]; }
     set(key, value) {
         this.values[key] = value;
-        this._write();
+        try { Settings.writeWhole(this.file, JSON.stringify(this.values, null, 1)); } catch (e) { log.warn('settings save: ' + e); }
         this.listeners.forEach((fn) => { try { fn(key, value); } catch (e) { log.error(e); } });
     }
     onChange(fn) { this.listeners.push(fn); }
     item(key) { return this.schema.find((s) => s.key === key); }
-    /** Visibility follows the app schema; hiding a setting preserves its saved value. */
+    /**
+     * Whether a setting is offered: not "hidden", and its "when" holds - { key: value or [values] }, each other
+     * setting at one of them (e.g. "when": { "diagPage": true }, "when": { "torqueUnit": "kgm" }). Its value
+     * stays as it is while it is not offered.
+     */
     shown(s) {
         if (!s || s.hidden) return false;
         return !s.when || Object.keys(s.when).every((k) => [].concat(s.when[k]).indexOf(this.values[k]) >= 0);
@@ -190,7 +159,6 @@ class Settings {
         this.set(key, list[(i + 1) % list.length]);
     }
 }
-Settings.io = require('./store');
 
 /* ---------------- UI wrapper ---------------- */
 class Ui {
@@ -381,29 +349,15 @@ function patchStartWidgetEvents(app) {
     };
 }
 
-/*
- * DEMO mark on widgets (AB-01): while kit/datastate.js says simulated data is shown, every picture
- * gets the striped band (demomark.js, on a copy) and every non-empty text cell starts with "DEMO " -
- * the small widget shows no picture at all, only its text lines (apps/edrive/live.js). Text cells get
- * or lose the mark at once when demo starts or ends; pictures with the next frame of the widget loop.
- * The text stays ASCII on purpose: a widget can't show other characters (widgetText), so a translated
- * mark would vanish.
- */
-const demoText = (s) => (datastate.isDemo() && s.trim() ? 'DEMO ' + s : s);
-
 class Widget {
     constructor(spec) {
         this.spec = spec || {};
         this.comp = null;
         this.vis = Object.create(null);      // spawnId -> visible (unknown = true)
         this._img = Object.create(null);
-        this._text = Object.create(null);    // spawnId -> { cell: the text the app set, without the DEMO mark }
-        this._gone = Object.create(null);    // spawnIds taken off the home screen
-        this._gen = 0;
         this._change = [];
         this._tap = [];
         this.timing = { png: 0, push: 0 };
-        datastate.onChange(() => this._demoChanged());
     }
     get ready() { return !!this.comp; }
     /** Placed widgets: [{ spawnId, big, visible }]. */
@@ -414,8 +368,6 @@ class Widget {
             return { spawnId: Number(k), big: i.widgetSize !== 1, size: i.widgetSize, visible: this.vis[k] !== false };
         });
     }
-    /** Taken off the home screen and not placed again (a draw that started before still finishes). */
-    _isGone(spawnId) { return !!this._gone[spawnId] && !(this.comp && this.comp.spawnedInstances && this.comp.spawnedInstances[spawnId]); }
     /** A widget is on the home screen and showing. */
     active() { return this.instances().some((i) => i.visible); }
     onChange(fn) { this._change.push(fn); }
@@ -426,37 +378,15 @@ class Widget {
         const c = rhmiApp && rhmiApp.getByName(name);
         if (!c) { log.warn('widget: no component ' + name); return; }
         this.comp = c;
-        c.on('created', (e) => { delete this._gone[e.spawnId]; this.vis[e.spawnId] = true; this._static(e.spawnId); this._changed('placed'); });
+        c.on('created', (e) => { this.vis[e.spawnId] = true; this._static(e.spawnId); this._changed('placed'); });
         c.on('resize', (e) => { this._forget(e.spawnId); this._changed('resized'); });
         c.on('visible', (e) => { this.vis[e.spawnId] = !!e.visible; if (e.visible) this._forget(e.spawnId); this._changed(e.visible ? 'shown' : 'hidden'); });
-        ['abort', 'destroyed'].forEach((n) => c.on(n, (e) => { this._release(e.spawnId); this._changed('removed'); }));
+        ['abort', 'destroyed'].forEach((n) => c.on(n, (e) => { delete this.vis[e.spawnId]; this._forget(e.spawnId); this._changed('removed'); }));
         c.on('action', (e) => { log.info('widget tapped (' + e.spawnId + ')'); this._tap.forEach((fn) => { try { fn(e); } catch (err) { log.error(err); } }); });
         this.instances().forEach((i) => this._static(i.spawnId));
         this._changed('ready');
     }
     _forget(spawnId) { const st = this._img[spawnId]; if (st) st.lastPx = null; }
-    /**
-     * A widget taken off the home screen (RT-27): its image handles are released - also the one a push
-     * still in flight creates - and nothing more is drawn or written for it. It leaves spawnedInstances
-     * as in the event replay above, so the widget loop stops drawing it.
-     */
-    _release(spawnId) {
-        this._gone[spawnId] = true;
-        if (this.comp && this.comp.spawnedInstances) delete this.comp.spawnedInstances[spawnId];
-        delete this.vis[spawnId];
-        delete this._text[spawnId];
-        const st = this._img[spawnId];
-        delete this._img[spawnId];
-        if (!st) return;
-        st.removed = true; st.next = null;
-        if (!st.busy) this._drop(st);
-    }
-    _drop(st) {
-        const files = st.live.splice(0);
-        if (!files.length || !this.comp) return;
-        Promise.resolve().then(() => this.comp.getResourceBundle().destroyResourceHandles(files))
-            .catch((e) => log.warn('widget: release ' + files.length + ' image handle(s): ' + e));
-    }
     /** The layout's fixed cells (app.json startWidget.cells), written once per placed widget. */
     _static(spawnId) {
         const cells = this.spec.cells || {};
@@ -466,52 +396,27 @@ class Widget {
         });
     }
     set(spawnId, cell, value, type) {
-        if (!this.comp || this._isGone(spawnId)) return Promise.resolve();
-        type = type || 'Text';
-        if (type === 'Text') {
-            value = widgetText(value);
-            (this._text[spawnId] = this._text[spawnId] || Object.create(null))[cell] = value;
-            value = demoText(value);
-        }
-        return this._put(spawnId, cell, value, type);
-    }
-    _put(spawnId, cell, value, type) {
-        return Promise.resolve(this.comp.setValue(Number(spawnId), cell, value, type))
+        if (!this.comp) return Promise.resolve();
+        if ((type || 'Text') === 'Text') value = widgetText(value);
+        return Promise.resolve(this.comp.setValue(Number(spawnId), cell, value, type || 'Text'))
             .catch((e) => log.warn('widget ' + cell + ': ' + e));
-    }
-    /** Demo started or ended: the text lines get or lose the mark now, the pictures with their next frame. */
-    _demoChanged() {
-        if (!this.comp) return;
-        Object.keys(this._text).forEach((id) => {
-            const cells = this._text[id];
-            Object.keys(cells).forEach((cell) => this._put(id, cell, demoText(cells[cell]), 'Text'));
-        });
-        Object.keys(this._img).forEach((id) => this._forget(id));
     }
     /** Show a drawn image (canvas.js Canvas) in a placed widget (cell: app.json startWidget.image). */
     image(spawnId, img) {
-        if (this._isGone(spawnId)) return Promise.resolve();
-        // gen: file names of a widget placed again never meet the old one's (released late, see _release)
-        const st = this._img[spawnId] || (this._img[spawnId] = { n: 0, gen: ++this._gen, live: [], busy: null, next: null });
+        const st = this._img[spawnId] || (this._img[spawnId] = { n: 0, live: [], busy: null, next: null });
         if (st.busy) { st.next = img; return st.busy; }
         const cell = this.spec.image || 'BackgroundImage1';
         const run = async (frame) => {
             if (!this.comp) return;
-            // the DEMO mark on a copy: the app may draw its next frame on the same canvas
-            if (datastate.isDemo()) { const cv = new Canvas(frame.w, frame.h); cv.d.set(frame.d); frame = demomark.widget(cv, this.spec.safe); }
             const px = Buffer.from(frame.d.buffer, frame.d.byteOffset, frame.d.length);
             if (st.lastPx && Date.now() - st.lastPush < 5000 && px.equals(st.lastPx)) return;
             const rb = this.comp.getResourceBundle();
-            const file = path.join(RHMI_RES, 'dyn_' + RUN_TAG + '_w' + spawnId + 'g' + st.gen + '_' + (st.n++ % 4) + '.png');
+            const file = path.join(RHMI_RES, 'dyn_' + RUN_TAG + '_w' + spawnId + '_' + (st.n++ % 4) + '.png');
             const t0 = Date.now(), png = frame.png(), t1 = Date.now();
             fs.writeFileSync(file + '.tmp', png);
             fs.renameSync(file + '.tmp', file);
             await rb.createResourceHandles([file]);
-            // a handle that is never shown goes at once: the widget was removed meanwhile, or the HMI
-            // didn't take it
-            const unused = () => { rb.destroyResourceHandles([file]).catch(() => {}); };
-            if (st.removed) { unused(); return; }
-            try { await this.comp.setValue(Number(spawnId), cell, rb.getResourceHandle(file), 'Asset'); } catch (e) { unused(); throw e; }
+            await this.comp.setValue(Number(spawnId), cell, rb.getResourceHandle(file), 'Asset');
             this.timing.png += t1 - t0; this.timing.push += Date.now() - t1;
             if (!st.lastPush) log.info('widget ' + spawnId + ': first image in ' + (Date.now() - t0) + ' ms');
             st.lastPx = Buffer.from(px); st.lastPush = Date.now();
@@ -520,7 +425,6 @@ class Widget {
         };
         st.busy = run(img).catch((e) => log.warn('widget image ' + spawnId + ': ' + e)).then(() => {
             st.busy = null;
-            if (st.removed) { this._drop(st); return; }        // taken off the home screen meanwhile
             if (st.next) { const n = st.next; st.next = null; return this.image(spawnId, n); }
         });
         return st.busy;
@@ -561,6 +465,9 @@ function wireSettings(ctx) {
     const values = (s) => (s.type === 'choice' ? (s.options || []).map((o) => o[0]) : s.type === 'number' ? s.steps || [] : null);
     const refresh = () => Promise.all(schema.map((s) => {
         const comp = 'SET_' + s.key.toUpperCase();
+        if (!ui.comp(comp)) return null;
+        // one another setting offers it ("when"): shown or not as that one is
+        if (s.when) ui.visible(comp, settings.shown(s));
         if (s.type === 'bool') return Promise.all([ui.text(comp, s.label), ui.checked(comp, !!settings.get(s.key))]);
         if (values(s)) return ui.selected(comp, Math.max(0, values(s).indexOf(settings.get(s.key))));
         // other types: two-row buttons in the wide settings state, label above, value below
@@ -576,8 +483,8 @@ function wireSettings(ctx) {
             });
         } else ui.onClick(comp, () => { settings.cycle(s.key); return refresh(); });
     });
-    // Settings: drawn over the page by the renderer (sheet.js) where the kit runs the screen, else the HMI's
-    // settings screen (upstream). The HMI's screen shows the values chosen in either.
+    // Settings: drawn over the page by the renderer (sheet.js) where the kit runs the screen,
+    // else the HMI's settings screen. The HMI's screen shows the values chosen in either.
     settings.onChange(() => { if (!ctx.display.sheet) refresh(); });
     if (ui.comp('BTN_SETTINGS')) {
         ui.onClick('BTN_SETTINGS', () => {
@@ -611,23 +518,18 @@ async function run(impl) {
 async function runInner(impl) {
     const app = new OnlineApp();
     log.info('starting ' + SPEC.id + ' ' + SPEC.version);
-    // signals this head unit does not offer, left out of the app's manifest when it was installed (the
-    // desktop installer, desktop/engine/signal_compat.py; build.py puts the list here): the values stay
-    // unknown, never zero. { interface: what is missing }. No file: nothing was left out.
-    let missing = null;
-    try { missing = JSON.parse(fs.readFileSync(path.join(__dirname, 'missing-interfaces.json'), 'utf8')); } catch (e) { /* none missing */ }
-    if (missing && typeof missing === 'object' && !Array.isArray(missing)) {
-        Object.keys(missing).forEach((i) => log.warn('not offered by this unit, left out at install (the app runs without it): ' + i + ' - ' +
-            (typeof missing[i] === 'string' ? missing[i] : JSON.stringify(missing[i]))));
-    }
+    // interfaces this unit lacks, which the installer left out (app.json "_optional")
+    try {
+        const missing = JSON.parse(fs.readFileSync(path.join(__dirname, 'missing-interfaces.json'), 'utf8'));
+        Object.keys(missing).forEach((i) => log.warn('this unit has no ' + i + ' - running without it: ' + missing[i]));
+    } catch (e) { /* none missing */ }
     // lifecycle as BMW's M Laptimer does it: report ACTIVE as soon as the app
     // status channel is up (otherwise MainApp stops the app right after start),
     // report HMI visibility, and exit when MainApp asks us to shut down
     const active = () => Promise.resolve().then(() => app.registerActive())
         .then(() => log.info('registered active')).catch((e) => log.warn('registerActive: ' + e));
     app.on('appStatusProxyReady', active);
-    const shutdown=new (require('./lifecycle'))({log});
-    app.on('shutdown', () => { log.info('shutdown requested by MainApp'); shutdown.run(); });
+    app.on('shutdown', () => { log.info('shutdown requested by MainApp'); setTimeout(() => process.exit(0), 200); });
     // home-screen widget: MainApp hands it over (now or whenever one is placed)
     const widget = new Widget(SPEC.startWidget);
     if (SPEC.startWidget) {
@@ -649,8 +551,7 @@ async function runInner(impl) {
     }
     if (!app.rhmiApplication) {
         // The SDK did not create the app's screens: nothing can be shown. Stay up (idle) rather than throw: a
-        // crash makes CorruptAppsHandler wipe the app's data, and a second one uninstalls it (upstream #39).
-        // initialized() is not called here either: MainApp shows "loading app" until it stops the app.
+        // crash makes CorruptAppsHandler wipe the app's data, and a second one uninstalls it (issue #39).
         log.error('the SDK created no RHMI application, so the app has no screens and does not start. ' +
             'Causes: the SDK config has rhmiLoadingEnabled off (an SDK extracted from a newer donor app; build.py ' +
             'turns it on - rebuild the app), a CONFIG_STATE start, or the HMI could not load the app\'s resources ' +
@@ -669,33 +570,17 @@ async function runInner(impl) {
          * (the HMI stops moving its focus or opening its menus); BACK, MENU and the touchscreen
          * still work. Read the controller with signals (FrontCCU). Only while shown; release with
          * grab(false). Needs the GPU renderer and mgu-inputgate.so in the HMI (deploy-car.sh).
-         * Where the kit runs the screen it holds the controller itself (its knob navigation); an app that
-         * grabs there gets the events in onInput while it holds it, and the kit's navigation pauses.
          */
         // onInput(fn): while grabbed, fn gets each controller event the HMI didn't (same fields
         // as FrontCCU.statusRotaryEncoderState, enums as numbers)
         controller: { grab(on) { display.grab(on); }, onInput(fn) { display.onCcu = fn; } },
-        /*
-         * The screen API of the renderer 2.x kit (upstream's, display.js). With mgu-render/1, touch routing and
-         * the full-screen layout the kit runs the screen: page tabs, page buttons (G.button / cv.target), lists
-         * and sheets by touch and the controller. Elsewhere (software, standard layout, an older renderer) the
-         * calls keep their meaning for that case: no tab, tap or scroll comes, sheet() is false, the HMI's bar
-         * keeps every button. Registering onTab, onTap or onScroll tells the kit this app can have its screen
-         * run (display.js _runnable: an app that turns its pages with BTN_PAGE alone keeps the HMI's bar).
-         */
         /**
          * onTab(fn): fn(i) when page tab i is tapped on the touchscreen (renderer with touch
          * routing), or pressed with the controller after turning onto it. Where the kit runs the
          * screen, fn(i, true) when that tap or press closed a sheet (Settings) over the page.
          */
         onTab(fn) { display.onTab = fn; },
-        /**
-         * onTap(fn): fn(x, y) for a tap on the page where the kit runs the screen: finger down and up within 30 px,
-         * not a drag, and not on a tab, page target (cv.target), bar button or sheet. x, y are the app's canvas px
-         * (ctx.canvas(1600, 520): what it drew there is under the finger), the page under the header only. While the
-         * screen is shown and in front its header, page and bar are claimed for the app; the claim goes when it is
-         * hidden, covered or not in front. In software, standard layout or on an older renderer it is never called.
-         */
+        /** onTap(fn): fn(x, y) for a tap on the page (app drawing px), where the kit runs the screen. */
         onTap(fn) { display.onTap = fn; },
         /** Show a sheet (sheet.js) over the page; false where it can't be (software path, other renderers). */
         sheet(sh) { return display.openSheet(sh); },
@@ -703,8 +588,7 @@ async function runInner(impl) {
         hideButton(id) { display.hideButton(id); },
         /**
          * onScroll(fn): fn(dy) scrolls a page drawn with cv.scroll = true by dy px (+ = further down), from a
-         * finger dragged on it (more than 14 px: then no tap) or the controller turned while on it (the kit's
-         * knob navigation, 70 px a click); returns false when already at that end.
+         * finger dragged on it or the controller turned while on it; returns false when already at that end.
          * cv.scroll = { y, bar: { x, y, w, h } } for a list on the page (from y down) with its scroll bar: the
          * controller goes through the page's targets over y (its buttons) before the list, and shows it is on
          * the list with the bar in the colour of the selection (no frame round the page).
@@ -715,13 +599,6 @@ async function runInner(impl) {
          * layout setting): an app that draws only when its data changes draws again then.
          */
         onLayout(fn) { display.onLayout(fn); },
-        onShutdown(fn) { shutdown.add(fn); },
-        /** Actual input capability, for an app's local diagnostic report. */
-        inputInfo() {
-            const gpu=display.gpu;
-            return {rendererReady:!!(gpu&&gpu.ready),native:!!(gpu&&gpu.native),pageTouch:display.own(),layout:display.layout(),
-                width:gpu&&gpu.screen?gpu.screen.w:null,height:gpu&&gpu.screen?gpu.screen.h:null};
-        },
         /** The surface to draw one frame on (record.js Recorder, reused): pass it to ui.image. */
         canvas(w, h) { return display.canvas(w, h); },
         /**
@@ -779,11 +656,9 @@ async function runInner(impl) {
         },
     };
 
-    // visibility of our states (pauses rendering when the user leaves); the HMI's settings screen too, where
-    // build.py makes one (settings, and no menu screen of the app shows them): the drawn screen gives way to
-    // it (display.js, upstream 2028c5e)
-    const settingsState = !!(SPEC.settings && SPEC.settings.length) && !(SPEC.screens || []).some((s) => s.settings === true);
-    const tracked = (SPEC.screens || []).concat(settingsState ? [{ name: 'SETTINGS' }] : []);
+    // visibility of our states (pauses rendering when the user leaves); the HMI's settings screen too (the
+    // drawn screen gives way to it: display.js)
+    const tracked = (SPEC.screens || []).concat(SPEC.settings && SPEC.settings.length ? [{ name: 'SETTINGS' }] : []);
     tracked.forEach((s) => {
         const st = ui.comp(s.name);
         if (st && st.on) st.on('visible', (ev) => ui._setVisible(s.name, !!(ev && ev.visible)));
@@ -799,9 +674,8 @@ async function runInner(impl) {
         tracked.forEach((s) => {
             const st = ui.comp(s.name);
             if (st) ui._setVisible(s.name, open.indexOf(st.getId ? st.getId() : -1) >= 0);
-            // back in front (reopened after Home or another app): the HMI does not always say the screen
-            // has its focus again, and without it the drawn screen stayed hidden (upstream b402b0c). The
-            // settings screen open over it still keeps it hidden (display.js _shown)
+            // back in front (reopened after Home or another app): the HMI does not always say the
+            // screen has its focus again, and without it the drawn screen stayed hidden
             if (st && shown && ui.isVisible(s.name)) ui._setFocus(s.name, true);
         });
     });
@@ -820,15 +694,24 @@ async function runInner(impl) {
         .then(() => { mapped[uuid] = true; log.info('mapped entry ' + uuid + ' -> ' + mainName); })
         .catch((e) => log.error('map entry state', e))));
     let opening = null;
-    const openEntry = (uuid) => {
+    // tries: right after a tap started the app the HMI can still refuse the state (INVALID_UUID /
+    // INVALID_COMPONENTID) - then it is asked again, 0.8 s apart, instead of needing a second tap
+    const openEntry = (uuid, tries) => {
         if (opening) return opening;   // MainApp can send the same tap twice
+        let again = false;
         const map = mapped[uuid] ? Promise.resolve() : ui.rhmi.mapEntryState(uuid, mainState).then(() => { mapped[uuid] = true; });
         opening = map
             .then(() => (mainState && mainState.updateResources ? mainState.updateResources().catch(() => {}) : null))
             .then(() => ui.rhmi.openEntryState(uuid))
             .then(() => ui._setVisible(mainName, true))
-            .catch((e) => log.error('open entry state', e))
-            .then(() => { opening = null; });
+            .catch((e) => {
+                if ((tries || 1) > 1 && /INVALID/.test(String(e && e.message ? e.message : e) + ' ' + JSON.stringify(e || {}))) again = true;
+                else log.error('open entry state', e);
+            })
+            .then(() => {
+                opening = null;
+                if (again) setTimeout(() => openEntry(uuid, tries - 1), 800);
+            });
         return opening;
     };
     // a tap on the home-screen widget opens the app
@@ -863,9 +746,9 @@ async function runInner(impl) {
     // launched by a tile tap / bookmark: the execute event came before we
     // listened, so open the screen ourselves (M Laptimer does the same)
     const lastEntry = app.getLastExecutedEntryPointUuid && app.getLastExecutedEntryPointUuid();
-    if (lastEntry && ['ENTRY_POINT', 'BOOKMARK', 'LUM'].indexOf(String(app.startReason)) >= 0) openEntry(lastEntry);
+    if (lastEntry && ['ENTRY_POINT', 'BOOKMARK', 'LUM'].indexOf(String(app.startReason)) >= 0) openEntry(lastEntry, 6);
     process.on('unhandledRejection', (e) => log.error('unhandled', e));
     return ctx;
 }
 
-module.exports = { run, log, Settings, Widget, SPEC };
+module.exports = { run, log, Settings, SPEC };

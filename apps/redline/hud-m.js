@@ -350,8 +350,7 @@ function drawRamp(cv, f, layer, h) {
         const it = items[0];
         if (it) {
             cv.text(it.value, gx, 124 + Math.min(dn, 3), 24, toneCol(it, h.P, RC.text), { align: 'center', font: o.valFont || 'bold' });
-            const lab = labelOf(o, RC.text);
-            fitLabel(cv, it.label.toLowerCase(), gx + 32, 102 + dn, lab.s, lab.c, 284 - gx - 36, { spacing: 0 });
+            fitLabel(cv, it.label.toLowerCase(), gx + 32, 102 + dn, labelOf(o, RC.text).s, RC.text, 284 - gx - 36, { spacing: 0 });
         }
     }
 }

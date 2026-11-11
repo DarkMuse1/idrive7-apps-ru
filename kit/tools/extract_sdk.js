@@ -55,7 +55,9 @@ if (!text.startsWith(prelude) || !tail.test(text)) { console.error('not a browse
 const body = text.replace(tail, ',{},[])');          // drop the entry so nothing app-specific runs
 
 // Module table: id -> [factory, {requireName: id}]
-const mods = require('./parse_browserify')(text);
+let mods;
+// eslint-disable-next-line no-new-func
+new Function('__cap', prelude + '__cap(e);' + body.slice(prelude.length))((e) => { mods = e; });
 
 // Give every oap-sdk module its path: start at the "oap-sdk/..." requires, then follow relative ones.
 const norm = (p) => path.posix.normalize(p).replace(/\.js$/, '') + '.js';
@@ -110,18 +112,9 @@ const table = [...keep].sort((a, b) => a - b)
 const out = `/* oap-sdk ${version} - extracted by extract_sdk.js from ${path.basename(appDir)} (${path.basename(src)}).
    Generated locally from the user's own firmware; not for redistribution.
    Readable source of every module: ./source/ */
-var __r = (function(mods, cache) {
-    function load(id) {
-        if (cache[id]) return cache[id].exports;
-        if (!mods[id]) return require(id);
-        var m = cache[id] = { exports: {} };
-        mods[id][0].call(m.exports, function(name) { return load(mods[id][1][name] || name); }, m, m.exports, load, mods, cache, []);
-        return m.exports;
-    }
-    return load;
-})({
+var __r = ${text.slice(0, text.indexOf(')()(') + 4)}{
 ${table}
-},{});
+},{},[]);
 var __ids = ${JSON.stringify(ids)};
 Object.keys(__ids).forEach(function (name) {
     Object.defineProperty(module.exports, name, { enumerable: true, configurable: true,
@@ -139,7 +132,6 @@ fs.writeFileSync(path.join(outDir, 'package.json'), JSON.stringify({
 const srcDir = path.join(outDir, 'source');
 fs.rmSync(srcDir, { recursive: true, force: true });
 for (const [id, p] of Object.entries(name)) {
-    if (path.isAbsolute(p) || p.split(/[\\/]/).some(x => x === '..' || x === '') || p.includes(':')) throw new Error('Unsafe SDK module path');
     const fn = mods[id][0].toString();
     const code = fn.slice(fn.indexOf('{') + 1, fn.lastIndexOf('}')).replace(/^\n/, '');
     const reqs = Object.keys(mods[id][1]);

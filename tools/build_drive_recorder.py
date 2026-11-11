@@ -3,7 +3,7 @@ from pathlib import Path
 import argparse,json,os,shutil,sys,tempfile
 
 ROOT=Path(__file__).resolve().parents[1]
-sys.path.insert(0,str(ROOT/'kit/tools'))
+sys.path.insert(0,str(ROOT/'tools/protected-apps/kit/tools'))
 import build as kit
 
 

@@ -5,17 +5,14 @@
  * 46 s loop: idle -> full-throttle pull through gears 1-4 -> lift -> hard stop
  * from ~140 km/h -> a few corners at ~0.9 g -> idle. Engine temperatures
  * start cold and warm up over ~4 minutes. Units: rpm, km/h, g, deg C.
- * Times are kit/clock.js monotonic milliseconds (sample(t) with car.js's step times).
  */
-const clock = require('./clock');
-
 const RATIOS = [0, 4.7, 3.1, 2.1, 1.67, 1.29, 1.0];   // gearbox
 const FINAL = 3.15, WHEEL_M = 0.335 * 2 * Math.PI;     // final drive, tyre circumference
 const rpmFor = (kmh, g) => (kmh / 3.6) / WHEEL_M * 60 * RATIOS[g] * FINAL;
 
 class Sim {
     constructor() {
-        this.t0 = clock.now(); this.last = null;
+        this.t0 = Date.now(); this.last = null;
         this.v = 0; this.gear = 1; this.oil = 18; this.coolant = 20; this.lat = 0;
         this.red = 7000;
     }
@@ -24,7 +21,7 @@ class Sim {
     setRedline(rpm) { this.red = rpm; this.shiftRpm = 0; }
 
     sample(now) {
-        now = now || clock.now();
+        now = now || Date.now();
         const dt = this.last ? Math.min(0.2, (now - this.last) / 1000) : 0.05;
         this.last = now;
         const t = ((now - this.t0) / 1000) % 46;

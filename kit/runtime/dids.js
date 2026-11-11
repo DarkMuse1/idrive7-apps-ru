@@ -8,9 +8,7 @@
  *   candidate = { ecu, did: 'F40F', bytes: 1, at: 0, factor: 1, offset: -40, min, max }
  *     raw = 'bytes' big-endian bytes from 'at' (0 = first data byte after the DID),
  *     value = raw * factor + offset, outside min..max = not plausible; signed: true = raw is
- *     two's complement (e.g. a torque that can be negative); timeoutMs: the reply's wait (default
- *     4 s); diagOpts: shorter waits for reads that poll (kit/diag.js physical(): retryBaseMs,
- *     pendingTimeoutMs, callTimeoutMs, maxMs)
+ *     two's complement (e.g. a torque that can be negative)
  *     bit: k = only bit k of raw (0 or 1), before factor / offset (a status flag)
  *   or { ecu, obd: '0F', ... }: the same PID with OBD service 01 instead of 0x22 F4xx
  *     (for engine units that refuse the F4xx identifiers with NRC 31); 'at' counts from the

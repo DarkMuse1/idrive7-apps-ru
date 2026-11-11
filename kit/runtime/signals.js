@@ -11,13 +11,11 @@
  *
  *   const sub = await signals.watch('de.bmw.infotainment.vehicle.CDS', '1', {
  *       statusEngineSpeed2: (v) => rpm = v.actualValueRPMEngineCrankshaft,
- *   }, log, { onAvailable: (up) => ... });
+ *   });
  *   sub.available  // true once the provider (the car) answers
- *   sub.shutdown() // stops polling and handlers, shuts the proxy down
  */
 const fs = require('fs');
 const path = require('path');
-const clock = require('./clock');
 
 let someip = null;
 try { someip = require('someip'); } catch (e) { /* host preview / not installed */ }
@@ -51,66 +49,33 @@ function loadConfig(iface) {
  * show up without waiting for the next change.
  * opts.pollMs: also re-read those fields that often while the provider is available - for
  * fields a car may not notify (BMW's x_call only ever reads TPMS, it never subscribes).
- * opts.onAvailable(up): called on every change of the provider's availability (additive; the unified
- * MGU Tools pool and MGU Tools' kit/runtime/car.js use it, as a mark only).
- *
- * Value delivery is as upstream idrive7-apps' kit (customer directive 2026-11-04: every kit check as
- * upstream's, proven on real cars): every notification and every getter reply reaches the handler.
- * MGU Tools' former RT-23 rule (drop a getter reply older than a notification already delivered) is gone;
- * it could drop a value upstream would show. res.shutdown() and the monotonic-clock poll (RT-12) stay -
- * they are additive, not a gate (the unified pool needs shutdown; a VM / bench needs the re-read).
  */
 async function watch(iface, instance, handlers, log, opts) {
-    opts = opts || {};
-    const res = { iface, available: false, proxy: null, error: null };
-    let closed = false, poll = null, proxy = null, proxyDown = false, reported = null;
-    const closeProxy = () => {
-        if (!proxy || proxyDown) return Promise.resolve();
-        proxyDown = true;
-        const p = proxy;
-        return Promise.resolve().then(() => p.shutdown && p.shutdown()).catch(() => {});
-    };
-    res.shutdown = () => {
-        closed = true;
-        if (poll) { clock.clearInterval(poll); poll = null; }
-        return closeProxy();
-    };
-    const setAvailable = (a) => {
-        if (closed) return;
-        res.available = !!a;
-        if (reported === res.available) return;
-        reported = res.available;
-        if (opts.onAvailable) { try { opts.onAvailable(res.available); } catch (e) { if (log) log.warn(iface + ' availability: ' + e); } }
-    };
+    const res = { iface, available: false, proxy: null, error: null, shutdown: () => Promise.resolve() };
     if (!someip) { res.error = 'someip native module not available'; return res; }
     try {
         const cfg = loadConfig(iface);
         const p = await nativeTick(() => someip.buildProxy(cfg, String(instance)).then((px) => px.init().then(() => px)));
-        res.proxy = proxy = p;
+        res.proxy = p;
+        res.shutdown = () => Promise.resolve().then(() => p.shutdown && p.shutdown()).catch(() => {});
         const fields = Object.keys(handlers || {});
-        const deliver = (f, v) => {
-            if (closed) return;
-            try { handlers[f](v); } catch (e) { if (log) log.warn(iface + '.' + f + ': ' + e); }
-        };
-        // getValue the fields that have a getter, so values show up without waiting for the next change;
-        // every reply is delivered, as upstream (last one in wins, as the car sends them); only a shutdown
-        // (our additive lifecycle) stops delivery
         const fetchAll = () => fields.forEach((f) => {
-            if (closed || !(cfg.fields && cfg.fields[f] && cfg.fields[f].getter)) return;
-            p.getValue(f, 3000).then((v) => { if (!closed) deliver(f, v); }).catch(() => {});
+            if (cfg.fields && cfg.fields[f] && cfg.fields[f].getter) {
+                p.getValue(f, 3000).then((v) => handlers[f](v)).catch(() => {});
+            }
         });
         await nativeTick(() => {
-            try { return p.subscribeToAvailability((a) => { setAvailable(a); if (a) setImmediate(fetchAll); }); } catch (e) { return null; /* older binding */ }
+            try { return p.subscribeToAvailability((a) => { res.available = !!a; if (a) setImmediate(fetchAll); }); } catch (e) { return null; /* older binding */ }
         });
         for (const f of fields) {
             try {
-                await nativeTick(() => p.subscribe({ name: f, onReceive: (v) => deliver(f, v) }));
+                await nativeTick(() => p.subscribe({ name: f, onReceive: (v) => { try { handlers[f](v); } catch (e) { if (log) log.warn(iface + '.' + f + ': ' + e); } } }));
             } catch (e) {
                 if (log) log.warn('subscribe ' + iface + '.' + f + ': ' + e);
             }
         }
-        if (p.isAvailable && p.isAvailable()) { setAvailable(true); fetchAll(); }
-        if (opts.pollMs) poll = clock.setInterval(() => { if (res.available && !closed) setImmediate(fetchAll); }, opts.pollMs);
+        if (p.isAvailable && p.isAvailable()) { res.available = true; fetchAll(); }
+        if (opts && opts.pollMs) setInterval(() => { if (res.available) setImmediate(fetchAll); }, opts.pollMs);
     } catch (e) {
         res.error = String(e);
         if (log) log.warn('signals ' + iface + ': ' + e);
@@ -140,11 +105,6 @@ function set(p, field, value, timeoutMs) {
     return nativeTick(() => p.setValue(field, value, timeoutMs || 5000));
 }
 
-/** Read a field on the native queue, with the same isolation as writes. */
-function get(p, field) {
-    return nativeTick(() => p.getValue(field));
-}
-
 /** Subscribe to a broadcast/event or field on a proxy from proxy(). */
 function on(p, name, fn, log) {
     return nativeTick(() => p.subscribe({ name, onReceive: (v) => { try { fn(v); } catch (e) { if (log) log.warn(name + ': ' + e); } } }));
@@ -156,4 +116,4 @@ function onAvailable(p, fn) {
         .then(() => { if (p.isAvailable && p.isAvailable()) fn(true); });
 }
 
-module.exports = { watch, proxy, call, set, get, on, onAvailable, loadConfig, hasNative: () => !!someip };
+module.exports = { watch, proxy, call, set, on, onAvailable, loadConfig, hasNative: () => !!someip };

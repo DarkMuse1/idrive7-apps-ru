@@ -2,10 +2,7 @@
 /**
  * parked.js - "parked only" for games and anything else that mustn't run while driving.
  *
- * Upstream idrive7-apps' kit/runtime/parked.js (origin/main 5389acc) as it is, kept beside Doom so its check is
- * exactly upstream's (this kit's kit/runtime/parked.js counts a car without a current speed as moving).
- *
- *   const parked = require('./parked').watch(ctx, log);
+ *   const parked = require('./kit/parked').watch(ctx, log);
  *   parked.moving()   // true while the car drives (above MAX_KMH)
  *   parked.speed()    // km/h last read, or null (no speed: a VM / bench)
  *
@@ -17,6 +14,10 @@
  * quiet after standing = parked (counting quiet as moving blocked a parked car in Doom 1.4.0),
  * quiet after driving = moving (the safe side) until a speed is read again. Without any real speed
  * (a VM or a bench: none, or "invalid" 65535) the car counts as parked.
+ *
+ * Behaviour exactly as upstream idrive7-apps' kit (customer directive 2026-11-04: every kit check as
+ * upstream's, proven on real cars). MGU Tools' former fail-closed rule (no current speed = moving) is
+ * gone: it stopped games on a parked car whose speed had gone quiet.
  */
 const MAX_KMH = 3;
 

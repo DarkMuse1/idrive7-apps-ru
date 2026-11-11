@@ -12,7 +12,7 @@
       "mgu-inputgate": "1.0.0"
     },
     "build": {
-      "python": "kit/tools/build.py",
+      "python": "tools/build_official_ru.py",
       "args": [
         "{id}",
         "--language",
@@ -27,7 +27,9 @@
     "exclude": [
       "ambient_light",
       "light_show",
-      "drive_recorder_lab"
+      "drive_recorder_lab",
+      "mgu_unified",
+      "aa_cluster_companion"
     ]
   },
   "tools": [
@@ -81,7 +83,7 @@
         "mgu-ambient-rgb": "0.1.2"
       },
       "build": {
-        "python": "kit/tools/build.py",
+        "python": "tools/protected-apps/kit/tools/build.py",
         "args": [
           "{id}",
           "--language",
@@ -137,6 +139,54 @@
         "python": "tools/build_light_show.py",
         "args": [
           "{id}"
+        ],
+        "sdk": "oap-sdk",
+        "output": "dist/{id}@{version}.tgz"
+      }
+    },
+    {
+      "manifest": "app.json",
+      "icon": "icon.png",
+      "mguHmi": [
+        "ID7"
+      ],
+      "requires": {
+        "idrive7-renderd": "2.1.10",
+        "mgu-inputgate": "1.0.0"
+      },
+      "id": "mgu_unified",
+      "kind": "app",
+      "path": "apps/mgu_unified",
+      "build": {
+        "python": "tools/protected-apps/kit/tools/build.py",
+        "args": [
+          "{id}",
+          "--language",
+          "ru"
+        ],
+        "sdk": "oap-sdk",
+        "output": "dist/{id}@{version}.tgz"
+      }
+    },
+    {
+      "manifest": "app.json",
+      "icon": "icon.png",
+      "mguHmi": [
+        "ID7"
+      ],
+      "requires": {
+        "idrive7-renderd": "2.1.10",
+        "mgu-inputgate": "1.0.0"
+      },
+      "id": "aa_cluster_companion",
+      "kind": "app",
+      "path": "apps/aa_cluster_companion",
+      "build": {
+        "python": "tools/protected-apps/kit/tools/build.py",
+        "args": [
+          "{id}",
+          "--language",
+          "ru"
         ],
         "sdk": "oap-sdk",
         "output": "dist/{id}@{version}.tgz"

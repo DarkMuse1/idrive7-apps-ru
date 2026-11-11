@@ -1,11 +1,32 @@
 """Fixed-language packages. Add a locales/<tag>.json catalog to build another language."""
-# Chinese contribution: 小白科技杂物社 / Bilibili 小白151 / GitHub JackieZ123430
+# Translation by: 抖音 小白科技杂物社 / BiliBili 小白151 / GitHub JackieZ123430
 import copy
 import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 LOCALES = ROOT / 'kit/runtime/locales'
+
+
+def normalize_language(language):
+    """Accept regional Korean CLI tags while keeping one catalog/package identity."""
+    return 'ko' if language.lower().replace('_', '-') in ('ko', 'ko-kr') else language
+
+
+def credit(language):
+    """A translation's credit (corner, settings rows, entry comment), shipped only in that language's
+    builds: kit/localization/credit.<language>.json. None when the language has no credit file."""
+    path = ROOT / 'kit/localization' / ('credit.%s.json' % language)
+    return json.loads(path.read_text(encoding='utf-8')) if language != 'en' and path.exists() else None
+
+
+def credit_name(language):
+    """Settings-row name of a translation credit; Chinese keeps its original CN_CREDITS."""
+    return 'CN_CREDITS' if language == 'zh-CN' else language.split('-')[0].upper() + '_CREDITS'
+
+
+def zh_credit():
+    return credit('zh-CN')
 
 
 def languages():
@@ -24,15 +45,12 @@ def text(value, words):
 
 
 def package_version(version, language):
-    # MGU Store source (DarkMuse1/idrive7-apps-ru): the Store's catalog accepts only x.y.z
-    # versions and installs each build as <id>@<version>.tgz, so a localized build keeps the
-    # app's own x.y.z version (from app.json) with no "-<lang>.<rev>" pre-release suffix — a
-    # suffix sorts before the base version and would break the Store's version comparison and
-    # the build output's filename. A re-translation bumps the app's version or the repo tag.
-    return version
+    revisions = json.loads((Path(__file__).parent / 'locale-revisions.json').read_text(encoding='utf-8'))
+    return version if language == 'en' else version + '-' + language.lower().replace('-', '.') + '.' + str(revisions.get(language, 1))
 
 
 def localize_spec(spec, language):
+    language = normalize_language(language)
     words = load_locale(language)
     s = copy.deepcopy(spec)
     s['version'] = package_version(s['version'], language)
@@ -75,8 +93,8 @@ def unicode_resources(ui, strings, language='en'):
     visit(ui)
     for key in strings:
         strings[key] = text(strings[key], words)
-        if language == 'zh-CN' and key.endswith('_CN_CREDITS_TITLE'):
-            strings[key] = '汉化 Translation by：抖音 小白科技杂物社 / BiliBili 小白151'
+        if credit(language) and key.endswith('_' + credit_name(language) + '_TITLE'):
+            strings[key] = credit(language)['settingsTitle']
     for n in range(256):
         strings['SID_CN_DYNAMIC_%04d' % n] = ''
     if len(strings) > 1024:

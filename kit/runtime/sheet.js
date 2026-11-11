@@ -40,7 +40,6 @@ function chevron(r, t, x, y, c) {
     r.line(x + 9, y, x, y + 9, 3, c);
 }
 function fit(r, s, size, w, font) {
-    // translated before it is cut to the width: a cut English text would find no catalog row (upstream PR #53)
     s = translate(String(s));
     if (r.textWidth(s, size, { font }) <= w) return s;
     while (s.length > 1 && r.textWidth(s + '...', size, { font }) > w) s = s.slice(0, -1);

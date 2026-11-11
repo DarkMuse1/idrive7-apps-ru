@@ -9,57 +9,23 @@ Produces in dist/:
     <id>@<ver>.tgz   npm-format package (the platform's preinstalled_apps format)
     <id>/            the staged tree (handy for inspection)
 
-    --sdk DIR    BMW's oap-sdk (default oap-sdk/, see README 3.1); checked before anything is built
-    --dist DIR   output folder (default dist/, dist-preview/ with --preview-only)
-    --preview-only
-                 offline, without BMW's SDK: only the staged tree, in dist-preview/<id>/, for
-                 kit/tools/preview.js and replay.js. node_modules/oap-sdk is a stub that throws,
-                 meta.json says "previewOnly": true and a PREVIEW_ONLY_NOT_INSTALLABLE file sits in
-                 the stage and in source/. No .mgu / .tgz: it can never be installed. Nothing is
-                 downloaded: an app.json asset that isn't there yet (Doom's game data) is left out.
-
-An SDK whose package.json has "mguPlaceholder": true (a stand-in for offline pipeline checks) is
-marked the same way, and its archives are named <id>@<ver>-NOT-INSTALLABLE.mgu / .tgz.
-
-The archives are reproducible: two builds of the same commit with the same Python give the same
-bytes. Folder contents are packed in sorted order, every timestamp is SOURCE_DATE_EPOCH (else the
-HEAD commit's time, else 0), owner 0:0 without names, folders 0755 and files 0644
-(deploy/mgu-app-install.sh sets the modes on the unit itself), and the gzip header has neither a
-time nor a file name. A failed build leaves no partial stage or archive (see build()).
-
 The RHMI layout (application.xml + uiDescription.json) is GENERATED from the
 "screens" + "settings" in app.json, using only widget templates that BMW's own
 apps use on this firmware (see reference/rhmi-widget-cells.md).
 """
-import gzip, hashlib, json, os, re, shutil, subprocess, sys, tarfile, uuid
+import gzip, json, os, re, shutil, sys, tarfile, tempfile, uuid
 from xml.sax.saxutils import escape
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import pack_data  # noqa: E402
-from localize import unicode_resources, localize_spec, load_locale, languages
+from localize import unicode_resources, localize_spec, load_locale, languages, credit, credit_name, normalize_language
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, '..', '..'))
 KIT = os.path.join(ROOT, 'kit')
 APPS = os.path.join(ROOT, 'apps')
 DIST = os.path.join(ROOT, 'dist')
-PREVIEW_DIST = os.path.join(ROOT, 'dist-preview')
 SDK = os.path.join(ROOT, 'oap-sdk')
 NS = uuid.UUID('6b1d3a52-8f0e-4c4b-9a77-0d0c4d4e5f10')
-
-# builds that must never reach a car: no SDK (--preview-only) or a placeholder SDK
-MARKER = 'PREVIEW_ONLY_NOT_INSTALLABLE'
-MARKER_TEXT = {
-    'preview': 'NOT INSTALLABLE: preview-only build (kit/tools/build.py --preview-only).\n'
-               "BMW's oap-sdk is not included; source/node_modules/oap-sdk is a stub that throws when loaded.\n"
-               'For the PC tools only (kit/tools/preview.js, kit/tools/replay.js).\n',
-    'placeholder': 'NOT INSTALLABLE: built with a placeholder oap-sdk (its package.json has "mguPlaceholder": true).\n'
-                   'For offline checks of the build pipeline only.\n',
-}
-PREVIEW_SDK_INDEX = ("'use strict';\n"
-                     "// kit/tools/build.py --preview-only: BMW's oap-sdk is not included, so this stage can\n"
-                     '// never be installed. Loading the SDK fails on purpose.\n'
-                     "throw new Error('preview-only build: BMW oap-sdk not included; not installable');\n")
-PREVIEW_SDK_PACKAGE = {'name': 'oap-sdk', 'version': '0.0.0-preview-only'}
 
 LANGS = ['ar_AE', 'cs_CZ', 'da_DK', 'de_DE', 'el_GR', 'en_GB', 'en_US', 'es_ES', 'fi_FI', 'fr_FR', 'he_IL',
          'hu_HU', 'id_ID', 'it_IT', 'ja_JP', 'ko_KR', 'nb_NO', 'nl_NL', 'no_NO', 'pl_PL', 'pt_BR', 'pt_PT',
@@ -133,116 +99,6 @@ def u(app, what):
     return str(uuid.uuid5(NS, app + ':' + what))
 
 
-class SdkError(Exception):
-    pass
-
-
-def check_sdk(sdk):
-    """The SDK folder's package.json, or SdkError when the SDK can't be used."""
-    for f in ('index.js', 'package.json'):
-        if not os.path.isfile(os.path.join(sdk, f)):
-            raise SdkError('%s not found' % os.path.join(sdk, f))
-    try:
-        with open(os.path.join(sdk, 'package.json'), encoding='utf-8') as fh:
-            pkg = json.load(fh)
-    except ValueError as e:
-        raise SdkError('%s is not valid JSON (%s)' % (os.path.join(sdk, 'package.json'), e))
-    if not isinstance(pkg, dict):
-        raise SdkError('%s is not a JSON object' % os.path.join(sdk, 'package.json'))
-    return pkg
-
-
-def source_date_epoch():
-    """Time stamp of every archive member: SOURCE_DATE_EPOCH, else the HEAD commit's time, else 0."""
-    v = os.environ.get('SOURCE_DATE_EPOCH', '').strip()
-    if v:
-        if not re.match(r'^[0-9]+$', v):
-            raise ValueError('SOURCE_DATE_EPOCH must be a whole number of seconds, not %r' % v)
-        return int(v)
-    try:
-        r = subprocess.run(['git', '-C', ROOT, 'log', '-1', '--format=%ct'],
-                           stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, timeout=60)
-        return int(r.stdout.strip()) if r.returncode == 0 else 0
-    except (OSError, ValueError, subprocess.SubprocessError):      # no git, not a checkout
-        return 0
-
-
-def add_tree(tf, path, arcname, mtime):
-    """Add a file or a folder (recursively, names sorted) with everything that differs between
-    machines and checkouts taken out: times, owners, Windows' 0666 / 0777 modes."""
-    ti = tf.gettarinfo(path, arcname)
-    ti.mtime = mtime
-    ti.uid = ti.gid = 0
-    ti.uname = ti.gname = ''
-    if ti.isdir():
-        ti.mode = 0o755
-        tf.addfile(ti)
-        for n in sorted(os.listdir(path)):
-            add_tree(tf, os.path.join(path, n), arcname + '/' + n, mtime)
-    elif ti.isreg():
-        ti.mode = 0o644
-        with open(path, 'rb') as fh:
-            tf.addfile(ti, fh)
-    else:
-        raise ValueError('%s: only files and folders are packed' % path)
-
-
-def write_archive(out, members, mtime):
-    """members: [(path, arcname)] in archive order -> out (.tar.gz, gzip header without time or name)."""
-    with open(out, 'wb') as raw:
-        with gzip.GzipFile(filename='', mode='wb', fileobj=raw, compresslevel=9, mtime=0) as gz:
-            with tarfile.open(fileobj=gz, mode='w', format=tarfile.PAX_FORMAT) as tf:
-                for path, arcname in members:
-                    add_tree(tf, path, arcname, mtime)
-
-
-# staged files are written and closed right away: complete on disk before they are archived
-def write_json(path, obj, **kw):
-    with open(path, 'w', encoding='utf-8', newline='\n') as fh:
-        json.dump(obj, fh, **kw)
-
-
-def write_text(path, text):
-    with open(path, 'w', encoding='utf-8', newline='\n') as fh:
-        fh.write(text)
-
-
-MISSING_INTERFACES = 'missing-interfaces.json'
-
-
-def missing_interfaces(adir):
-    """apps/<id>/missing-interfaces.json - {interface: what this head unit does not offer} - checked;
-    {} when there is none (every build but the desktop installer's)."""
-    p = os.path.join(adir, MISSING_INTERFACES)
-    if not os.path.isfile(p):
-        return {}
-    with open(p, encoding='utf-8') as fh:
-        data = json.load(fh)
-    if not isinstance(data, dict) or not all(isinstance(k, str) and k and isinstance(v, str) for k, v in data.items()):
-        raise ValueError(MISSING_INTERFACES + ' is not {interface: text}')
-    return data
-
-
-def replace_dir(new, final):
-    """Move a finished stage into place. A folder can't be renamed onto another one on Windows, so
-    the old stage is moved aside first, and back again if the move fails."""
-    old = None
-    if os.path.lexists(final):
-        old = os.path.join(os.path.dirname(final), '.%s.old-%d' % (os.path.basename(final), os.getpid()))
-        shutil.rmtree(old, ignore_errors=True)
-        os.rename(final, old)
-    try:
-        os.rename(new, final)
-    except BaseException:
-        if old is not None:
-            os.rename(old, final)
-        raise
-    if old is not None:
-        shutil.rmtree(old, ignore_errors=True)
-        if os.path.lexists(old):
-            print('  note: could not remove the previous stage %s (in use?); delete it by hand' % shown(old))
-
-
 class Ids:
     def __init__(self):
         self.n = 0
@@ -278,35 +134,13 @@ def setting_options(s):
 
 
 
-PLAIN_NAME = re.compile(r'[A-Za-z0-9_][A-Za-z0-9._+-]*')
-
-
-def check_assets(app_id, assets):
-    """app.json "assets": each "file" is written into the app's folder, so it must be a plain file
-    name there - no folders, no '..', no drive - or a downloaded file could land anywhere."""
-    if not isinstance(assets, list):
-        sys.exit('%s: app.json "assets" must be a list' % app_id)
-    for i, a in enumerate(assets):
-        name = a.get('file') if isinstance(a, dict) else None
-        # fullmatch: '$' would also accept a trailing newline
-        if not isinstance(name, str) or not PLAIN_NAME.fullmatch(name):
-            sys.exit('%s: app.json assets[%d].file must be a plain file name (letters, digits, . _ + -, '
-                     'no folders), not %r' % (app_id, i, name))
-
-
-def fetch_assets(adir, assets, offline=False):
-    """Large files an app needs but git doesn't keep (app.json "assets"): downloaded once, checked by SHA-256.
-    offline (--preview-only): nothing is downloaded; a missing asset is reported and left out."""
+def fetch_assets(adir, assets):
+    """Large files an app needs but git doesn't keep (app.json "assets"): downloaded once, checked by SHA-256."""
     import hashlib, io, urllib.request, zipfile
     sha = lambda b: hashlib.sha256(b).hexdigest()
     for a in assets:
         dst = os.path.join(adir, a['file'])
-        if os.path.exists(dst):
-            with open(dst, 'rb') as fh:
-                if sha(fh.read()) == a['sha256']:
-                    continue
-        if offline:
-            print('  %s: missing or not matching its SHA-256, not downloaded (--preview-only stays offline)' % a['file'])
+        if os.path.exists(dst) and sha(open(dst, 'rb').read()) == a['sha256']:
             continue
         print('  fetching %s from %s' % (a['file'], a['url']))
         data = urllib.request.urlopen(a['url'], timeout=300).read()
@@ -316,9 +150,7 @@ def fetch_assets(adir, assets, offline=False):
             data = zipfile.ZipFile(io.BytesIO(data)).read(a['zipMember'])
         if sha(data) != a['sha256']:
             sys.exit('%s: file does not match its SHA-256' % a['file'])
-        with open(dst + '.part', 'wb') as fh:
-            fh.write(data)
-        os.replace(dst + '.part', dst)
+        open(dst, 'wb').write(data)
 
 
 def build_ui(spec, language='en'):
@@ -361,6 +193,8 @@ def build_ui(spec, language='en'):
 
     def settings_items(items):
         for s in spec['settings']:
+            if s.get('hidden'):
+                continue
             name = 'SET_' + s['key'].upper()
             if s['type'] == 'bool':
                 items.append(comp('checkbox', name, rows=[text_row('SET_' + s['key'], s['label'])]))
@@ -379,12 +213,12 @@ def build_ui(spec, language='en'):
                 strings[sid(app, 'SET_' + s['key'])] = s['label']
                 items.append(comp('tworow', name, rows=[{'Text1stRow': {'value': s['label'], 'type': 'Text'},
                                                         'Text2ndRow': {'value': '', 'type': 'Text'}}]))
-        # Chinese builds only: credit for the Chinese translation (localize.py sets the Chinese title)
-        if language == 'zh-CN':
-            credit_title, credit_link = sid(app, 'CN_CREDITS_TITLE'), sid(app, 'CN_CREDITS_LINK')
-            strings[credit_title] = 'Translation by Douyin 小白科技杂物社 / BiliBili 小白151'
-            strings[credit_link] = 'GitHub JackieZ123430 · github.com/JackieZ123430/idrive7-apps-cn'
-            items.append(comp('tworow', 'CN_CREDITS', rows=[{
+        # Translated builds with a credit file only: credit for the translation (localize.py keeps its title)
+        if credit(language):
+            name = credit_name(language)
+            credit_title, credit_link = sid(app, name + '_TITLE'), sid(app, name + '_LINK')
+            strings[credit_title], strings[credit_link] = credit(language)['settingsTitle'], credit(language)['settingsLink']
+            items.append(comp('tworow', name, rows=[{
                 'Text1stRow': {'value': credit_title, 'type': 'StringId'},
                 'Text2ndRow': {'value': credit_link, 'type': 'StringId'},
             }]))
@@ -419,11 +253,8 @@ def build_ui(spec, language='en'):
             groups.append(('List', items))
             bar = []
             for b in scr.get('buttons', []):
-                hidden = scr.get('hmiBar') is False
-                bid, bx, bc = comp('barbutton', b[0], rows=[text_row(b[0], b[1])], extra_props={2: 0, 3: 0} if hidden else None)
-                # Keep action IDs for existing handlers, but generate no Bar
-                # layout and no visible/focusable fallback buttons when disabled.
-                (items if hidden else bar).append((bid, bx, bc))
+                bid, bx, bc = comp('barbutton', b[0], rows=[text_row(b[0], b[1])])
+                bar.append((bid, bx, bc))
             if bar:
                 groups.append(('Bar', bar))
         elif kind == 'settings':
@@ -491,20 +322,23 @@ def make_icon(spec, out):
     if os.path.exists(src):
         shutil.copy(src, out)
         return
-    # rendered by the kit's own canvas (node) so no extra tooling is needed. An argument list, no
-    # shell: the glyph comes from app.json (iconGlyph / title) and must never become a command
-    node = shutil.which('node')
-    if not node:
-        raise RuntimeError('%s has no icon.png, and node (to draw one with kit/tools/make_icon.js) is not on PATH' % spec['id'])
-    glyph = str(spec.get('iconGlyph', spec['title'][:2]))
-    subprocess.run([node, os.path.join(HERE, 'make_icon.js'), glyph, out], check=True)
+    # rendered by the kit's own canvas (node) so no extra tooling is needed
+    os.system(f'node "{os.path.join(HERE, "make_icon.js")}" "{spec.get("iconGlyph", spec["title"][:2])}" "{out}"')
 
 
 WIDGET_COMPONENT_ID = 501
 
 
-def build_start_widget(spec, app_id, icon_src, out):
+def build_start_widget(spec, app_id, icon_src, out, pkg_out=None):
     """app.json "startWidget" -> rhmiDataStartWidget/ (installed format), the home-screen widget.
+
+    With pkg_out, also the package format inside source/ (application.json with uiDescriptions
+    and variantGroups, like the package's rhmiData). MainApp's AppManagement installs it the way
+    it installs rhmiData (its config "rhmiDataStartWidget": source -> installed, then
+    mergeVariants), so an app installed through MainApp from the .tgz alone, as the MGU Store
+    does, gets its widget too. VERIFIED on a G05 (2026-11-03): after a Store install the widget
+    is in the home screen's widget list. deploy/mgu-app-install.sh still copies the installed
+    format beside source/ from the .mgu, as before.
 
     Same shape as BMW's own widgets on this firmware (Drive Recorder, Weather, News): a logical
     container with one startWidget component whose "Widget" cell names an HMI layout template.
@@ -526,79 +360,58 @@ def build_start_widget(spec, app_id, icon_src, out):
         'entryPointsStringBundleUuid': u(app_id, 'sw-ep-strings'), 'entryPointsResourceBundleUuid': u(app_id, 'sw-ep-resources'),
         'externalDialogStringBundleUuid': u(app_id, 'sw-ed-strings'),
         'bookmarkUuidPool': [u(app_id, 'sw-bookmarks'), 1, 2, 3, 4, 5, 6, 7]}}
-    write_json(os.path.join(out, 'application.json'), app_json, separators=(',', ':'))
+    json.dump(app_json, open(os.path.join(out, 'application.json'), 'w', encoding='utf-8', newline='\n'), separators=(',', ':'))
     xml = ('<?xml version="1.0" encoding="UTF-8"?>\n<application>\n'
            '    <container id="500" type="logical">\n        <layoutGroup id="502">\n'
            f'            <component id="{WIDGET_COMPONENT_ID}" type="startWidget">\n'
            f'                <property id="7" value="{wuuid}"/>\n'
            '            </component>\n        </layoutGroup>\n    </container>\n</application>\n')
-    write_text(os.path.join(out, 'uiDescription', 'application.xml'), xml)
+    open(os.path.join(out, 'uiDescription', 'application.xml'), 'w', encoding='utf-8', newline='\n').write(xml)
     ui = {'schemaVersion': '1.3.0', 'containers': {'500': {'type': 'logical', 'name': 'startWidgetLogical', 'components': {
         str(WIDGET_COMPONENT_ID): {'type': 'startWidget', 'name': comp,
                                    'properties': {'UUID': {'value': wuuid, 'type': 'Text'}},
                                    'cells': {'Widget': {'value': sw.get('layout', 'LT_Table_OnlineApps_DriveRecorderWidget'), 'type': 'Text'},
                                              'SelectionName': {'value': sid_name, 'type': 'StringId'},
                                              'SelectionIcon': {'value': icon, 'type': 'ResourceId'}}}}}}}
-    write_json(os.path.join(out, 'uiDescription', 'uiDescription.json'), ui, indent=1)
+    json.dump(ui, open(os.path.join(out, 'uiDescription', 'uiDescription.json'), 'w', encoding='utf-8', newline='\n'), indent=1)
     for lang in LANGS:
-        write_json(os.path.join(out, 'strings', lang + '.json'), {sid_name: name}, ensure_ascii=False)
+        json.dump({sid_name: name}, open(os.path.join(out, 'strings', lang + '.json'), 'w', encoding='utf-8', newline='\n'), ensure_ascii=False)
     shutil.copy(icon_src, os.path.join(out, 'resources', icon))
+    if pkg_out:
+        shutil.rmtree(pkg_out, ignore_errors=True)
+        os.makedirs(os.path.join(pkg_out, 'uiDescriptions', 'ID7'))
+        os.makedirs(os.path.join(pkg_out, 'variantGroups', 'Common', 'texts'))
+        os.makedirs(os.path.join(pkg_out, 'variantGroups', 'Common', 'images'))
+        a = app_json['application']
+        pj = {'schemaVersion': app_json['schemaVersion'], 'application': {k: a[k] for k in (
+            'uuid', 'type', 'name', 'vendor', 'version', 'defaultLanguage', 'stringBundleUuid', 'resourceBundleUuid', 'entryPoints')}}
+        pj['application']['uiDescriptions'] = [{'applicationFilePath': './uiDescriptions/ID7/application.xml',
+                                                'uiDescriptionFilePath': './uiDescriptions/ID7/uiDescription.json', 'hmi': ['ID7']}]
+        pj['application']['variantGroups'] = [{'stringsPath': './variantGroups/Common/texts',
+                                               'resourcesPath': './variantGroups/Common/images', 'hmi': ['ID7'], 'brands': ['BMW']}]
+        json.dump(pj, open(os.path.join(pkg_out, 'application.json'), 'w', encoding='utf-8', newline='\n'), indent=2)
+        open(os.path.join(pkg_out, 'uiDescriptions', 'ID7', 'application.xml'), 'w', encoding='utf-8', newline='\n').write(xml)
+        json.dump(ui, open(os.path.join(pkg_out, 'uiDescriptions', 'ID7', 'uiDescription.json'), 'w', encoding='utf-8', newline='\n'), indent=1)
+        for lang in LANGS:
+            json.dump({sid_name: name}, open(os.path.join(pkg_out, 'variantGroups', 'Common', 'texts', lang + '.json'), 'w', encoding='utf-8', newline='\n'), ensure_ascii=False)
+        shutil.copy(icon_src, os.path.join(pkg_out, 'variantGroups', 'Common', 'images', icon))
     return {'component': comp, 'layout': ui['containers']['500']['components'][str(WIDGET_COMPONENT_ID)]['cells']['Widget']['value']}
 
 
-def build(app_id, language='en', dist=DIST, sdk=SDK, mode='real', mtime=0):
-    """mode: 'real' (BMW's SDK), 'placeholder' (a stand-in SDK: NOT-INSTALLABLE archives) or
-    'preview' (no SDK, stage only). mtime: time stamp of the archive members.
-
-    The app is staged in a temporary folder next to its output and moved into place only when it is
-    complete; archives are written as .part files and renamed. A build that fails leaves no partial
-    stage or archive behind, and the previous output of that app as it was."""
-    with open(os.path.join(APPS, app_id, 'app.json'), encoding='utf-8') as fh:
-        spec = json.load(fh)
+def build(app_id, language='en', preview_only=False):
+    language = normalize_language(language)
+    if not preview_only and not all(os.path.isfile(os.path.join(SDK, name)) for name in ('index.js', 'package.json')):
+        raise SystemExit('BMW oap-sdk is missing. Extract it from your own head unit with kit/tools/extract_sdk.js, '
+                         'or use --preview-only for an offline preview (no installable package).')
+    adir = os.path.join(APPS, app_id)
+    spec = json.load(open(os.path.join(adir, 'app.json'), encoding='utf-8'))
     spec = localize_spec(spec, language)
     spec.setdefault('id', app_id)
     ver = spec['version']
-    # downloads go to the app's own folder, before anything is staged
-    check_assets(app_id, spec.get('assets', []))
-    fetch_assets(os.path.join(APPS, app_id), spec.get('assets', []), offline=mode == 'preview')
-    os.makedirs(dist, exist_ok=True)
-    final = os.path.join(dist, app_id)
-    stage = os.path.join(dist, '.%s.staging-%d' % (app_id, os.getpid()))
-    suffix = '-NOT-INSTALLABLE' if mode == 'placeholder' else ''
-    bundle = os.path.join(dist, f'{app_id}@{ver}{suffix}.mgu')
-    npm = os.path.join(dist, f'{app_id}@{ver}{suffix}.tgz')
-    parts = []
-    try:
-        shutil.rmtree(stage, ignore_errors=True)
-        uidesc, state_ids = stage_app(spec, app_id, language, stage, sdk, mode)
-        if mode != 'preview':
-            parts = [bundle + '.part', npm + '.part']
-            write_archive(parts[0], [(os.path.join(stage, n), n) for n in ('meta.json', MARKER, 'source', 'rhmiData', 'rhmiDataStartWidget', 'oapgen')
-                                     if os.path.exists(os.path.join(stage, n))], mtime)
-            write_archive(parts[1], [(os.path.join(stage, 'source'), 'package')], mtime)
-        replace_dir(stage, final)
-        for p in parts:
-            os.replace(p, p[:-len('.part')])
-    except BaseException:
-        shutil.rmtree(stage, ignore_errors=True)
-        for p in parts:
-            try:
-                os.remove(p)
-            except OSError:
-                pass
-        raise
-    if mode == 'preview':
-        print(f'{app_id} {ver}: {shown(final)} (preview only, not installable), '
-              f'{len(uidesc["containers"])} screens, states {state_ids}')
-    else:
-        print(f'{app_id} {ver}: {shown(bundle)} ({os.path.getsize(bundle) // 1024} KiB), '
-              f'{len(uidesc["containers"])} screens, states {state_ids}'
-              + (' - NOT INSTALLABLE (placeholder oap-sdk)' if suffix else ''))
-
-
-def stage_app(spec, app_id, language, stage, sdk, mode):
-    """Write the app's staged tree into `stage` (a new folder). Returns (uiDescription, state ids)."""
-    ver = spec['version']
+    stage = os.path.join(DIST, app_id)
+    # The source folder may use display casing; keep the installed identity stable.
+    app_id = spec['id']
+    shutil.rmtree(stage, ignore_errors=True)
     src = os.path.join(stage, 'source')
     os.makedirs(os.path.join(src, 'javascript', 'kit'))
     os.makedirs(os.path.join(src, 'config'))
@@ -626,31 +439,18 @@ def stage_app(spec, app_id, language, stage, sdk, mode):
     # impl.background runs then, without screens
     if spec.get('autostart'):
         pkg['mguAppStartType'] = 'autostart'
-    # per-app internet egress: mgu-uplink lets this app's uid out when package.json has
-    # mguInternet (mgu-deploy then writes apps.d/<id>). Opt-in via app.json "internet": true.
-    if spec.get('internet'):
-        pkg['mguInternet'] = True
-    write_json(os.path.join(src, 'package.json'), pkg, indent=2)
-    write_json(os.path.join(src, 'manifest.json'), manifest, indent=2)
+    json.dump(pkg, open(os.path.join(src, 'package.json'), 'w', encoding='utf-8', newline='\n'), indent=2)
+    json.dump(manifest, open(os.path.join(src, 'manifest.json'), 'w', encoding='utf-8', newline='\n'), indent=2)
     shutil.copy(os.path.join(KIT, 'platform', 'permissions.json'), os.path.join(src, 'permissions.json'))
-    write_json(os.path.join(src, 'npm-shrinkwrap.json'), {'name': app_id, 'version': ver, 'lockfileVersion': 1})
-    # the SDK merges this over its own config. Newer SDKs (27.x, extracted from a newer donor app) build the
-    # app's screens and entry point only with these on, and some donors ship them off: the app then had no
-    # screens and crashed (upstream #39; kit/runtime/mgu.js now stays idle then). Older SDKs (24.x) ignore them.
-    write_json(os.path.join(src, 'config', 'base.json'),
-               {'rhmiLoadingEnabled': True, 'entryPointLoadingEnabled': True, 'settings': {app_id: spec.get('config', {})}},
-               indent=2)
+    json.dump({'name': app_id, 'version': ver, 'lockfileVersion': 1}, open(os.path.join(src, 'npm-shrinkwrap.json'), 'w', encoding='utf-8', newline='\n'))
+    # the SDK merges this over its own config. Newer SDKs (27.x, extracted from a newer donor app) build the app's
+    # screens and entry point only with these on, and some donors ship them off: the app then has no screens and
+    # crashed (issue #39). Older SDKs (24.x) ignore them.
+    json.dump({'rhmiLoadingEnabled': True, 'entryPointLoadingEnabled': True, 'settings': {app_id: spec.get('config', {})}},
+              open(os.path.join(src, 'config', 'base.json'), 'w', encoding='utf-8', newline='\n'), indent=2)
     # app code
-    adir = os.path.join(APPS, app_id)
-    asset_hashes = {a['file']: a.get('sha256') for a in spec.get('assets', [])}
+    fetch_assets(adir, spec.get('assets', []))
     for f in os.listdir(adir):
-        if f in asset_hashes:
-            with open(os.path.join(adir, f), 'rb') as asset:
-                valid = hashlib.sha256(asset.read()).hexdigest() == asset_hashes[f]
-            if not valid:
-                if mode == 'preview':
-                    continue  # A mismatched local WAD must not silently reach the offline stage.
-                raise ValueError('asset changed after verification: ' + f)
         if f.endswith('.js'):
             shutil.copy(os.path.join(adir, f), os.path.join(src, 'javascript', 'app.js' if f == 'main.js' else f))
         elif f.endswith(('.wasm', '.wad')) or f in ('LICENSE', 'NOTICE'):
@@ -666,6 +466,14 @@ def stage_app(spec, app_id, language, stage, sdk, mode):
             shutil.copy(os.path.join(adir, f), os.path.join(src, 'javascript', f))
             print('  %s (committed)' % f)
     # kit runtime
+    if app_id == 'dtc_scanner' and language in ('zh-CN', 'ru'):
+        module = 'build_diagnostic_zh' if language == 'zh-CN' else 'build_diagnostic_ru'
+        catalog = __import__(module).catalog
+        with tempfile.TemporaryDirectory(prefix='mgu-diagnostic-') as temporary:
+            data = os.path.join(temporary, language + '.json')
+            with open(data, 'w', encoding='utf-8', newline='\n') as file:
+                json.dump(catalog(), file, ensure_ascii=False, separators=(',', ':'))
+            pack_data.pack(temporary, os.path.join(src, 'javascript', 'diagnostic_i18n.pack'))
     kr = os.path.join(KIT, 'runtime')
     for f in os.listdir(kr):
         p = os.path.join(kr, f)
@@ -679,32 +487,46 @@ def stage_app(spec, app_id, language, stage, sdk, mode):
             p = os.path.join(src, 'javascript', 'kit', 'fonts', name)
             if os.path.exists(p):
                 os.remove(p)
-    # signals the head unit does not offer, left out of this app's manifest by the desktop installer: it
-    # writes apps/<id>/missing-interfaces.json into its own staged copy of the sources only
-    # (desktop/engine/engine.py adapt_read_signals). The app logs them when it starts (kit/runtime/mgu.js).
-    missing = missing_interfaces(adir)
-    if missing:
-        write_json(os.path.join(src, 'javascript', 'kit', MISSING_INTERFACES), missing, indent=1, sort_keys=True)
+    if language != 'ru':
+        for name in ('ru.json', 'ru.tsv'):
+            p = os.path.join(src, 'javascript', 'kit', 'locales', name)
+            if os.path.exists(p):
+                os.remove(p)
+    if language == 'ru':
+        shutil.copy(os.path.join(KIT, 'localization', 'fonts', 'cyrillic-ru.json'),
+                    os.path.join(src, 'javascript', 'kit', 'fonts', 'cyrillic.json'))
+    if language == 'ko':
+        # Korean and Chinese are separate fixed-language packages. Loading both large
+        # atlases could fragment the renderer's two 1024x4096 glyph shelves.
+        os.remove(os.path.join(src, 'javascript', 'kit', 'fonts', 'cjk.json'))
+        for name in ('korean.json', 'OFL-NotoSansKR.txt'):
+            shutil.copy(os.path.join(KIT, 'localization', 'fonts', name),
+                        os.path.join(src, 'javascript', 'kit', 'fonts', name))
     if language == 'zh-CN':
-        # Retain localization authorship in the installed Chinese entry code as plain comments.
+        # Diagnostic glyphs are Chinese-only; keep the English runtime atlas intact.
+        if app_id == 'dtc_scanner':
+            shutil.copy(os.path.join(KIT, 'localization', 'fonts', 'diagnostic-zh-CN.json'),
+                        os.path.join(src, 'javascript', 'kit', 'fonts', 'cjk.json'))
+    if credit(language):
+        # The translation credit in the installed entry code, as plain comments.
         entry = os.path.join(src, 'javascript', 'app.js')
-        credit = ('// 中文汉化署名：抖音 小白科技杂物社 / BiliBili 小白151 / GitHub JackieZ123430\n'
-                  '// 汉化仓库：https://github.com/JackieZ123430/idrive7-apps-cn\n')
+        comment = ''.join('// %s\n' % line for line in credit(language)['comment'])
         with open(entry, 'rb') as file:
             body = file.read()
         with open(entry, 'wb') as file:
-            file.write(credit.encode('utf-8') + body)
+            file.write(comment.encode('utf-8') + body)
     rt_spec = {k: spec.get(k) for k in ('id', 'title', 'version', 'screens', 'settings', 'config', 'startWidget')}
     rt_spec['stateIds'] = state_ids
-    write_json(os.path.join(src, 'javascript', 'kit', 'app-spec.json'), rt_spec, indent=1)
-    write_json(os.path.join(src, 'javascript', 'kit', 'locale.json'), {'language': language, 'strings': load_locale(language)}, ensure_ascii=False)
-    if mode == 'preview':
-        # never BMW's code, even when an SDK is there: a preview stage may be shared
-        write_text(os.path.join(src, 'node_modules', 'oap-sdk', 'index.js'), PREVIEW_SDK_INDEX)
-        write_json(os.path.join(src, 'node_modules', 'oap-sdk', 'package.json'), PREVIEW_SDK_PACKAGE, indent=2)
-    else:
-        shutil.copy(os.path.join(sdk, 'index.js'), os.path.join(src, 'node_modules', 'oap-sdk', 'index.js'))
-        shutil.copy(os.path.join(sdk, 'package.json'), os.path.join(src, 'node_modules', 'oap-sdk', 'package.json'))
+    json.dump(rt_spec, open(os.path.join(src, 'javascript', 'kit', 'app-spec.json'), 'w', encoding='utf-8', newline='\n'), indent=1)
+    locale = {'language': language, 'strings': load_locale(language)}
+    if credit(language):
+        locale['credit'] = credit(language)['corner']
+    json.dump(locale, open(os.path.join(src, 'javascript', 'kit', 'locale.json'), 'w', encoding='utf-8', newline='\n'), ensure_ascii=False)
+    if preview_only:
+        print('%s %s: offline preview in %s (NO SDK, NOT INSTALLABLE)' % (app_id, ver, stage))
+        return
+    shutil.copy(os.path.join(SDK, 'index.js'), os.path.join(src, 'node_modules', 'oap-sdk', 'index.js'))
+    shutil.copy(os.path.join(SDK, 'package.json'), os.path.join(src, 'node_modules', 'oap-sdk', 'package.json'))
 
     # --- rhmiData: package format (inside source/) and installed format ---
     icon = spec['id'] + '_icon.png'
@@ -731,11 +553,11 @@ def stage_app(spec, app_id, language, stage, sdk, mode):
                                             'uiDescriptionFilePath': './uiDescriptions/ID7/uiDescription.json', 'hmi': ['ID7']}]
     pj['application']['variantGroups'] = [{'stringsPath': './variantGroups/Common/texts',
                                            'resourcesPath': './variantGroups/Common/images', 'hmi': ['ID7'], 'brands': ['BMW']}]
-    write_json(os.path.join(pr, 'application.json'), pj, indent=2)
-    write_text(os.path.join(pr, 'uiDescriptions', 'ID7', 'application.xml'), xml)
-    write_json(os.path.join(pr, 'uiDescriptions', 'ID7', 'uiDescription.json'), uidesc, indent=1)
+    json.dump(pj, open(os.path.join(pr, 'application.json'), 'w', encoding='utf-8', newline='\n'), indent=2)
+    open(os.path.join(pr, 'uiDescriptions', 'ID7', 'application.xml'), 'w', encoding='utf-8', newline='\n').write(xml)
+    json.dump(uidesc, open(os.path.join(pr, 'uiDescriptions', 'ID7', 'uiDescription.json'), 'w', encoding='utf-8', newline='\n'), indent=1)
     for lang in LANGS:
-        write_json(os.path.join(pr, 'variantGroups', 'Common', 'texts', lang + '.json'), strings, ensure_ascii=False)
+        json.dump(strings, open(os.path.join(pr, 'variantGroups', 'Common', 'texts', lang + '.json'), 'w', encoding='utf-8', newline='\n'), ensure_ascii=False)
     make_icon(spec, os.path.join(pr, 'variantGroups', 'Common', 'images', icon))
 
     ir = os.path.join(stage, 'rhmiData')
@@ -748,69 +570,59 @@ def stage_app(spec, app_id, language, stage, sdk, mode):
         'externalDialogStringBundleUuid': u(app_id, 'ed-strings'),
         'bookmarkUuidPool': [u(app_id, 'bookmarks'), 1, 2, 3, 4, 5, 6, 7],
     })
-    write_json(os.path.join(ir, 'application.json'), ij, separators=(',', ':'))
-    write_text(os.path.join(ir, 'uiDescription', 'application.xml'), xml)
-    write_json(os.path.join(ir, 'uiDescription', 'uiDescription.json'), uidesc, indent=1)
+    json.dump(ij, open(os.path.join(ir, 'application.json'), 'w', encoding='utf-8', newline='\n'), separators=(',', ':'))
+    open(os.path.join(ir, 'uiDescription', 'application.xml'), 'w', encoding='utf-8', newline='\n').write(xml)
+    json.dump(uidesc, open(os.path.join(ir, 'uiDescription', 'uiDescription.json'), 'w', encoding='utf-8', newline='\n'), indent=1)
     for lang in LANGS:
-        write_json(os.path.join(ir, 'strings', lang + '.json'), strings, ensure_ascii=False)
+        json.dump(strings, open(os.path.join(ir, 'strings', lang + '.json'), 'w', encoding='utf-8', newline='\n'), ensure_ascii=False)
     shutil.copy(os.path.join(pr, 'variantGroups', 'Common', 'images', icon), os.path.join(ir, 'resources', icon))
     if spec.get('startWidget'):
-        info = build_start_widget(spec, app_id, os.path.join(ir, 'resources', icon), os.path.join(stage, 'rhmiDataStartWidget'))
+        info = build_start_widget(spec, app_id, os.path.join(ir, 'resources', icon), os.path.join(stage, 'rhmiDataStartWidget'),
+                                  os.path.join(src, 'rhmiDataStartWidget'))
         print('  home-screen widget: %s (%s)' % (info['component'], info['layout']))
 
     # --- installer helpers + metadata ---
     shutil.copytree(os.path.join(KIT, 'tools', 'oapgen'), os.path.join(stage, 'oapgen'))
     meta = {'id': app_id, 'version': ver, 'title': spec['title'], 'native': NATIVE, 'kit': 1}
-    if mode != 'real':
-        meta['previewOnly'] = True
-        for d in (stage, src):
-            write_text(os.path.join(d, MARKER), MARKER_TEXT[mode])
-    write_json(os.path.join(stage, 'meta.json'), meta, indent=1)
-    return uidesc, state_ids
+    # app.json signals with "_optional": "<what the app loses>": a unit without that interface
+    # still installs the app, without it (deploy/mgu-app-install.sh says what is missing)
+    optional = {i: f['_optional'] for i, f in spec.get('signals', {}).items() if isinstance(f, dict) and f.get('_optional')}
+    if optional:
+        meta['optional'] = optional
+    json.dump(meta, open(os.path.join(stage, 'meta.json'), 'w', encoding='utf-8', newline='\n'), indent=1)
+
+    # --- archives ---
+    os.makedirs(DIST, exist_ok=True)
+    bundle = os.path.join(DIST, f'{app_id}@{ver}.mgu')
+    with gz_header_free(bundle) as gz, tarfile.open(fileobj=gz, mode='w') as tf:
+        for n in ('meta.json', 'source', 'rhmiData', 'rhmiDataStartWidget', 'oapgen'):
+            if os.path.exists(os.path.join(stage, n)):
+                tf.add(os.path.join(stage, n), arcname=n)
+    npm = os.path.join(DIST, f'{app_id}@{ver}.tgz')
+    with gz_header_free(npm) as gz, tarfile.open(fileobj=gz, mode='w') as tf:
+        tf.add(src, arcname='package')
+    print(f'{app_id} {ver}: {os.path.relpath(bundle, ROOT)} ({os.path.getsize(bundle) // 1024} KiB), '
+          f'{len(uidesc["containers"])} screens, states {state_ids}')
 
 
-def shown(p):
-    """A path for messages: relative to the repository when inside it (as before), else as given."""
-    try:
-        rel = os.path.relpath(p, ROOT)
-    except ValueError:              # another drive (Windows)
-        return p
-    return p if rel == '..' or rel.startswith('..' + os.sep) else rel
+def gz_header_free(path):
+    """A gzip stream whose header carries no clock time (mtime 0). The header holds 32 bits, so on a
+    head unit whose clock is past 2106 (a car once showed 2179) every build failed.
+    Use: with gz_header_free(p) as gz, tarfile.open(fileobj=gz, mode='w') as tf"""
+    return gzip.GzipFile(path, 'wb', mtime=0)
 
 
 def main():
     import argparse
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('--language', choices=languages(), default='en')
-    parser.add_argument('--sdk', type=os.path.abspath, default=SDK, help="BMW's oap-sdk folder (default: oap-sdk/)")
-    parser.add_argument('--dist', type=os.path.abspath, default=None,
-                        help='output folder (default: dist/, or dist-preview/ with --preview-only)')
-    parser.add_argument('--preview-only', action='store_true',
-                        help="stage only, without BMW's SDK (offline, never installable)")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--language', type=normalize_language, choices=languages(), default='en',
+                        help='UI language; Korean also accepts ko-KR, ko-kr and ko_KR')
+    parser.add_argument('--preview-only', action='store_true', help='stage an offline preview without BMW SDK or installable archives')
     parser.add_argument('apps', nargs='*')
     args = parser.parse_args()
-    dist = args.dist or (PREVIEW_DIST if args.preview_only else DIST)
-    mode = 'preview'
-    if not args.preview_only:
-        # before anything is created or deleted in the output folder: without the SDK there is
-        # nothing installable to build (a partial stage and a traceback helped nobody)
-        try:
-            pkg = check_sdk(args.sdk)
-        except SdkError as e:
-            print('build.py: no usable BMW oap-sdk: %s\n'
-                  "Extract it from your own head unit's x_call app (README 3.1, kit/tools/extract_sdk.js), or use\n"
-                  '--preview-only for an offline, non-installable build. Nothing was built; %s was not touched.'
-                  % (e, shown(dist)), file=sys.stderr)
-            sys.exit(2)
-        mode = 'placeholder' if pkg.get('mguPlaceholder') is True else 'real'
-    try:
-        mtime = source_date_epoch()
-    except ValueError as e:
-        print('build.py: %s. Nothing was built.' % e, file=sys.stderr)
-        sys.exit(2)
     ids = args.apps or sorted(d for d in os.listdir(APPS) if os.path.exists(os.path.join(APPS, d, 'app.json')))
     for i in ids:
-        build(i, args.language, dist=dist, sdk=args.sdk, mode=mode, mtime=mtime)
+        build(i, args.language, preview_only=args.preview_only)
 
 
 if __name__ == '__main__':

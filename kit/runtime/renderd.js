@@ -14,12 +14,8 @@
  * opts.native: ask for mgu-render's own dialect (mgu-render/1, the Store's renderer). There touch
  * claims and the controller grab work on one connection, and X_STATE says when the renderer has
  * the app on screen. A renderer that does not speak it answers READY alone and the connection
- * stays in the upstream dialect. Pixel images (record.js setImage, op 18 id ver x y w h): in the
- * upstream dialect IMAGE uploads (Doom connects without opts.native, as upstream's Doom); on a
- * mgu-render/1 connection, where message 9 is CLAIM and op 18 has another layout, they go as
- * pixmaps (X_PIXMAP / X_PIXELS) and each frame's op 18 is written in the native layout (x y w h r
- * id) on the way out - the recording itself is not changed (this kit's addition: upstream's kit
- * draws no pixel image on mgu-render/1; the unified MGU Tools app draws them on its screens).
+ * stays in the upstream dialect. Pixel images (op 18) are upstream only: an app that draws them
+ * (Doom) connects without opts.native.
  */
 const net = require('net');
 const fs = require('fs');
@@ -38,9 +34,6 @@ const CLAIM = 9, TOUCH = 105, CLOSED = 106;
 // mgu-render/1 (mgu-store native/mgu-render/PROTOCOL.md)
 const X = { MODE: 0x4d520001, GRAB: 0x4d520002, READY: 0x4d520101, STATE: 0x4d520102, CCU: 0x4d520103 };
 const X_MODE_LAYER = 1;
-// mgu-render/1 pixmaps (X_PIXMAP): pixels premultiplied RGBA / RGBA shown opaque; filter 0 = nearest pixel
-const X_PIXMAP = 0x4d520003, X_PIXELS = 0x4d520004, PIX_PREMUL = 1, PIX_OPAQUE = 2;
-const OP_IMAGE = 18;
 
 function msg(type, payload) {
     const len = payload ? payload.length : 0;
@@ -51,52 +44,6 @@ function msg(type, payload) {
     return b;
 }
 function words(u32) { return Buffer.from(u32.buffer, u32.byteOffset, u32.byteLength); }
-/** RGBA rows, premultiplied (as canvas.js draws an image: source over, straight alpha in) */
-function premultiply(d, n) {
-    const b = Buffer.allocUnsafe(n * 4);
-    for (let i = 0; i < n * 4; i += 4) {
-        const a = d[i + 3];
-        b[i] = (d[i] * a + 127) / 255; b[i + 1] = (d[i + 1] * a + 127) / 255; b[i + 2] = (d[i + 2] * a + 127) / 255; b[i + 3] = a;
-    }
-    return b;
-}
-/**
- * Draw op words (record.js) with every IMAGE op (18: id ver x y w h) in mgu-render/1's layout (x y w h r id):
- * a copy when there is one, else the same array. Op lengths as record.js play(); an op it does not know
- * ends the walk (the rest goes as it is).
- */
-function nativeOps(u) {
-    let out = null, of = null;
-    const f = new Float32Array(u.buffer, u.byteOffset, u.length), n = u.length;
-    let i = 0;
-    while (i < n) {
-        const op = u[i++];
-        switch (op) {
-        case 1: case 16: i += 1; break;                     // CLEAR c, ALPHA a
-        case 2: i += 5; break;                              // RECT
-        case 3: i += 5 + 2 * u[i + 4]; break;               // GRAD x y w h n (t c)*n
-        case 6: i += 6 + 2 * u[i + 5]; break;               // CARD x y w h r n (t c)*n
-        case 4: case 9: i += 6; break;                      // RRECT, LINE
-        case 5: i += 7; break;                              // RSTROKE
-        case 7: i += 8; break;                              // RAMPRECT
-        case 8: i += 11; break;                             // ARC
-        case 10: i += 1 + 9 * u[i]; break;                  // TRIS n (x y c)*3n
-        case 11: i += 3 + 8 * u[i + 2]; break;              // GLYPHS atlas c n (8 words)*n
-        case 12: case 17: i += 3; break;                    // LAYER id x y, XF s ox oy
-        case 13: i += 4; break;                             // CLIP
-        case 14: break;                                     // NOCLIP
-        case OP_IMAGE: {
-            if (i + 6 > n) return out || u;
-            if (!out) { out = new Uint32Array(u); of = new Float32Array(out.buffer, out.byteOffset, out.length); }
-            const id = u[i], x = f[i + 2], y = f[i + 3], w = f[i + 4], h = f[i + 5];
-            of[i] = x; of[i + 1] = y; of[i + 2] = w; of[i + 3] = h; of[i + 4] = 0; out[i + 5] = id;
-            i += 6; break;
-        }
-        default: return out || u;
-        }
-    }
-    return out || u;
-}
 
 class RenderClient extends EventEmitter {
     constructor(appId, log, opts) {
@@ -220,6 +167,22 @@ class RenderClient extends EventEmitter {
         if (this.fd !== null) { fs.writeSync(this.fd, b); return true; }
         return this.sock && this.connected ? this.sock.write(b) : false;
     }
+    /* A buffer for one IMAGE message of `size` bytes: the one kept for that size once the socket has passed
+     * it on (a big picture every frame - DOOM's 1920 x 504 view - would otherwise leave two new copies of
+     * several MB a frame, which Node 8 frees late: the app's memory grows until the app manager stops it). */
+    _imageBuf(size) {
+        const pool = this.imgPool || (this.imgPool = new Map());
+        const free = this.fd !== null || !this.sock || this.sock.bufferSize === 0;
+        let b = free ? pool.get(size) : null;
+        if (!b) {
+            b = Buffer.allocUnsafe(size);
+            if (size >= 65536) {
+                if (pool.size >= 4) pool.delete(pool.keys().next().value);
+                pool.set(size, b);
+            }
+        }
+        return b;
+    }
     _u32msg(type, arr) { const u = new Uint32Array(arr); return msg(type, words(u)); }
 
     _data(d) {
@@ -232,8 +195,7 @@ class RenderClient extends EventEmitter {
             if (type === X.READY && p.length >= 12) {
                 const caps = p.readUInt32LE(8);
                 this.native = true;
-                this.info = { touch: !!(caps & 1), controller: !!(caps & 2), frontGate: !!(caps & 4), pixmap: !!(caps & 8),
-                    pixmapSide: p.length >= 48 ? p.readUInt32LE(44) : 0 };
+                this.info = { touch: !!(caps & 1), controller: !!(caps & 2), frontGate: !!(caps & 4) };
             } else if (type === E.READY) {
                 this.ready = true; this.errLogged = false;
                 this.screen = { w: p.readUInt32LE(4), h: p.readUInt32LE(8) };
@@ -336,39 +298,16 @@ class RenderClient extends EventEmitter {
     }
     /** upload a pixel image when this connection hasn't got its current version */
     _ensureImage(id) {
+        if (this.native) { if (!this.imgWarned) { this.imgWarned = true; this.log.warn('renderd: pixel images need the upstream dialect'); } return; }
         const im = rec.imageById.get(id);
         if (!im || !im.data) return;
-        if (this.native) { this._ensurePixmap(id, im); return; }
         if (this.sent.image.get(id) === im.ver) return;
-        const head = Buffer.alloc(12);
-        head.writeUInt32LE(id, 0); head.writeUInt32LE(im.w, 4); head.writeUInt32LE(im.h, 8);
-        const px = Buffer.from(im.data.buffer, im.data.byteOffset, im.w * im.h * 4);
-        this._write(msg(M.IMAGE, Buffer.concat([head, px])));
+        const n = im.w * im.h * 4, b = this._imageBuf(8 + 12 + n);
+        b.writeUInt32LE(M.IMAGE, 0); b.writeUInt32LE(12 + n, 4);
+        b.writeUInt32LE(id, 8); b.writeUInt32LE(im.w, 12); b.writeUInt32LE(im.h, 16);
+        Buffer.from(im.data.buffer, im.data.byteOffset, n).copy(b, 20);
+        this._write(b);
         this.sent.image.set(id, im.ver);
-    }
-    /**
-     * mgu-render/1: pixel image id as a pixmap of its size (made again when the size or its kind changes), its
-     * pixels sent whole when this connection hasn't got its current version. Opaque pictures (a game's frame) go
-     * as RGBA shown opaque, as the upstream dialect's IMAGE; one with transparent pixels premultiplied.
-     */
-    _ensurePixmap(id, im) {
-        const side = this.info && this.info.pixmapSide;
-        if ((this.info && !this.info.pixmap) || (side && (im.w > side || im.h > side))) {
-            if (!this.imgWarned) { this.imgWarned = true; this.log.warn('renderd: this renderer takes no pixmap ' + im.w + 'x' + im.h + ' (image ' + id + ')'); }
-            return;
-        }
-        const have = this.sent.image.get(id);
-        if (have && have.ver === im.ver && have.w === im.w && have.h === im.h) return;
-        const n = im.w * im.h, d = im.data;
-        if (d.length < n * 4) return;
-        let opaque = true;
-        for (let i = 3; i < n * 4; i += 4) if (d[i] !== 255) { opaque = false; break; }
-        const format = opaque ? PIX_OPAQUE : PIX_PREMUL;
-        if (!have || have.w !== im.w || have.h !== im.h || have.format !== format) this._write(this._u32msg(X_PIXMAP, [id, im.w, im.h, format, 0]));
-        const head = new Uint32Array([id, 1, 0, 0, im.w, im.h]);
-        const px = opaque ? Buffer.from(d.buffer, d.byteOffset, n * 4) : premultiply(d, n);
-        this._write(msg(X_PIXELS, Buffer.concat([words(head), px])));
-        this.sent.image.set(id, { ver: im.ver, w: im.w, h: im.h, format });
     }
     _ensureLayer(id) {
         if (this.sent.layer.has(id)) return;
@@ -389,9 +328,8 @@ class RenderClient extends EventEmitter {
         if (!this.ready || !this.placement) return false;
         this._ensureRes(r);
         this.waiting = true;
-        const u = r.words();
-        return this._write(msg(M.FRAME, words(this.native && r.images && r.images.size ? nativeOps(u) : u)));
+        return this._write(msg(M.FRAME, words(r.words())));
     }
 }
 
-module.exports = { RenderClient, SOCKET, SOCKETS, nativeOps };
+module.exports = { RenderClient, SOCKET, SOCKETS };

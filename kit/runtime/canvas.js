@@ -62,25 +62,18 @@ class Canvas {
         return this;
     }
 
-    /** Draw an RGBA image (sw x sh bytes), source-over, scaled with nearest pixels. */
+    /** Draw an opaque RGBA image (sw x sh bytes) scaled into x, y, w, h, nearest pixel. */
     drawImage(src, sw, sh, x, y, w, h) {
         const x0 = Math.max(0, Math.round(x)), y0 = Math.max(0, Math.round(y));
         const x1 = Math.min(this.w, Math.round(x + w)), y1 = Math.min(this.h, Math.round(y + h));
         if (x1 <= x0 || y1 <= y0) return this;
-        const d = this.d, fx = sw / w, fy = sh / h, color = [0, 0, 0, 0];
+        const d = this.d, fx = sw / w, fy = sh / h;
         for (let py = y0; py < y1; py++) {
             const sy = Math.min(sh - 1, ((py - y + 0.5) * fy) | 0) * sw;
             let di = (py * this.w + x0) * 4;
             for (let px = x0; px < x1; px++, di += 4) {
                 const si = (sy + Math.min(sw - 1, ((px - x + 0.5) * fx) | 0)) * 4;
-                const alpha = src[si + 3];
-                if (alpha === 0) continue;
-                if (alpha === 255) {
-                    d[di] = src[si]; d[di + 1] = src[si + 1]; d[di + 2] = src[si + 2]; d[di + 3] = 255;
-                } else {
-                    color[0] = src[si]; color[1] = src[si + 1]; color[2] = src[si + 2]; color[3] = alpha;
-                    this._blend(px, py, color, 1);
-                }
+                d[di] = src[si]; d[di + 1] = src[si + 1]; d[di + 2] = src[si + 2]; d[di + 3] = 255;
             }
         }
         return this;
@@ -457,12 +450,11 @@ class Canvas {
     /**
      * Text. font = family name baked by kit/tools/bake_fonts.py ('label', 'num').
      * align: 'left' | 'center' | 'right'; y is the BASELINE.
-     * translate: false (upstream: literal: true) preserves external wording (also for textWidth).
      * Returns the drawn width in px.
      */
     text(str, x, y, size, c, opts) {
         opts = opts || {};
-        const s = opts.translate === false || opts.literal ? String(str) : t(str);
+        const s = opts.literal ? String(str) : t(str);
         const f = fonts.get(opts.font || 'label', size, s);
         if (!f) return 0;
         c = rgba(c);
@@ -480,7 +472,7 @@ class Canvas {
     }
 
     textWidth(str, size, opts) {
-        const s = opts && (opts.translate === false || opts.literal) ? String(str) : t(str), f = fonts.get((opts && opts.font) || 'label', size, s);
+        const s = opts && opts.literal ? String(str) : t(str), f = fonts.get((opts && opts.font) || 'label', size, s);
         return f ? fonts.measure(f, s) * (size / f.size) + ((opts && opts.spacing) || 0) * Math.max(0, s.length - 1) : 0;
     }
 

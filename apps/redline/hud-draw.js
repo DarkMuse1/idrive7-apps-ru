@@ -333,11 +333,7 @@ function drawReadouts(cv, x0, x1, y, items, P, layer, clear) {
 function drawChip(cv, x0, x1, y, chip, P) {
     // a chip may carry its own text and colour (the launch time: { text, tone }); the grades go by the verdict
     const c = Theme.chipCol(chip, P), cx = (x0 + x1) / 2;
-    if (!chip.burst) {
-        const text = chip.text || chip.verdict, opts = { align: 'center', font: 'bold', spacing: 2 };
-        cv.text(text, cx, y + 36, Theme.fitSize(cv, text, 28, x1 - x0 - 12, opts), c, opts);
-        return;
-    }
+    if (!chip.burst) { cv.text(chip.text || chip.verdict, cx, y + 36, 28, c, { align: 'center', font: 'bold', spacing: 2 }); return; }
     const a = chip.age || 0, k = Theme.burstRing(a);
     const size = a < Theme.BURST.pop ? 34 - 8 * (a / Theme.BURST.pop) : 26, alpha = Theme.burstAlpha(a);
     if (k >= 0) {
@@ -345,10 +341,7 @@ function drawChip(cv, x0, x1, y, chip, P) {
         const rr = Math.min(30 + 36 * k, IH - (y + 26) - 2);
         cv.arc(cx, y + 26, rr - 2, rr, 0, 360, withAlpha(c, 0.8 * (1 - k)));
     }
-    if (alpha > 0) {
-        const text = chip.text || VERDICT_TEXT[chip.verdict] || chip.verdict, opts = { align: 'center', font: 'bold', spacing: 1.5 };
-        cv.text(text, cx, y + 36, Theme.fitSize(cv, text, size, x1 - x0 - 12, opts), withAlpha(c, alpha), opts);
-    }
+    if (alpha > 0) cv.text(chip.text || VERDICT_TEXT[chip.verdict] || chip.verdict, cx, y + 36, size, withAlpha(c, alpha), { align: 'center', font: 'bold', spacing: 1.5 });
 }
 
 /** The parts every layout draws the same way. */

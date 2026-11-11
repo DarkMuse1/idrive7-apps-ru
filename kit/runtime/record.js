@@ -89,36 +89,15 @@ class Recorder {
         this.atlases = new Set();    // glyph atlases and colour ramps it uses (uploaded once by the transport)
         this.ramps = new Set();
         this.images = new Set();     // pixel images it draws (setImage)
-        this.recording = true;
         this.targets = [];           // what a tap or the controller can press on the page: { x, y, w, h, run, key } (target)
         this._extra = 0;
         this.extraUsed = false;      // the drawing read extra (it reaches below the page: display.js places it so)
-        this.scroll = false;         // the page scrolls (ctx.onScroll): true, or { y, bar } for a list from y down
+        this.recording = true;
     }
-    /**
-     * logical px the screen has below the app's page (display.js: where the kit runs the screen with no bar
-     * under the page), 0 if none. Reading it marks the drawing as one that reaches down (extraUsed).
-     */
+    /** logical px the screen has below the app's page (display.js), 0 if none */
     get extra() { if (this._extra) this.extraUsed = true; return this._extra; }
     set extra(v) { this._extra = v || 0; }
-    reset() {
-        this.n = 0; this.frameTabs = null; this._cnStamped = false; this.targets = []; this.scroll = false; this.extraUsed = false;
-        if (this.layersUsed) this.layersUsed.clear();
-        this.atlases.clear(); this.ramps.clear(); this.images.clear();
-        return this;
-    }
-    /**
-     * Something on the page a tap (or the iDrive controller, turned onto it and pressed) runs: run().
-     * key names it from frame to frame (the controller stays on it). Drawn by the caller; where the kit
-     * runs the screen (display.js) a tap on it runs it and the controller rings the one it is on. Elsewhere
-     * (software path, standard layout, an older renderer) it is only recorded: nothing acts on it, and the
-     * recording itself is the same with or without it.
-     */
-    target(x, y, w, h, run, key, r, options) {
-        const target={x,y,w,h,run,key:String(key),r};
-        if(options&&typeof options.drag==='function')target.drag=options.drag;
-        this.targets.push(target);return this;
-    }
+    reset() { this.n = 0; this._cnStamped = false; this.targets = []; this.scroll = false; this.extraUsed = false; if (this.layersUsed) this.layersUsed.clear(); this.atlases.clear(); this.ramps.clear(); this.images.clear(); return this; }
     _grow(k) {
         if (this.n + k <= this.u.length) return;
         let len = this.u.length * 2;
@@ -129,6 +108,12 @@ class Recorder {
     }
     /** the recorded words (a view, valid until the next draw call) */
     words() { return this.u.subarray(0, this.n); }
+    /**
+     * Something on the page a tap (or the iDrive controller, turned onto it and pressed) runs: run().
+     * key names it from frame to frame (the controller stays on it). Drawn by the caller; where the kit
+     * runs the screen (display.js) it rings the one the controller is on.
+     */
+    target(x, y, w, h, run, key, r) { this.targets.push({ x, y, w, h, run, key: String(key), r }); return this; }
 
     /* ---------- canvas.js API ---------- */
     /** Draw pixel image `id` (see setImage) scaled into x, y, w, h (nearest pixel). */
@@ -245,7 +230,7 @@ class Recorder {
     /** Text; y is the baseline. Returns the width in logical px (as canvas.js). */
     text(str, x, y, size, c, opts) {
         opts = opts || {};
-        const s = opts.translate === false || opts.literal ? String(str) : t(str), family = opts.font || 'label';
+        const s = opts.literal ? String(str) : t(str), family = opts.font || 'label';
         const f = fonts.get(family, size * this.textScale, s);
         if (!f) return 0;
         const sc = size / f.size, sp = opts.spacing || 0;
@@ -275,7 +260,7 @@ class Recorder {
         return w;
     }
     textWidth(str, size, opts) {
-        const s = opts && (opts.translate === false || opts.literal) ? String(str) : t(str), f = fonts.get((opts && opts.font) || 'label', size * this.textScale, s);
+        const s = opts && opts.literal ? String(str) : t(str), f = fonts.get((opts && opts.font) || 'label', size * this.textScale, s);
         return f ? fonts.measure(f, s) * (size / f.size) + ((opts && opts.spacing) || 0) * Math.max(0, s.length - 1) : 0;
     }
 

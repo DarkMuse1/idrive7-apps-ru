@@ -14,10 +14,6 @@
  * quiet after standing = parked (counting quiet as moving blocked a parked car in Doom 1.4.0),
  * quiet after driving = moving (the safe side) until a speed is read again. Without any real speed
  * (a VM or a bench: none, or "invalid" 65535) the car counts as parked.
- *
- * Behaviour exactly as upstream idrive7-apps' kit (customer directive 2026-11-04: every kit check as
- * upstream's, proven on real cars). MGU Tools' former fail-closed rule (no current speed = moving) is
- * gone: it stopped games on a parked car whose speed had gone quiet.
  */
 const MAX_KMH = 3;
 

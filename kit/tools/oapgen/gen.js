@@ -50,14 +50,6 @@ function main(argv) {
     const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8').replace(/\${userId}/g, String(userId)));
     const ifs = load('IFConfigGenerator').generate(db, manifest);
     const acl = load('AclGenerator').generate(db, manifest);
-    const names = Object.create(null);
-    Object.keys(ifs).forEach((id) => {
-        const name = id.replace(/\./g, '_');
-        if (!/^[A-Za-z0-9_-]+$/.test(name) || name.toLowerCase() === 'acl' || names[name.toLowerCase()]) {
-            throw new Error('unsafe or duplicate generated interface name');
-        }
-        names[name.toLowerCase()] = true;
-    });
     if (!fs.existsSync(outDir)) fs.mkdirSync(outDir);
     let n = 0;
     Object.keys(ifs).forEach((id) => {

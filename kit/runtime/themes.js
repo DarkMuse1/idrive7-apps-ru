@@ -8,18 +8,6 @@
  * from the theme colour to red at the dial's limit (redline, max boost, ...).
  */
 const THEMES = {
-    mgu_tools: (() => {
-        const C = require('./tokens').color;
-        return {
-            name: 'MGU Tools', bg: C.bg, panelTop: C.surface, panelBottom: C.surface,
-            panelEdge: C.line, tab: C.textDim, track: C.track, tick: C.tick,
-            text: C.text, dim: C.textDim, accent: C.accent, accent2: C.accent,
-            ok: C.accent, warn: C.warn, crit: C.crit, cold: C.accent,
-            glow: C.accentSoft, stripes: [C.accent], oil: C.warn, bar: C.accent,
-            hang: C.warn, sel: C.accent, selText: C.text, marker: C.text,
-            ramp: [C.accent, C.accent], hotRamp: [C.accent, C.accent, C.warn, C.crit],
-        };
-    })(),
     m_red: {
         name: 'M Red',
         bg: '#050506', panelTop: '#17181c', panelBottom: '#0d0d10', panelEdge: '#2a2b31',

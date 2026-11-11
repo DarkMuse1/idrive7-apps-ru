@@ -37,7 +37,6 @@
 const { mix, ramp, withAlpha } = require('./canvas');
 const { makeLayer, dropLayer } = require('./record');
 const { getLanguage, t: localizeLabel } = require('./i18n');
-const clock = require('./clock');
 const upperText = (value) => localizeLabel(String(value)).toUpperCase();
 
 const isNum = (x) => typeof x === 'number' && isFinite(x);
@@ -120,8 +119,7 @@ const col = (t, c, dflt) => (c ? t[c] || c : dflt);
 function panel(cv, t, x, y, w, h, title) { return box(cv, t, x, y, w, stretch(cv, y, h), title); }
 /**
  * Height of a panel at y: one down to the page's bottom goes on down to the screen's where there is room
- * (cv.extra: display.js, only where the kit runs the screen with no bar under the page; else 0 and the
- * panel is h). (read only then: a page whose panels all end higher up is centred in the room instead)
+ * (cv.extra: display.js). (read only then: a page whose panels all end higher up is centred in the room instead)
  */
 function stretch(cv, y, h) { return y + h >= 500 && cv.extra ? h + cv.extra : h; }
 function box(cv, t, x, y, w, h, title) {
@@ -367,7 +365,7 @@ function bar(cv, t, x, y, w, h, g) {
  * g.panel = false: no panel / title (just the bar in x, y, w, h).
  */
 function segBar(cv, t, x, y, w, h, g) {
-    if (g.panel !== false) panel(cv, t, x, y, w, h, g.label);
+    if (g.panel !== false) { h = stretch(cv, y, h); box(cv, t, x, y, w, h, g.label); }   // (the bar grows with its panel)
     const min = g.min || 0, max = g.max, v = g.value, sv = sm(g, 'seg|' + x + '|' + y, v), step = g.step || (max - min) / 16, SL = 18;
     const hot = g.ramp === 'hot', lim = g.limit == null ? max : g.limit, over = hot && isNum(v) && v >= lim;
     const base = g.color ? t[g.color] || g.color : t.accent;
@@ -378,7 +376,8 @@ function segBar(cv, t, x, y, w, h, g) {
         if (g.unit) cv.text(' ' + g.unit, x + w - 24, y + 60, 26, t.dim, { align: 'right' });
     }
     const bx = x + (g.panel !== false ? 24 : 0), bw = w - (g.panel !== false ? 48 : 0) - SL;
-    const y0 = g.panel !== false ? y + 80 : y, y1 = g.panel !== false ? y + Math.max(130, h - 82) : y + h;
+    // (in a panel: the scale's labels end ~20 px over its bottom, as other panels' last lines do)
+    const y0 = g.panel !== false ? y + 80 : y, y1 = g.panel !== false ? y + Math.max(130, h - 64) : y + h;
     const X = (val) => bx + clamp((val - min) / (max - min), 0, 1) * bw;
     const band = (a, b, c, pad) => {
         pad = pad || 0; const xa = X(a), xb = X(b);
@@ -412,39 +411,28 @@ function segBar(cv, t, x, y, w, h, g) {
 }
 
 /* ---------------- tiles / readouts ---------------- */
-/** Stat tile: label, big value + unit, optional history trace.
- * historyGaps breaks the trace at missing samples without compressing time.
- */
+/** Stat tile: label, big value + unit, optional history trace. */
 function stat(cv, t, x, y, w, h, g) {
-    panel(cv, t, x, y, w, h, g.label);
+    // the trace and the sub line follow a stretched panel's bottom (hb); sizes keep to the tile's own h
+    const hb = stretch(cv, y, h);
+    box(cv, t, x, y, w, hb, g.label);
     const v = g.value, c = zoneColor(t, g, v, g.color ? t[g.color] || g.color : t.accent);
     const vcol = zoneColor(t, g, v, g.valueColor ? t[g.valueColor] || g.valueColor : t.text);
-    const hist = (g.history || []).filter(isNum);
+    const hist = (g.history || []).filter(isNum), size = g.size || Math.min(96, h * 0.42), vy = y + 52 + size * 0.78;
     if (hist.length > 2 && h > 150) {
-        const hx = x + 18, hw = w - 36, hy = y + h - (g.sub ? 44 : 18), hh = Math.min(60, h * 0.25);
+        // (the trace stays under the value: at most up to 8 px under its baseline)
+        const hx = x + 18, hw = w - 36, hy = y + hb - (g.sub ? MARGIN + 28 : MARGIN), hh = Math.min(60, h * 0.25, hy - vy - 8);
         let lo = Math.min.apply(null, hist), hi = Math.max.apply(null, hist);
         if (hi - lo < 1e-6) { lo -= 1; hi += 1; }
         const pts = g.history.map((p, i) => [hx + (i / Math.max(1, g.history.length - 1)) * hw, isNum(p) ? hy - ((p - lo) / (hi - lo)) * hh : hy]);
-        const draw = points => {
-            if (points.length < 2) return;
-            cv.fillUnder(points, hy, withAlpha(c, 0.16));
-            cv.polyline(points, 2.5, withAlpha(c, 0.85));
-        };
-        if (g.historyGaps) {
-            let segment = [];
-            pts.forEach((point, i) => {
-                if (isNum(g.history[i])) segment.push(point);
-                else { draw(segment); segment = []; }
-            });
-            draw(segment);
-        } else draw(pts);
+        cv.fillUnder(pts, hy, withAlpha(c, 0.16));
+        cv.polyline(pts, 2.5, withAlpha(c, 0.85));
     }
-    const size = g.size || Math.min(96, h * 0.42);
     const vs = fmt(v, g.decimals);
     const vw = cv.textWidth(vs, size, { font: 'num' });
-    cv.text(vs, x + 18, y + 52 + size * 0.78, size, isNum(v) ? vcol : t.dim, { font: 'num' });
-    if (g.unit) cv.text(g.unit, x + 26 + vw, y + 52 + size * 0.78, 28, t.dim);
-    if (g.sub) cv.text(g.sub, x + 18, y + h - 16, 22, t.dim, { spacing: 0.5 });
+    cv.text(vs, x + 18, vy, size, isNum(v) ? vcol : t.dim, { font: 'num' });
+    if (g.unit) cv.text(g.unit, x + 26 + vw, vy, 28, t.dim);
+    if (g.sub) cv.text(g.sub, x + 18, y + hb - MARGIN, 22, t.dim, { spacing: 0.5 });
 }
 
 /**
@@ -573,8 +561,6 @@ function table(cv, t, x, y, w, cols, rows, g) {
             if (cell == null) return;
             const txt = typeof cell === 'object' ? cell.text : cell, cc = typeof cell === 'object' && cell.color ? col(t, cell.color, t.text) : col(t, c.color, t.text);
             const al = c.align || 'left', tx = al === 'right' ? xs[i] + c.w - 8 : al === 'center' ? xs[i] + c.w / 2 : xs[i];
-            // g.middle (ported from the upstream kit): the text in the row's middle, for taller rows; without it
-            // at 0.68 of the row's height, as before
             cv.text(String(txt), tx, ry + (g.middle ? rh / 2 + (c.size || sz) * 0.36 : rh * 0.68), c.size || sz, cc, { align: al, font: (typeof cell === 'object' && cell.font) || c.font || 'label' });
         });
     });
@@ -686,8 +672,7 @@ function tabWidths(cv, names, size, opt, min, pad, room, pad0) {
     return tw.map((w) => w + p);
 }
 function frame(cv, t, tabs, sel, badges) {
-    cv.frameTabs = { tabs: tabs || [], sel, badges: (badges || []).filter(Boolean) };
-    if (cv.chrome) { cv.chrome.tabs = cv.frameTabs; return; }
+    if (cv.chrome) { cv.chrome.tabs = { tabs: tabs || [], sel, badges: (badges || []).filter(Boolean) }; return; }
     const W = cv.w, S = t.sel || t.accent;
     cv.fillRect(0, 0, W, BAR_H, t.bg);
     cv.fillRect(0, 0, W, BAR_H, withAlpha('#ffffff', 0.07));
@@ -695,7 +680,7 @@ function frame(cv, t, tabs, sel, badges) {
     const opt = { align: 'center', font: 'bold', spacing: 1.5 };
     const live = (badges || []).filter(Boolean);
     const labels = (tabs || []).map((n) => upperText(n));
-    const badgesW = live.reduce((a, b) => a + Math.max(24 * 3.5, cv.textWidth(b.text, 18, opt) + 24, b.minWidth || 0) + 24 * 0.4, 0);
+    const badgesW = live.reduce((a, b) => a + Math.max(24 * 3.5, cv.textWidth(b.text, 18, opt) + 24) + 24 * 0.4, 0);
     const widths = tabWidths(cv, labels, 20, opt, 150, 48, W - 32 - badgesW, 20);
     let x = 16;
     cv.tabRects = [];
@@ -718,7 +703,7 @@ function badgeRow(cv, t, xr, y, h, size, badges) {
     const opt = { align: 'center', font: 'bold', spacing: 1.5 };
     let bx = xr;
     badges.forEach((b) => {
-        const bw = Math.max(h * 3.5, cv.textWidth(b.text, size, opt) + h, b.minWidth || 0), c = t[b.color] || b.color || t.warn;
+        const bw = Math.max(h * 3.5, cv.textWidth(b.text, size, opt) + h), c = t[b.color] || b.color || t.warn;
         cv.roundRect(bx - bw, y, bw, h, h * 0.2, withAlpha(c, 0.2));
         cv.text(b.text, bx - bw / 2, y + h / 2 + size * 0.36, size, c, opt);
         bx -= bw + h * 0.4;
@@ -833,10 +818,8 @@ function menuBar(cv, t, x, y, w, h, buttons, focus, variant, flash) {
 }
 
 /**
- * A button on the page: a pill with its label, pressed by a tap or the controller (cv.target). Drawn only
- * where the kit runs the screen (cv.own, display.js: renderer 2.x / mgu-render/1 with touch, full-screen
- * layout; the app's bar button then leaves the bar, ctx.hideButton). Elsewhere it draws nothing and
- * returns 0: the HMI's bar keeps the button.
+ * A button on the page: a pill with its label, pressed by a tap or the controller (cv.target). Drawn
+ * only where the kit runs the screen (display.js: the app's bar button then leaves the bar, hideButton).
  * opts: { key (default: the label), color (a warning colour, for resets), primary (filled), busy (drawn
  * dimmed, nothing to press), confirm (a reset: the first press asks, Confirm pressed within 5 s runs it) }.
  * Returns the button's width.
@@ -849,24 +832,22 @@ function button(cv, t, x, y, w, h, label, run, opts) {
     let o = opts || {};
     if (!cv.own) return 0;              // elsewhere the HMI's bar has the button
     if (o.confirm && run) {
-        // (the window on kit/clock.js: the head unit sets its wall clock after start-up)
-        const key = o.key || label, act = run, live = () => armed.has(key) && clock.now() - armed.get(key) < 5000;
+        const key = o.key || label, act = run, live = () => armed.has(key) && Date.now() - armed.get(key) < 5000;
         if (live()) { label = 'Confirm'; o = Object.assign({}, o, { color: t.crit, primary: true }); }
         run = () => {
             if (live()) { armed.delete(key); if (onArmed) onArmed(); return act(); }
-            armed.set(key, clock.now());
+            armed.set(key, Date.now());
             if (onArmed) { onArmed(); setTimeout(onArmed, 5050); }
             return null;
         };
     }
     const S = t.sel || t.accent, c = o.color || S;
-    const text = upperText(label);       // (translated first, as the tabs: t() finds no row for an upper-cased text)
-    if (!w) w = Math.max(h * 3, cv.textWidth(text, h * 0.4, { font: 'bold', spacing: 1.5 }) + h * 1.2);
+    if (!w) w = Math.max(h * 3, cv.textWidth(String(label).toUpperCase(), h * 0.4, { font: 'bold', spacing: 1.5 }) + h * 1.2);
     cv.roundRect(x, y, w, h, h / 2, o.primary ? withAlpha(c, o.busy ? 0.35 : 0.85) : withAlpha('#ffffff', 0.07));
     if (!o.primary) cv.strokeRoundRect(x, y, w, h, h / 2, 1.5, withAlpha(o.color || '#ffffff', o.busy ? 0.25 : o.color ? 0.75 : 0.3));
-    cv.text(text, x + w / 2, y + h / 2 + h * 0.15, h * 0.4, o.primary ? '#ffffff' : o.busy ? t.dim : o.color || t.text,
+    cv.text(String(label).toUpperCase(), x + w / 2, y + h / 2 + h * 0.15, h * 0.4, o.primary ? '#ffffff' : o.busy ? t.dim : o.color || t.text,
         { align: 'center', font: 'bold', spacing: 1.5 });
-    if (!o.busy && run && cv.target) cv.target(x, y, w, h, run, o.key || label);
+    if (!o.busy && run) cv.target(x, y, w, h, run, o.key || label);
     return w;
 }
 
