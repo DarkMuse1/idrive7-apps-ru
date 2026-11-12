@@ -4,8 +4,8 @@
 // Node 8 / stock HU Node, launched by the existing root systemd component.
 const fs = require('fs'), path = require('path'), net = require('net');
 const crypto = require('crypto'), cp = require('child_process');
-const IMAGE_SHA256 = '057bf1d9642c49a280814c55c77c288e4af5f9b03777067d21e9f0ba455d0a72';
-const IMAGE_SIZE = 288928;
+const IMAGE_SHA256 = 'c20c6553df97798fe8c8698569e6ac333b2fba6800873268fccdc75cc7573593';
+const IMAGE_SIZE = 293032;
 const AUTH_SHA256 = '025d48c1f719080b61cbc981b5d0fcc55251b749c507644bc30ca5e736c964dd';
 const digest = data => crypto.createHash('sha256').update(data).digest('hex');
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
