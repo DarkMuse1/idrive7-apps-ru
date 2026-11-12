@@ -1,0 +1,44 @@
+{
+  "bold": {
+    "sizes": [
+      24,
+      32,
+      44,
+      64
+    ],
+    "cacheKey": "ru-eeb6c4c1cabe6629"
+  },
+  "gear": {
+    "sizes": [
+      200,
+      300
+    ],
+    "cacheKey": "ru-517c634891c42064"
+  },
+  "label": {
+    "sizes": [
+      18,
+      24,
+      32,
+      44
+    ],
+    "cacheKey": "ru-bd78bf1a21647092"
+  },
+  "light": {
+    "sizes": [
+      32,
+      64,
+      110
+    ],
+    "cacheKey": "ru-e2e64fd0fa48e7e0"
+  },
+  "num": {
+    "sizes": [
+      40,
+      64,
+      96,
+      150
+    ],
+    "cacheKey": "ru-ba5f624c5ca9a3fc"
+  }
+}

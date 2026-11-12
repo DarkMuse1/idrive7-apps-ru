@@ -1,0 +1,421 @@
+Cluster Centre	Центр приборной панели
+Cluster Info	Данные на приборной панели
+Cluster Layouts	Оформление приборной панели
+Cluster Themes	Темы приборной панели
+HUD Widgets	Виджеты проекционного дисплея
+Pages of engine, gearbox and eDrive data, warm-up, turbo cool-down, a shift light and a 0-60 timer in the centre of the factory cluster, drawn by the cluster itself	Данные двигателя, коробки передач и eDrive, прогрев, охлаждение турбины, индикатор переключения и таймер разгона в центре штатной приборной панели
+A small panel of up to three live values (battery power from eDrive Live, battery charge, battery, oil and coolant temperature) over the Waze map in the cluster or on the HUD, and turn signal arrows on the HUD	До трёх текущих показателей поверх карты Waze на приборной панели или проекционном дисплее: мощность и заряд батареи, температуры батареи, масла и охлаждающей жидкости; стрелки поворотников на проекционном дисплее
+Your own layout on the whole instrument cluster (round dials, gear, temperatures), drawn by the cluster itself	Собственное оформление всей приборной панели: шкалы, передача и температуры
+Redraws the instrument cluster: GT3 race dash, M-style, Sport, Minimal, Roadster, Track, Drag, Rally, Retro 80s, Cruise or Dyno (BMW-coloured readout tiles), with shift lights, boost, temps, tyres, a G-meter and a 0-60 timer	Темы приборной панели: GT3, M, Спорт, Минимализм, Родстер, Трек, Дрэг, Ралли, Ретро 80-х, Круиз и Динамометр; индикаторы переключения, наддув, температуры, шины, перегрузки и таймер разгона
+Gear, shift lights, boost, oil, coolant and intake temperatures, a G-meter and trip figures on the windshield HUD, in Classic, M or Night themes	Передача, индикаторы переключения, наддув, температуры масла, охлаждающей жидкости и впуска, перегрузки и данные поездки на проекционном дисплее; темы Классическая, M и Ночная
+Show in the cluster	Показать на приборной панели
+Show on the cluster	Показать на приборной панели
+Arm 0-60 timer	Подготовить таймер разгона 0–60
+Vehicle	Автомобиль
+Auto (found from the car)	Автоопределение по автомобилю
+Plug-in hybrid (charge, electric range, battery power)	Подключаемый гибрид: заряд, электрический запас хода, мощность батареи
+Petrol or diesel (boost, timing, torque, fuel rail)	Бензин или дизель: наддув, зажигание, момент, топливная рампа
+Fuel tank size	Объём топливного бака
+Battery power (kW)	Мощность батареи (кВт)
+Fast: between eDrive Live's readings from the car's speed and acceleration	Быстро: между показаниями eDrive Live, по скорости и ускорению автомобиля
+eDrive Live's readings only	Только показания eDrive Live
+Show in the cluster centre	Показывать в центре приборной панели
+Page: Temperatures	Страница: температуры
+Page: Fuel and boost	Страница: топливо и наддув
+Page: Warm-up	Страница: прогрев
+Page: Turbo cool-down	Страница: охлаждение турбины
+Page: eDrive	Страница: eDrive
+Page: Engine on / off	Страница: работа двигателя
+Page: Steering and yaw	Страница: руль и рыскание
+Page: 0-60 and quarter mile	Страница: 0–60 и четверть мили
+Page: Custom page 1	Страница: своя страница 1
+Page: Custom page 2	Страница: своя страница 2
+Change page by itself	Автоматическое переключение страниц
+No (Next page in the app)	Нет: кнопкой «Следующая страница»
+Every 5 s	Каждые 5 с
+Every 10 s	Каждые 10 с
+Every 15 s	Каждые 15 с
+Every 30 s	Каждые 30 с
+Every minute	Каждую минуту
+Look	Оформление
+Like the factory cluster (thin, no boxes)	Как штатная панель: тонкие линии, без рамок
+Modern (glass cards, bold, glowing)	Современное: прозрачные карточки, крупный шрифт и свечение
+Size in the centre	Размер в центре
+Between the stock readouts (smaller)	Между штатными показателями: компактно
+The whole middle (the stock speed and range cover its edges)	Весь центр: штатная скорость и запас хода перекрывают края
+Tiles on the built-in pages	Показатели на встроенных страницах
+Number and bar	Число и полоса
+Arc gauge	Дуговая шкала
+Number only	Только число
+Blue	Синий
+White	Белый
+Orange	Оранжевый
+Red	Красный
+Green	Зелёный
+Number size	Размер чисел
+Large	Крупный
+Shift light and gear at the top	Индикатор переключения и передача сверху
+Shift light: starts at	Индикатор переключения: начало
+Shift light: flashes at	Индикатор переключения: мигание
+Cool-down countdown on every page	Отсчёт охлаждения на всех страницах
+Oil warm at (°C)	Масло прогрето при (°C)
+Rev limit while cold	Предел оборотов холодного двигателя
+Rev limit when warm	Предел оборотов прогретого двигателя
+Cool-down: hard driving above	Охлаждение: высокая нагрузка выше
+Speed and distance unit	Единицы скорости и расстояния
+mph and miles	миль/ч и мили
+km/h and km	км/ч и км
+Nm	Н·м
+kgm	кгс·м
+Warn: oil above (°C)	Предупреждение: масло выше (°C)
+Warn: coolant above (°C)	Предупреждение: охлаждающая жидкость выше (°C)
+Warn: intake air above (°C)	Предупреждение: воздух впуска выше (°C)
+Warn: gearbox above (°C)	Предупреждение: коробка передач выше (°C)
+Warn: battery above (°C)	Предупреждение: батарея выше (°C)
+Warn: low pressure fuel below (bar)	Предупреждение: низкое давление топлива ниже (бар)
+Custom page 1: slots	Своя страница 1: число показателей
+Custom page 1: tiles	Своя страница 1: вид показателей
+Custom page 1: slot 1	Своя страница 1: показатель 1
+Custom page 1: slot 2	Своя страница 1: показатель 2
+Custom page 1: slot 3	Своя страница 1: показатель 3
+Custom page 1: slot 4	Своя страница 1: показатель 4
+Custom page 1: slot 5	Своя страница 1: показатель 5
+Custom page 1: slot 6	Своя страница 1: показатель 6
+Custom page 2: slots	Своя страница 2: число показателей
+Custom page 2: tiles	Своя страница 2: вид показателей
+Custom page 2: slot 1	Своя страница 2: показатель 1
+Custom page 2: slot 2	Своя страница 2: показатель 2
+Custom page 2: slot 3	Своя страница 2: показатель 3
+Custom page 2: slot 4	Своя страница 2: показатель 4
+Custom page 2: slot 5	Своя страница 2: показатель 5
+Custom page 2: slot 6	Своя страница 2: показатель 6
+Nothing	Ничего
+Boost (actual)	Фактический наддув
+Boost (target)	Целевой наддув
+Lateral g	Поперечная перегрузка
+Longitudinal g	Продольная перегрузка
+Battery power	Мощность батареи
+Electric range	Электрический запас хода
+Fuel range	Запас хода на топливе
+Time zone (the clock)	Часовой пояс
+Time zone (clock)	Часовой пояс
+US Eastern	США: восточное время
+US Central	США: центральное время
+US Mountain	США: горное время
+Arizona (no DST)	Аризона: без перехода на летнее время
+US Pacific	США: тихоокеанское время
+Alaska	Аляска
+Hawaii	Гавайи
+Atlantic	Атлантическое время
+UK / Ireland / Portugal	Великобритания / Ирландия / Португалия
+Central Europe	Центральная Европа
+Eastern Europe	Восточная Европа
+Korea / Japan (UTC+9)	Корея / Япония (UTC+9)
+Clock	Часы
+12-hour	12-часовой
+24-hour	24-часовой
+Electric range when full (until the car's own is found)	Запас хода при полном заряде: до получения данных автомобиля
+Show the panel	Показывать панель
+Where the Waze map is	Рядом с картой Waze
+Always on the HUD	Всегда на проекционном дисплее
+Panel position	Положение панели
+Bottom of the map	Внизу карты
+Top of the map	Вверху карты
+Panel: first item	Панель: первый показатель
+Panel: second item	Панель: второй показатель
+Panel: third item	Панель: третий показатель
+Battery power (kW, from eDrive Live)	Мощность батареи (кВт, из eDrive Live)
+Battery charge (%)	Заряд батареи (%)
+Boost pressure (car signal)	Давление наддува: сигнал автомобиля
+Engine speed (rpm)	Обороты двигателя (об/мин)
+Bar after the kW	Полоса после мощности
+On the cluster only	Только на приборной панели
+On the cluster and HUD	На приборной панели и проекционном дисплее
+Thin kW bar along the bottom	Тонкая полоса мощности внизу
+Turn signal arrows on the HUD	Стрелки поворотников на проекционном дисплее
+HUD panel and arrows: brightness	Яркость панели и стрелок проекционного дисплея
+HUD panel and arrows: dimmer at night	Затемнять панель и стрелки проекционного дисплея ночью
+Logs	Журналы
+Off (stock cluster)	Выкл.: штатная приборная панель
+Analog sport	Спортивные стрелочные шкалы
+Digital round	Круглые цифровые шкалы
+Modern wide	Современная широкая панель
+Digital dash	Цифровая панель
+Freedom	Свободная
+Retro	Ретро
+Track	Трек
+Pulse	Пульс
+Classic M	Классическая M
+Follow the drive programme (S / M: sport)	По программе движения: S / M — спорт
+Efficient	Экономичная
+Background	Фон
+Pure black (hides the cluster's gear box)	Чёрный: скрывает рамку передачи
+Tinted, as designed	Цветной: по оформлению темы
+Cluster	Приборная панель
+Standard (X5 and other G models)	Стандартная: X5 и другие модели G
+M car: two more boxes in the middle, readings moved round them	Модель M: ещё два поля в центре, показатели вокруг них
+Bottom strip	Нижняя полоса
+The car's own (ranges, drive mode and gear from the car; the dials centred above it)	Штатная: запас хода, режим и передача; шкалы над ней
+The layout's (full screen)	Полоса темы: на весь экран
+Draw around the gear box (Digital dash)	Обходить рамку передачи: цифровая панель
+Off: background under the box	Выкл.: фон под рамкой
+On: nothing under the box (shows the cluster's frame)	Вкл.: показывать штатную рамку
+Frame behind the gear box	Фон рамки передачи
+Off: the box blends into the black background	Выкл.: рамка сливается с чёрным фоном
+On: a grey frame round the box	Вкл.: серая рамка
+Centre of the cluster	Центр приборной панели
+Readings (gear, ranges, temperatures)	Показатели: передача, запас хода, температуры
+Waze (Waze on cluster drawn over the layout, else the stock map)	Waze поверх темы; иначе штатная карта
+Stock (the stock centre content)	Штатное содержимое центра
+Red zone from	Начало красной зоны
+Needle sweep when it comes up	Проход стрелок при включении
+All settings	Все настройки
+Theme (when not by drive mode)	Тема: без привязки к режиму движения
+Off (BMW's own cluster)	Выкл.: штатная панель BMW
+Roadster	Родстер
+Drag	Дрэг
+Rally	Ралли
+Retro 80s	Ретро 80-х
+Cruise	Круиз
+Dyno	Динамометр
+Calibration grid	Калибровочная сетка
+Map calibration	Калибровка карты
+Change with SPORT / COMFORT / ECO PRO	По режиму SPORT / COMFORT / ECO PRO
+In Comfort	В режиме Comfort
+In Sport	В режиме Sport
+In Eco Pro	В режиме Eco Pro
+Show Waze map inside the theme	Показывать карту Waze внутри темы
+mph, °F, psi	миль/ч, °F, psi
+km/h, °C, bar	км/ч, °C, бар
+Redline (shift light)	Обороты переключения: индикатор
+Show boost	Показывать наддув
+Leave BMW's bottom strip clear	Оставить штатную нижнюю полосу BMW
+Oil temperature warning	Предупреждение о температуре масла
+Coolant temperature warning	Предупреждение о температуре охлаждающей жидкости
+Boost warning	Предупреждение о наддуве
+G-meter: swap left / right	Перегрузки: поменять лево / право
+G-meter: brake on top	Перегрузки: торможение сверху
+G-meter range	Диапазон перегрузок
+G-meter trail	След на графике перегрузок
+1 s	1 с
+2 s	2 с
+4 s	4 с
+Night colours	Ночные цвета
+Auto (dimmer after sunset)	Автоматически: темнее после заката
+Badge	Эмблема модели
+BMW lettering on the badge	Надпись BMW на эмблеме
+Auto (until the car sends data)	Автоматически: до получения данных автомобиля
+Layout (when not by drive mode)	Компоновка: без привязки к режиму движения
+Off (BMW's own HUD)	Выкл.: штатный проекционный дисплей BMW
+Daily	Повседневная
+Shift only	Только переключение
+Window calibration	Калибровка области
+In Comfort (Daily by default; BMW keeps its speed bottom-left)	Comfort: по умолчанию «Повседневная», штатная скорость BMW слева внизу
+In Sport (off by default: BMW's Sport HUD takes the middle)	Sport: по умолчанию выкл., штатная проекция Sport занимает центр
+In Eco Pro (off by default: BMW's own HUD)	Eco Pro: по умолчанию штатная проекция BMW
+Theme	Тема
+Auto (Night after sunset)	Автоматически: ночная после заката
+Classic	Классическая
+Night	Ночная
+Daytime theme for Auto	Дневная тема для автоматического режима
+HUD position, left / right	Проекция: левее / правее
+HUD position, up / down	Проекция: выше / ниже
+HUD size	Размер проекции
+Cold-engine rev guard (Redline)	Ограничение индикатора оборотов при непрогретом двигателе
+Show clock	Показывать часы
+Show oil temperature	Показывать температуру масла
+Show coolant temperature	Показывать температуру охлаждающей жидкости
+Show boost (Sport layout)	Показывать наддув: спортивная компоновка
+WARM-UP	ПРОГРЕВ
+TURBO	ТУРБИНА
+BOOST	НАДДУВ
+BATTERY	БАТАРЕЯ
+TIME	ВРЕМЯ
+TORQUE	МОМЕНТ
+COOLANT	ОХЛ. ЖИДК.
+INTAKE	ВПУСК
+OUTSIDE	НАРУЖНАЯ
+ELECTRIC	ЭЛЕКТРО
+CHARGE	ЗАРЯД
+LAT G	ПОПЕР. G
+LONG G	ПРОДОЛ. G
+LAST SHIFT	ПЕРЕКЛЮЧЕНИЕ
+SHIFT AT	ПЕРЕКЛ. ПРИ
+FUEL RANGE	ЗАПАС ТОПЛИВА
+Warm-up	Прогрев
+Turbo cool-down	Охлаждение турбины
+Fuel and boost	Топливо и наддув
+Engine on / off	Работа двигателя
+Steering and yaw	Руль и рыскание
+Custom page 1	Своя страница 1
+Custom page 2	Своя страница 2
+Cold	Холодный
+Hot	Горячий
+Hybrid battery (plug-in hybrids)	Батарея подключаемого гибрида
+Tyre pressure, front left	Давление шины: передняя левая
+Tyre pressure, front right	Давление шины: передняя правая
+Tyre pressure, rear left	Давление шины: задняя левая
+Tyre pressure, rear right	Давление шины: задняя правая
+Tyre temperature, front left	Температура шины: передняя левая
+Tyre temperature, front right	Температура шины: передняя правая
+Tyre temperature, rear left	Температура шины: задняя левая
+Tyre temperature, rear right	Температура шины: задняя правая
+Cornering g	Поперечная перегрузка
+Braking / accel g	Торможение / разгон
+Last shift	Последнее переключение
+Shift point	Момент переключения
+Torque, % of max	Момент: % от максимального
+Power, % of max	Мощность: % от максимальной
+Front left	Передняя левая
+Front right	Передняя правая
+Rear left	Задняя левая
+Rear right	Задняя правая
+Engine speed	Обороты двигателя
+Boost	Наддув
+Engine torque	Крутящий момент
+Intake air temperature	Температура воздуха впуска
+Outside temperature	Наружная температура
+Fuel level	Уровень топлива
+Battery charge	Заряд батареи
+Battery temperature	Температура батареи
+FREE	БЕСПЛАТНО
+Free and open source. If you paid for this, ask for a refund.	Бесплатное приложение с открытым кодом. Если вы заплатили за него, запросите возврат.
+Official build	Официальная сборка
+Modified build	Изменённая сборка
+shifts)	переключений)
+control unit(s) - press again within 5 s	блоков — нажмите ещё раз в течение 5 с
+control unit(s) - scanning again	блоков — повторное сканирование
+MODIFIED BUILD	ИЗМЕНЁННАЯ СБОРКА
+this is free	бесплатное приложение
+official build, key	официальная сборка, ключ
+why the engine started	причина запуска двигателя
+In the cluster	На приборах
+off (stock map)	выкл.: штатная карта
+waiting: a layout shows (set its centre to these pages)	ожидание: активна тема; выберите эти страницы для её центра
+none chosen	не выбрано
+every	каждые
+with Next page	кнопкой «Следующая страница»
+Cluster renderer	Отрисовщик
+Engine units (UDS)	Блоки двигателя (UDS)
+Shared by apps	Общие данные
+0-60 timer	Таймер разгона 0–60
+Signals found	Найдено сигналов
+press Signals	нажмите «Сигналы»
+Signals on this car for steering, yaw and engine starts	Сигналы руля, рыскания и запуска двигателя этого автомобиля
+page	страница
+centre	центр
+layers	слоёв
+refused	отклонено
+boost pressure	давление наддува
+car signal (sport display)	сигнал автомобиля: спортивные приборы
+car signal	сигнал автомобиля
+Nothing to show now: no power from an app, and no value chosen has a reading	Нет данных для отображения: приложение не передаёт мощность, выбранные показатели пока отсутствуют
+Waze map	Карта Waze
+Apps providing	Приложения — источники данных
+no reading	нет показаний
+Turn signals	Поворотники
+turn signals	поворотники
+Day / night	День / ночь
+day / night	день / ночь
+Driver profile	Профиль водителя
+driver profile	профиль водителя
+none received	данные не получены
+none read yet	данные ещё не прочитаны
+No raw turn signal or day / night value received yet.	Исходные значения поворотников и режима день / ночь ещё не получены.
+cluster renderer status	состояние отрисовщика приборной панели
+no answer yet	ответа пока нет
+data now	текущие данные
+raw signals	исходные сигналы
+driving assistant (Modern wide, Sport)	ассистент движения: широкая современная и спортивная темы
+not started (Modern wide or Sport not shown yet)	не запущен: широкая современная или спортивная тема ещё не открывалась
+data status	состояние данных
+fast power (the kW gauges)	быстрые данные мощности: шкалы кВт
+shown now	сейчас отображается
+eDrive Live's reading as it is	исходные показания eDrive Live
+gauges	приборы
+every car sample	каждое показание автомобиля
+fits	аппроксимаций
+cruise (head-up display)	круиз-контроль: проекционный дисплей
+nothing yet	данных пока нет
+range and charge signals	сигналы запаса хода и заряда
+power and consumption signals	сигналы мощности и расхода
+cruise control signals	сигналы круиз-контроля
+time and date signals	сигналы времени и даты
+cluster-render log	журнал cluster-render
+this app's log	журнал этого приложения
+Cluster Centre log	журнал центра приборной панели
+Logs: photograph each code (page	Журналы: сфотографируйте каждый код, страница
+codes	коды
+then press Logs for the next	затем нажмите «Журналы» для следующего
+The full logs are also on the USB stick	Полные журналы также записаны на USB-накопитель
+Plug in a USB stick and press Logs again from the start for the full logs as a file	Подключите USB-накопитель и снова откройте «Журналы», чтобы сохранить полный журнал в файл
+What the car sends for the drive mode and the ranges (photograph this in each mode)	Сигналы режима движения и запаса хода: сфотографируйте в каждом режиме
+Read as	Определено как
+steering	руль
+yaw	рыскание
+What the cluster shows besides this app (the renderer's report; photograph it with a layout up)	Что ещё отображает приборная панель: отчёт отрисовщика; сфотографируйте при включённой теме
+Signals on this car for ranges, fuel and charge	Сигналы запаса хода, топлива и заряда этого автомобиля
+On the cluster	На приборах
+Off - the stock cluster shows (press Show on the cluster)	Выключено: штатная панель; нажмите «Показать на приборной панели»
+Showing	Отображается
+colours	цвета
+Waiting for live car data	Ожидание данных автомобиля
+Car data	Данные автомобиля
+not live	нет текущих данных
+live	текущие данные
+diagnostic link	диагностическая связь
+Drive mode (car)	Режим движения
+Range (car)	Запас хода
+raw	исходное значение
+Cluster failed to start	Не удалось запустить оформление приборной панели
+HUD failed to start	Не удалось запустить виджеты проекционного дисплея
+race dash	гоночная
+M8 style	стиль M8
+just the speed	скорость
+round dials	круглые
+tyres + temps	шины и t°
+rev arc · G-meter	обороты и g
+80s digital	цифры 80-х
+calm · trip	поездка
+safety tiles	показатели
+gear · clock · oil	передача · часы · масло
+rev bar · temps · boost	обороты · температуры · наддув
+shift lights · shift score	индикаторы и оценка переключения
+round BMW speed	круглая шкала скорости BMW
+lights · gear	индикаторы · передача
+boost · peak	наддув · максимум
+oil · coolant · intake	масло · охлаждающая жидкость · впуск
+lights · G-meter	индикаторы · перегрузки
+range · trip	запас хода · поездка
+amber digital	цифровая янтарная тема
+Themes	Темы
+Layouts	Компоновки
+Position	Положение
+Otherwise	Иначе
+BMW's own	Штатная
+BMW's own cluster	Штатная панель
+BMW's own HUD	Штатная проекция
+NOW SHOWING	АКТИВНАЯ ТЕМА
+Change with the drive mode	По режиму движения
+LAYOUTS · TAP A DRIVE MODE TO GIVE IT THAT LAYOUT	КОМПОНОВКИ: ВЫБЕРИТЕ ВАРИАНТ ДЛЯ КАЖДОГО РЕЖИМА
+Tap to turn the HUD off	Нажмите, чтобы выключить проекцию
+HUD OFF	Проекция выкл.
+Cluster OFF	Приборы выкл.
+stock cluster	штатная панель
+stock HUD	штатная проекция
+Live Cockpit	Live Cockpit
+Minimal	Мини
+Alerts	Оповещения
+G-meter	Перегрузки
+slots	полей
+warnings on	предупреждения вкл.
+trail	след
+centred	по центру
+off	выкл.
+connecting	подключение
+not needed yet	пока не требуется
+Values	Показатели
+no Waze on cluster status	нет состояния Waze
+folder	папка
+assumed: none known	предположительно: тип не определён
+readings	показатели

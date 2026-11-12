@@ -1,0 +1,413 @@
+{
+  "id": "cluster_info",
+  "title": "Данные на приборной панели",
+  "description": "До трёх текущих показателей поверх карты Waze на приборной панели или проекционном дисплее: мощность и заряд батареи, температуры батареи, масла и охлаждающей жидкости; стрелки поворотников на проекционном дисплее",
+  "version": "1.6.8",
+  "startType": "autostart",
+  "vendor": "custom",
+  "loggingId": "OA9E",
+  "iconGlyph": "gauge",
+  "signals": {
+    "de.bmw.infrastructure.VehicleCondition": {
+      "VehicleCondition": "s"
+    },
+    "de.bmw.infotainment.vehicle.CDS": {
+      "statusEngineTemperature": "rs",
+      "statusEngineSpeed2": "rs"
+    },
+    "de.bmw.body.Light": {
+      "StatusFunctionsIndicators": "s",
+      "StatusFunctionsIndicators2": "s"
+    },
+    "de.bmw.infotainment.vehicle.Vehicle": {
+      "statusDayNightChangeOver": "rs"
+    },
+    "de.bmw.infotainment.personalization.SessionManager": {
+      "_instances": "de.bmw.infotainment.personalization.SessionManager",
+      "currentUserAccountReference": "r"
+    },
+    "de.bmw.infotainment.drivingexcitement.FES": {
+      "statusSwitchDriveDynamicSport2": "rs",
+      "statusActualValueTorque2": "rs"
+    }
+  },
+  "screens": [
+    {
+      "name": "MAIN",
+      "kind": "canvas",
+      "title": "Cluster Info",
+      "buttons": [
+        [
+          "BTN_SETTINGS",
+          "Settings"
+        ]
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "key": "show",
+      "label": "Show the panel",
+      "type": "choice",
+      "default": "map",
+      "options": [
+        [
+          "map",
+          "Where the Waze map is"
+        ],
+        [
+          "hud",
+          "Always on the HUD"
+        ],
+        [
+          "off",
+          "Off"
+        ]
+      ]
+    },
+    {
+      "key": "place",
+      "label": "Panel position",
+      "type": "choice",
+      "default": "bottom",
+      "options": [
+        [
+          "bottom",
+          "Bottom of the map"
+        ],
+        [
+          "top",
+          "Top of the map"
+        ]
+      ]
+    },
+    {
+      "key": "slot1",
+      "label": "Panel: first item",
+      "type": "choice",
+      "default": "power",
+      "options": [
+        [
+          "none",
+          "Nothing"
+        ],
+        [
+          "power",
+          "Battery power (kW, from eDrive Live)"
+        ],
+        [
+          "soc",
+          "Battery charge (%)"
+        ],
+        [
+          "battery",
+          "Battery temperature"
+        ],
+        [
+          "oil",
+          "Engine oil temperature"
+        ],
+        [
+          "coolant",
+          "Coolant temperature"
+        ],
+        [
+          "boost",
+          "Boost pressure (car signal)"
+        ],
+        [
+          "rpm",
+          "Engine speed (rpm)"
+        ],
+        [
+          "torque",
+          "Engine torque"
+        ]
+      ]
+    },
+    {
+      "key": "slot2",
+      "label": "Panel: second item",
+      "type": "choice",
+      "default": "battery",
+      "options": [
+        [
+          "none",
+          "Nothing"
+        ],
+        [
+          "power",
+          "Battery power (kW, from eDrive Live)"
+        ],
+        [
+          "soc",
+          "Battery charge (%)"
+        ],
+        [
+          "battery",
+          "Battery temperature"
+        ],
+        [
+          "oil",
+          "Engine oil temperature"
+        ],
+        [
+          "coolant",
+          "Coolant temperature"
+        ],
+        [
+          "boost",
+          "Boost pressure (car signal)"
+        ],
+        [
+          "rpm",
+          "Engine speed (rpm)"
+        ],
+        [
+          "torque",
+          "Engine torque"
+        ]
+      ]
+    },
+    {
+      "key": "slot3",
+      "label": "Panel: third item",
+      "type": "choice",
+      "default": "oil",
+      "options": [
+        [
+          "none",
+          "Nothing"
+        ],
+        [
+          "power",
+          "Battery power (kW, from eDrive Live)"
+        ],
+        [
+          "soc",
+          "Battery charge (%)"
+        ],
+        [
+          "battery",
+          "Battery temperature"
+        ],
+        [
+          "oil",
+          "Engine oil temperature"
+        ],
+        [
+          "coolant",
+          "Coolant temperature"
+        ],
+        [
+          "boost",
+          "Boost pressure (car signal)"
+        ],
+        [
+          "rpm",
+          "Engine speed (rpm)"
+        ],
+        [
+          "torque",
+          "Engine torque"
+        ]
+      ]
+    },
+    {
+      "key": "bar",
+      "label": "Bar after the kW",
+      "type": "choice",
+      "default": "cluster",
+      "options": [
+        [
+          "cluster",
+          "On the cluster only"
+        ],
+        [
+          "on",
+          "On the cluster and HUD"
+        ],
+        [
+          "off",
+          "Never"
+        ]
+      ]
+    },
+    {
+      "key": "underline",
+      "label": "Thin kW bar along the bottom",
+      "type": "choice",
+      "default": "off",
+      "options": [
+        [
+          "off",
+          "Off"
+        ],
+        [
+          "cluster",
+          "On the cluster only"
+        ],
+        [
+          "on",
+          "On the cluster and HUD"
+        ]
+      ]
+    },
+    {
+      "key": "turnSignals",
+      "label": "Turn signal arrows on the HUD",
+      "type": "choice",
+      "default": "on",
+      "options": [
+        [
+          "on",
+          "On"
+        ],
+        [
+          "off",
+          "Off"
+        ]
+      ]
+    },
+    {
+      "key": "hudBrightness",
+      "label": "HUD panel and arrows: brightness",
+      "type": "number",
+      "unit": "%",
+      "default": 100,
+      "steps": [
+        100,
+        75,
+        50
+      ]
+    },
+    {
+      "key": "nightDim",
+      "label": "HUD panel and arrows: dimmer at night",
+      "type": "choice",
+      "default": "on",
+      "options": [
+        [
+          "on",
+          "On"
+        ],
+        [
+          "off",
+          "Off"
+        ]
+      ]
+    },
+    {
+      "key": "tempUnit",
+      "label": "Temperature unit",
+      "type": "choice",
+      "default": "f",
+      "options": [
+        [
+          "f",
+          "Fahrenheit"
+        ],
+        [
+          "c",
+          "Celsius"
+        ]
+      ]
+    },
+    {
+      "key": "torqueUnit",
+      "label": "Torque unit",
+      "type": "choice",
+      "default": "nm",
+      "options": [
+        [
+          "nm",
+          "Nm"
+        ],
+        [
+          "kgm",
+          "kgm"
+        ]
+      ]
+    },
+    {
+      "key": "theme",
+      "label": "Colour theme",
+      "type": "choice",
+      "default": "m_tricolour",
+      "options": [
+        [
+          "m_red",
+          "M Red"
+        ],
+        [
+          "m_tricolour",
+          "M Tricolour"
+        ],
+        [
+          "ice",
+          "Ice White"
+        ],
+        [
+          "amber",
+          "Night Amber"
+        ]
+      ]
+    },
+    {
+      "key": "layout",
+      "label": "Screen layout",
+      "type": "choice",
+      "default": "full",
+      "options": [
+        [
+          "full",
+          "Full screen"
+        ],
+        [
+          "standard",
+          "Standard"
+        ]
+      ]
+    },
+    {
+      "key": "renderer",
+      "label": "Renderer",
+      "type": "choice",
+      "default": "auto",
+      "options": [
+        [
+          "auto",
+          "GPU 60 fps (default)"
+        ],
+        [
+          "software",
+          "Software"
+        ]
+      ]
+    },
+    {
+      "key": "demo",
+      "label": "Demo data",
+      "type": "choice",
+      "default": "off",
+      "options": [
+        [
+          "auto",
+          "Auto"
+        ],
+        [
+          "on",
+          "Always"
+        ],
+        [
+          "off",
+          "Never"
+        ]
+      ]
+    }
+  ],
+  "requires": {
+    "idrive7-renderd": "2.1.7",
+    "mgu-inputgate": "1.0.0"
+  }
+}

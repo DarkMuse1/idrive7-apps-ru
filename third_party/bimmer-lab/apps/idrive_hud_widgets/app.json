@@ -1,0 +1,956 @@
+{
+  "id": "idrive_hud_widgets",
+  "title": "Виджеты проекционного дисплея",
+  "description": "Передача, индикаторы переключения, наддув, температуры масла, охлаждающей жидкости и впуска, перегрузки и данные поездки на проекционном дисплее; темы Классическая, M и Ночная",
+  "version": "0.12.6",
+  "vendor": "custom",
+  "loggingId": "OAH1",
+  "iconGlyph": "HUD",
+  "shared": [
+    "hud.js",
+    "hud_text.js",
+    "hud_data.js",
+    "hud_themes.js",
+    "layouts.js",
+    "shaders.js",
+    "icons.js",
+    "shift_score.js",
+    "sun.js",
+    "cluster_render_client.js",
+    "calibration.js",
+    "visible.js",
+    "page.js",
+    "previews.js",
+    "sensors.js",
+    "waze.js",
+    "badges.js",
+    "screen.js",
+    "runs.js",
+    "tz.js"
+  ],
+  "signals": {
+    "de.bmw.infotainment.vehicle.CDS": {
+      "statusEngineSpeed2": "rs",
+      "statusEngineTemperature": "rs"
+    },
+    "de.bmw.infotainment.vehicle.CDS2": {
+      "statusLongitudinalAccelerationMassCenter": "rs",
+      "statusLateralAccelerationMassCenter": "rs"
+    },
+    "de.bmw.infotainment.vehicle.Vehicle2": {
+      "statusCarSpeed2": "rs"
+    },
+    "de.bmw.infotainment.drivingexcitement.FES": {
+      "statusSwitchDriveDynamicSport2": "rs",
+      "statusActualValueTorque2": "rs",
+      "statusFESVehicleDynamicSwitchHMI": "rs"
+    },
+    "de.bmw.infrastructure.VehicleInformation": {
+      "statusGearboxDrive": "s",
+      "DataPowerTrain2": "s"
+    },
+    "com.harman.infotainment.systemfunctions.tasu.tasu.InternalTasu": {
+      "_instances": "SystemFunctionsInternalTasuInst1",
+      "_methods": [
+        "sendTasuRequest"
+      ],
+      "_broadcasts": [
+        "sendTasuResponse"
+      ]
+    },
+    "de.bmw.infotainment.KombiIF": {
+      "statusRangeTankStatus": "rs"
+    },
+    "de.bmw.infrastructure.EnvironmentalInformation": {
+      "ExteriorTemperature": "s"
+    }
+  },
+  "screens": [
+    {
+      "name": "MAIN",
+      "kind": "canvas",
+      "title": "HUD Widgets",
+      "buttons": [
+        [
+          "BTN_SETTINGS",
+          "All settings"
+        ]
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "key": "hudLayout",
+      "label": "Layout (when not by drive mode)",
+      "type": "choice",
+      "default": "daily",
+      "options": [
+        [
+          "off",
+          "Off (BMW's own HUD)"
+        ],
+        [
+          "daily",
+          "Daily"
+        ],
+        [
+          "sport",
+          "Sport"
+        ],
+        [
+          "redline",
+          "Redline"
+        ],
+        [
+          "minimal",
+          "Minimal"
+        ],
+        [
+          "shiftonly",
+          "Shift only"
+        ],
+        [
+          "boost",
+          "Boost"
+        ],
+        [
+          "warmup",
+          "Warm-up"
+        ],
+        [
+          "track",
+          "Track"
+        ],
+        [
+          "cruise",
+          "Cruise"
+        ],
+        [
+          "retro",
+          "Retro"
+        ],
+        [
+          "grid",
+          "Calibration grid"
+        ],
+        [
+          "wincal",
+          "Window calibration"
+        ]
+      ]
+    },
+    {
+      "key": "byMode",
+      "label": "Change with SPORT / COMFORT / ECO PRO",
+      "type": "bool",
+      "default": true
+    },
+    {
+      "key": "inComfort",
+      "label": "In Comfort (Daily by default; BMW keeps its speed bottom-left)",
+      "type": "choice",
+      "default": "daily",
+      "options": [
+        [
+          "off",
+          "Off (BMW's own HUD)"
+        ],
+        [
+          "daily",
+          "Daily"
+        ],
+        [
+          "sport",
+          "Sport"
+        ],
+        [
+          "redline",
+          "Redline"
+        ],
+        [
+          "minimal",
+          "Minimal"
+        ],
+        [
+          "shiftonly",
+          "Shift only"
+        ],
+        [
+          "boost",
+          "Boost"
+        ],
+        [
+          "warmup",
+          "Warm-up"
+        ],
+        [
+          "track",
+          "Track"
+        ],
+        [
+          "cruise",
+          "Cruise"
+        ],
+        [
+          "retro",
+          "Retro"
+        ]
+      ]
+    },
+    {
+      "key": "inSport",
+      "label": "In Sport (off by default: BMW's Sport HUD takes the middle)",
+      "type": "choice",
+      "default": "off",
+      "options": [
+        [
+          "off",
+          "Off (BMW's own HUD)"
+        ],
+        [
+          "daily",
+          "Daily"
+        ],
+        [
+          "sport",
+          "Sport"
+        ],
+        [
+          "redline",
+          "Redline"
+        ],
+        [
+          "minimal",
+          "Minimal"
+        ],
+        [
+          "shiftonly",
+          "Shift only"
+        ],
+        [
+          "boost",
+          "Boost"
+        ],
+        [
+          "warmup",
+          "Warm-up"
+        ],
+        [
+          "track",
+          "Track"
+        ],
+        [
+          "cruise",
+          "Cruise"
+        ],
+        [
+          "retro",
+          "Retro"
+        ]
+      ]
+    },
+    {
+      "key": "inEco",
+      "label": "In Eco Pro (off by default: BMW's own HUD)",
+      "type": "choice",
+      "default": "off",
+      "options": [
+        [
+          "off",
+          "Off (BMW's own HUD)"
+        ],
+        [
+          "daily",
+          "Daily"
+        ],
+        [
+          "sport",
+          "Sport"
+        ],
+        [
+          "redline",
+          "Redline"
+        ],
+        [
+          "minimal",
+          "Minimal"
+        ],
+        [
+          "shiftonly",
+          "Shift only"
+        ],
+        [
+          "boost",
+          "Boost"
+        ],
+        [
+          "warmup",
+          "Warm-up"
+        ],
+        [
+          "track",
+          "Track"
+        ],
+        [
+          "cruise",
+          "Cruise"
+        ],
+        [
+          "retro",
+          "Retro"
+        ]
+      ]
+    },
+    {
+      "key": "hudTheme",
+      "label": "Theme",
+      "type": "choice",
+      "default": "auto",
+      "options": [
+        [
+          "auto",
+          "Auto (Night after sunset)"
+        ],
+        [
+          "classic",
+          "Classic"
+        ],
+        [
+          "m",
+          "M"
+        ],
+        [
+          "night",
+          "Night"
+        ]
+      ]
+    },
+    {
+      "key": "dayTheme",
+      "label": "Daytime theme for Auto",
+      "type": "choice",
+      "default": "classic",
+      "options": [
+        [
+          "classic",
+          "Classic"
+        ],
+        [
+          "m",
+          "M"
+        ]
+      ]
+    },
+    {
+      "key": "hudX",
+      "label": "HUD position, left / right",
+      "type": "number",
+      "unit": "px",
+      "default": 0,
+      "steps": [
+        -200,
+        -190,
+        -180,
+        -170,
+        -160,
+        -150,
+        -140,
+        -130,
+        -120,
+        -110,
+        -100,
+        -90,
+        -80,
+        -70,
+        -60,
+        -50,
+        -40,
+        -30,
+        -20,
+        -10,
+        0,
+        10,
+        20,
+        30,
+        40,
+        50,
+        60,
+        70,
+        80,
+        90,
+        100,
+        110,
+        120,
+        130,
+        140,
+        150,
+        160,
+        170,
+        180,
+        190,
+        200
+      ],
+      "hidden": true
+    },
+    {
+      "key": "hudY",
+      "label": "HUD position, up / down",
+      "type": "number",
+      "unit": "px",
+      "default": 0,
+      "steps": [
+        -150,
+        -140,
+        -130,
+        -120,
+        -110,
+        -100,
+        -90,
+        -80,
+        -70,
+        -60,
+        -50,
+        -40,
+        -30,
+        -20,
+        -10,
+        0,
+        10,
+        20,
+        30,
+        40,
+        50,
+        60,
+        70,
+        80,
+        90,
+        100,
+        110,
+        120,
+        130,
+        140,
+        150
+      ],
+      "hidden": true
+    },
+    {
+      "key": "hudScale",
+      "label": "HUD size",
+      "type": "number",
+      "unit": "%",
+      "default": 100,
+      "steps": [
+        80,
+        85,
+        90,
+        95,
+        100,
+        105,
+        110,
+        115,
+        120
+      ],
+      "hidden": true
+    },
+    {
+      "key": "units",
+      "label": "Units",
+      "type": "choice",
+      "default": "us",
+      "options": [
+        [
+          "us",
+          "mph, °F, psi"
+        ],
+        [
+          "metric",
+          "km/h, °C, bar"
+        ]
+      ]
+    },
+    {
+      "key": "clock",
+      "label": "Clock",
+      "type": "choice",
+      "default": "12h",
+      "options": [
+        [
+          "12h",
+          "12-hour"
+        ],
+        [
+          "24h",
+          "24-hour"
+        ]
+      ]
+    },
+    {
+      "key": "timeZone",
+      "label": "Time zone (clock)",
+      "type": "number",
+      "default": -9999,
+      "steps": [
+        -9999,
+        10001,
+        10002,
+        10003,
+        10004,
+        10005,
+        10006,
+        10007,
+        10008,
+        10009,
+        10011,
+        10012,
+        10013,
+        -720,
+        -690,
+        -660,
+        -630,
+        -600,
+        -570,
+        -540,
+        -510,
+        -480,
+        -450,
+        -420,
+        -390,
+        -360,
+        -330,
+        -300,
+        -270,
+        -240,
+        -210,
+        -180,
+        -150,
+        -120,
+        -90,
+        -60,
+        -30,
+        0,
+        30,
+        60,
+        90,
+        120,
+        150,
+        180,
+        210,
+        240,
+        270,
+        300,
+        330,
+        360,
+        390,
+        420,
+        450,
+        480,
+        510,
+        540,
+        570,
+        600,
+        630,
+        660,
+        690,
+        720,
+        750,
+        780,
+        810,
+        840
+      ]
+    },
+    {
+      "key": "tankLitres",
+      "label": "Fuel tank size",
+      "type": "number",
+      "unit": "L",
+      "default": 65,
+      "steps": [
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110
+      ]
+    },
+    {
+      "key": "redline",
+      "label": "Redline (shift light)",
+      "type": "number",
+      "unit": "rpm",
+      "default": 7000,
+      "steps": [
+        5500,
+        6000,
+        6500,
+        7000,
+        7500
+      ]
+    },
+    {
+      "key": "shiftBefore",
+      "label": "Shift point before redline",
+      "type": "number",
+      "unit": "rpm",
+      "default": 300,
+      "steps": [
+        0,
+        100,
+        200,
+        300,
+        500,
+        800,
+        1000
+      ]
+    },
+    {
+      "key": "coldGuard",
+      "label": "Cold-engine rev guard (Redline)",
+      "type": "bool",
+      "default": true
+    },
+    {
+      "key": "showClock",
+      "label": "Show clock",
+      "type": "bool",
+      "default": true
+    },
+    {
+      "key": "showOil",
+      "label": "Show oil temperature",
+      "type": "bool",
+      "default": true
+    },
+    {
+      "key": "showCoolant",
+      "label": "Show coolant temperature",
+      "type": "bool",
+      "default": true
+    },
+    {
+      "key": "showBoost",
+      "label": "Show boost (Sport layout)",
+      "type": "bool",
+      "default": true
+    },
+    {
+      "key": "warnOil",
+      "label": "Oil temperature warning",
+      "type": "number",
+      "unit": "°C",
+      "default": 130,
+      "steps": [
+        0,
+        110,
+        115,
+        120,
+        125,
+        130,
+        135,
+        140,
+        145,
+        150
+      ]
+    },
+    {
+      "key": "warnCoolant",
+      "label": "Coolant temperature warning",
+      "type": "number",
+      "unit": "°C",
+      "default": 115,
+      "steps": [
+        0,
+        100,
+        105,
+        110,
+        115,
+        120,
+        125
+      ]
+    },
+    {
+      "key": "warnBoost",
+      "label": "Boost warning",
+      "type": "number",
+      "unit": "bar",
+      "default": 0,
+      "steps": [
+        0,
+        0.8,
+        1.0,
+        1.2,
+        1.4,
+        1.6,
+        1.8,
+        2.0
+      ]
+    },
+    {
+      "key": "gFlipLat",
+      "label": "G-meter: swap left / right",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "gFlipLong",
+      "label": "G-meter: brake on top",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "gRange",
+      "label": "G-meter range",
+      "type": "choice",
+      "default": 1.2,
+      "options": [
+        [
+          0.8,
+          "0.8 g"
+        ],
+        [
+          1.0,
+          "1.0 g"
+        ],
+        [
+          1.2,
+          "1.2 g"
+        ],
+        [
+          1.5,
+          "1.5 g"
+        ],
+        [
+          2.0,
+          "2.0 g"
+        ]
+      ]
+    },
+    {
+      "key": "gTrail",
+      "label": "G-meter trail",
+      "type": "choice",
+      "default": 2,
+      "options": [
+        [
+          0,
+          "Off"
+        ],
+        [
+          1,
+          "1 s"
+        ],
+        [
+          2,
+          "2 s"
+        ],
+        [
+          4,
+          "4 s"
+        ]
+      ]
+    },
+    {
+      "key": "demo",
+      "label": "Demo data",
+      "type": "choice",
+      "default": "auto",
+      "options": [
+        [
+          "auto",
+          "Auto (until the car sends data)"
+        ],
+        [
+          "on",
+          "On"
+        ],
+        [
+          "off",
+          "Off"
+        ]
+      ]
+    }
+  ],
+  "config": {
+    "target": "hud",
+    "statusName": "HUD",
+    "socketPath": "/dev/shm/cluster-render/render.sock",
+    "utcOffsetMinutes": null,
+    "_comment": "socketPath: cluster-render's documented default. utcOffsetMinutes: leave null to use the head unit's own time zone; set it (e.g. -300 for EST) only if the HUD clock shows the wrong hour on the car. tankLitres: the fuel gauge's full mark (the car sends litres, not the tank size; a G01 X3 holds 65).",
+    "dme": {
+      "comment": "Boost from the engine unit (DME, ecu 18) over read-only UDS 0x22, only while the sport display sends no boost and a boost readout is shown. Absolute kPa, the outside air pressure (baro) is subtracted. Candidates tried in order, the first plausible one wins. From cauliflowermossgrape's car_vitals (MIT). Intake air temperature the same way (config.dme.intake, every 2 s, only while an intake readout shows); candidates from cruzen991/Cluster's signal table (MIT), unverified on this car.",
+      "ecu": 18,
+      "boost": [
+        {
+          "did": "F470",
+          "bytes": 2,
+          "at": 3,
+          "factor": 0.03125,
+          "offset": 0,
+          "min": 20,
+          "max": 600,
+          "note": "OBD PID 0x70 boost pressure control: actual boost pressure sensor A (absolute), 1/32 kPa"
+        },
+        {
+          "did": "F487",
+          "bytes": 2,
+          "at": 1,
+          "factor": 0.03125,
+          "offset": 0,
+          "min": 20,
+          "max": 600,
+          "note": "OBD PID 0x87 intake manifold absolute pressure sensor A, 1/32 kPa"
+        },
+        {
+          "did": "F40B",
+          "bytes": 1,
+          "at": 0,
+          "factor": 1,
+          "offset": 0,
+          "min": 20,
+          "max": 255,
+          "note": "OBD PID 0x0B intake manifold absolute pressure, kPa (max 255 = 1.5 bar boost)"
+        },
+        {
+          "obd": "0B",
+          "bytes": 1,
+          "at": 0,
+          "factor": 1,
+          "offset": 0,
+          "min": 20,
+          "max": 255,
+          "note": "OBD service 01 PID 0x0B (same as F40B)"
+        }
+      ],
+      "baro": [
+        {
+          "did": "F433",
+          "bytes": 1,
+          "at": 0,
+          "factor": 1,
+          "offset": 0,
+          "min": 50,
+          "max": 115,
+          "note": "OBD PID 0x33 barometric pressure, kPa (101.3 when not available)"
+        },
+        {
+          "obd": "33",
+          "bytes": 1,
+          "at": 0,
+          "factor": 1,
+          "offset": 0,
+          "min": 50,
+          "max": 115,
+          "note": "OBD service 01 PID 0x33 (same as F433)"
+        }
+      ],
+      "intake": [
+        {
+          "did": "F40F",
+          "bytes": 1,
+          "at": 0,
+          "factor": 1,
+          "offset": -40,
+          "min": -35,
+          "max": 150,
+          "note": "OBD PID 0x0F intake air temperature, C + 40"
+        },
+        {
+          "did": "F477",
+          "bytes": 1,
+          "at": 1,
+          "factor": 1,
+          "offset": -40,
+          "min": -35,
+          "max": 150,
+          "note": "OBD PID 0x77 charge air cooler temperature, bank 1 sensor 1 (byte after the support byte), C + 40"
+        },
+        {
+          "obd": "0F",
+          "bytes": 1,
+          "at": 0,
+          "factor": 1,
+          "offset": -40,
+          "min": -35,
+          "max": 150,
+          "note": "OBD service 01 PID 0x0F (same as F40F)"
+        }
+      ]
+    },
+    "tankLitres": 65
+  }
+}

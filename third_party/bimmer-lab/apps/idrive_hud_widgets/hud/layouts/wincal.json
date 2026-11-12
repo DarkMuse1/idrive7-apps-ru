@@ -1,0 +1,48 @@
+{
+ "schemaVersion": 2,
+ "name": "Window calibration",
+ "_about": "Calibration for the HUD's visible window (Nov 7 2026): lines every 50 px with x/y labels every 100 over the whole 800x480 target, and a cyan frame where the layouts assume the window is today (120,100 560x280: BMW's height-adjust frame in a Nov 7 car photo, measured Nov 9). Photograph it while moving the HUD's height in iDrive, so BMW's own adjustment frame shows the real edges next to the grid.",
+ "widgets": [
+  {
+   "id": "grid",
+   "type": "grid",
+   "x": 0,
+   "y": 0,
+   "w": 800,
+   "h": 480,
+   "step": 50
+  },
+  {
+   "id": "grid_labels",
+   "type": "gridlabels",
+   "x": 0,
+   "y": 0,
+   "w": 800,
+   "h": 480,
+   "step": 100,
+   "font": "label"
+  },
+  {
+   "id": "window_now",
+   "type": "box",
+   "z": 5,
+   "x": 120,
+   "y": 100,
+   "w": 560,
+   "h": 280,
+   "fill": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "line": [
+    60,
+    215,
+    255,
+    255
+   ],
+   "border": 3
+  }
+ ]
+}

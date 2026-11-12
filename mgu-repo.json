@@ -190,6 +190,128 @@
         "sdk": "oap-sdk",
         "output": "dist/{id}@{version}.tgz"
       }
+    },
+    {
+      "id": "cluster_centre",
+      "kind": "app",
+      "path": "third_party/eroobeeroo-cluster/apps/cluster_centre",
+      "manifest": "app.json",
+      "mguHmi": [
+        "ID7"
+      ],
+      "build": {
+        "python": "tools/build_source_ru.py",
+        "args": [
+          "{id}",
+          "--language",
+          "ru"
+        ],
+        "sdk": "oap-sdk",
+        "output": "dist/{id}@{version}.tgz"
+      },
+      "requires": {
+        "idrive7-renderd": "2.1.7",
+        "mgu-inputgate": "1.0.0",
+        "cluster-render": "0.4.2"
+      }
+    },
+    {
+      "id": "cluster_info",
+      "kind": "app",
+      "path": "third_party/eroobeeroo-cluster/apps/cluster_info",
+      "manifest": "app.json",
+      "mguHmi": [
+        "ID7"
+      ],
+      "build": {
+        "python": "tools/build_source_ru.py",
+        "args": [
+          "{id}",
+          "--language",
+          "ru"
+        ],
+        "sdk": "oap-sdk",
+        "output": "dist/{id}@{version}.tgz"
+      },
+      "requires": {
+        "idrive7-renderd": "2.1.7",
+        "mgu-inputgate": "1.0.0",
+        "cluster-render": "0.4.2"
+      }
+    },
+    {
+      "id": "cluster_layouts",
+      "kind": "app",
+      "path": "third_party/eroobeeroo-cluster/apps/cluster_layouts",
+      "manifest": "app.json",
+      "mguHmi": [
+        "ID7"
+      ],
+      "build": {
+        "python": "tools/build_source_ru.py",
+        "args": [
+          "{id}",
+          "--language",
+          "ru"
+        ],
+        "sdk": "oap-sdk",
+        "output": "dist/{id}@{version}.tgz"
+      },
+      "requires": {
+        "idrive7-renderd": "2.1.7",
+        "mgu-inputgate": "1.0.0",
+        "cluster-render": "0.4.2"
+      }
+    },
+    {
+      "id": "cluster_themes",
+      "kind": "app",
+      "path": "third_party/bimmer-lab/apps/cluster_themes",
+      "manifest": "app.json",
+      "mguHmi": [
+        "ID7"
+      ],
+      "build": {
+        "python": "tools/build_source_ru.py",
+        "args": [
+          "{id}",
+          "--language",
+          "ru"
+        ],
+        "sdk": "oap-sdk",
+        "output": "dist/{id}@{version}.tgz"
+      },
+      "icon": "icon.png",
+      "requires": {
+        "idrive7-renderd": "2.1.7",
+        "mgu-inputgate": "1.0.0",
+        "cluster-render": "0.5.1"
+      }
+    },
+    {
+      "id": "idrive_hud_widgets",
+      "kind": "app",
+      "path": "third_party/bimmer-lab/apps/idrive_hud_widgets",
+      "manifest": "app.json",
+      "mguHmi": [
+        "ID7"
+      ],
+      "build": {
+        "python": "tools/build_source_ru.py",
+        "args": [
+          "{id}",
+          "--language",
+          "ru"
+        ],
+        "sdk": "oap-sdk",
+        "output": "dist/{id}@{version}.tgz"
+      },
+      "icon": "icon.png",
+      "requires": {
+        "idrive7-renderd": "2.1.7",
+        "mgu-inputgate": "1.0.0",
+        "cluster-render": "0.5.1"
+      }
     }
   ]
 }
