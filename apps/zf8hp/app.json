@@ -2,7 +2,7 @@
   "id": "zf8hp",
   "title": "Настройка АКПП",
   "description": "Transmission Config, experimental ZF 8HP monitor: live data, clutch fill adaptations, shift maps and temperature history",
-  "version": "1.5.7",
+  "version": "1.5.8",
   "vendor": "custom",
   "loggingId": "OAA2",
   "iconGlyph": "8HP",
@@ -128,8 +128,20 @@
       "label": "Temperature unit",
       "type": "choice",
       "default": "c",
-      "options": [["c", "Celsius"], ["f", "Fahrenheit"]],
-      "aliases": {"C": "c", "F": "f"}
+      "options": [
+        [
+          "c",
+          "Celsius"
+        ],
+        [
+          "f",
+          "Fahrenheit"
+        ]
+      ],
+      "aliases": {
+        "C": "c",
+        "F": "f"
+      }
     },
     {
       "key": "theme",
@@ -193,7 +205,20 @@
       "type": "choice",
       "default": "auto",
       "reset": 2,
-      "options": [["auto", "Auto"], ["on", "Always"], ["off", "Never"]]
+      "options": [
+        [
+          "auto",
+          "Auto"
+        ],
+        [
+          "on",
+          "Always"
+        ],
+        [
+          "off",
+          "Never"
+        ]
+      ]
     }
   ],
   "config": {

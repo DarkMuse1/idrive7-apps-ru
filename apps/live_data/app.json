@@ -2,7 +2,7 @@
   "id": "live_data",
   "title": "Живые данные",
   "description": "Read-only live values from the car and its control units, a trip computer with fuel cost, and gauge screens of your own, one of them as the home-screen widget",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "vendor": "custom",
   "loggingId": "OA9D",
   "iconGlyph": "gauge",
@@ -232,7 +232,9 @@
         8,
         12
       ],
-      "when": {"advanced": true}
+      "when": {
+        "advanced": true
+      }
     },
     {
       "key": "trips",
@@ -302,7 +304,12 @@
       "type": "bool",
       "default": false
     },
-    {"key": "advanced", "label": "Advanced settings", "type": "bool", "default": false},
+    {
+      "key": "advanced",
+      "label": "Advanced settings",
+      "type": "bool",
+      "default": false
+    },
     {
       "key": "theme",
       "label": "Colour theme",

@@ -48,9 +48,8 @@ const { drawHud, drawDown, gearText } = Draw;
 let ClusterRender = null;
 try { ClusterRender = require('./cluster_render_client').ClusterRender; } catch (e) { /* logged at start */ }
 
-const SCENE_W = 800, SCENE_H = 480;
-// the tach image and where it sits at 100 %: centred in the visible area, clear of BMW's speed
-const IW = 400, IH = 130, BASE_X = (SCENE_W - IW) / 2, BASE_Y = 140;
+// the tach image (400x130); where it sits at 100 % is the scene's (SCENE below)
+const IW = 400, IH = 130;
 // frames a second: setting "hudFps" (10 / 20 / 30); the layer is made for the most, the timer paces it
 const FPS_MAX = 30, FPS_DEFAULT = 20;
 const READOUT_MS = 250;          // the readouts row is refreshed at most this often
@@ -153,12 +152,15 @@ function reactionMs(flash, rpm) {
     return clamp(effLead + (rpm - flash.target) / flash.rate * 1000, 0, 600);
 }
 
-/** Where the tach image shows in the HUD's scene (800x480), from the size and position settings. */
+/** Where the tach image shows in the HUD's scene (SCENE), from the size and position settings. */
 function placeOf(settings) {
-    const k = clamp(numOf(settings, 'hudSize', 100), 50, 140) / 100, w = Math.round(IW * k), h = Math.round(IH * k);
-    const x = BASE_X + Math.round((IW - w) / 2) + clamp(numOf(settings, 'hudX', 0), -120, 120);
-    const y = BASE_Y + clamp(numOf(settings, 'hudY', 0), -120, 120);
-    return { x: clamp(x, 0, SCENE_W - w), y: clamp(y, 0, SCENE_H - h), w: w, h: h };
+    // (smaller, further right and further down since 2.0.27: a small tach in the glass's bottom right corner)
+    // 100 % is the scene's own size for the tach (iDrive 8's small HUD: as wide as it), never more than all of it
+    const k = Math.min(clamp(numOf(settings, 'hudSize', 100), 40, 140) / 100 * SCENE.fit, SCENE.w / IW, SCENE.h / IH);
+    const w = Math.round(IW * k), h = Math.round(IH * k);
+    const x = Math.round((SCENE.w - IW) / 2) + Math.round((IW - w) / 2) + clamp(numOf(settings, 'hudX', 0), -120, 280);
+    const y = SCENE.baseY + clamp(numOf(settings, 'hudY', 0), -120, 220);
+    return { x: clamp(x, 0, SCENE.w - w), y: clamp(y, 0, SCENE.h - h), w: w, h: h };
 }
 
 /*
@@ -172,6 +174,30 @@ const NAV_RIGHT = 672, NAV_BOTTOM = 356, NAV_GAP = 4;
 const BMW_SPEED = { x: 116, y: 320, w: 236, h: 48 };
 // the glass the driver sees whole (the test pattern's 120 px frame on the G21)
 const GLASS = { x: 120, y: 120, w: 560, h: 240 };
+/** The part of the HUD's 800x480 scene seen through the windshield, measured from car photos by bimmer-lab
+ * (github.com/bimmer-lab/apps shared/visible.js, MIT, 2026-11-05; it moves with the driver's eye height). */
+const HUD_WINDOW = { x: 120, y: 100, w: 485, h: 278 };
+/*
+ * The HUD's scene: iDrive 7's 800x480, of which only part is seen (above), or the size cluster-render names
+ * in its hello (iDrive 8: "hud:353x203", all of it shown, above the HUD's own speed bar: no BMW speed in it).
+ * baseY: the tach's top at 100 % and Position 0; fit: its size at 100 %.
+ */
+const ID7_SCENE = { w: 800, h: 480, fit: 1, baseY: 140, window: HUD_WINDOW, glass: GLASS, speed: BMW_SPEED, navRight: NAV_RIGHT, navBottom: NAV_BOTTOM };
+let SCENE = ID7_SCENE;
+function sceneOf(targets) {
+    const m = /(?:^|,)\s*hud:(\d+)x(\d+)/.exec(String(targets || ''));
+    const w = m ? Number(m[1]) : 800, h = m ? Number(m[2]) : 480;
+    if (w === 800 && h === 480 || w < 40 || h < 20) return ID7_SCENE;
+    const fit = Math.min(1, w / IW, h / IH), all = { x: 0, y: 0, w: w, h: h };
+    return { w: w, h: h, fit: fit, baseY: Math.round((h - Math.round(IH * fit)) / 2), window: all, glass: all,
+        speed: { x: 0, y: 0, w: 0, h: 0 }, navRight: w - NAV_GAP, navBottom: h - NAV_GAP };
+}
+/** Use the scene cluster-render's hello names (its targets string); true when it changed. */
+function useScene(targets) {
+    const next = sceneOf(targets), changed = next.w !== SCENE.w || next.h !== SCENE.h;
+    SCENE = next;
+    return changed;
+}
 const overlapOf = (a, b) => Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
 /**
  * Where the directions go: the glass's bottom right corner ("hudNavX" / "hudNavY" move it), but never over or
@@ -182,16 +208,17 @@ const overlapOf = (a, b) => Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.ma
 function navPlaceOf(settings) {
     const w = HudNav.NW, h = HudNav.NH, t = placeOf(settings);
     const dx = clamp(Number(settings.get('hudNavX')) || 0, -400, 100), dy = clamp(Number(settings.get('hudNavY')) || 0, -200, 100);
-    const at = (x, y) => ({ x: clamp(Math.round(x), 0, SCENE_W - w), y: clamp(Math.round(y), 0, SCENE_H - h), w: w, h: h });
-    const corner = at(NAV_RIGHT - w + dx, NAV_BOTTOM - h + dy);
+    const at = (x, y) => ({ x: clamp(Math.round(x), 0, SCENE.w - w), y: clamp(Math.round(y), 0, SCENE.h - h), w: w, h: h });
+    const corner = at(SCENE.navRight - w + dx, SCENE.navBottom - h + dy);
     const tries = [corner,
         at(corner.x, t.y + t.h + NAV_GAP),                  // under the tach
         at(t.x + t.w + NAV_GAP, corner.y),                  // right of it
         at(t.x - w - NAV_GAP, corner.y),                    // left of it
         at(corner.x, t.y - h - NAV_GAP)];                   // above it
     // covering anything weighs far more than reaching past the glass's edge (px outside it, summed per side)
-    const outside = (r) => Math.max(GLASS.x - r.x, 0) + Math.max(r.x + r.w - GLASS.x - GLASS.w, 0) + Math.max(GLASS.y - r.y, 0) + Math.max(r.y + r.h - GLASS.y - GLASS.h, 0);
-    const cost = (r) => (overlapOf(r, t) + overlapOf(r, BMW_SPEED)) * 1000 + outside(r);
+    const G = SCENE.glass;
+    const outside = (r) => Math.max(G.x - r.x, 0) + Math.max(r.x + r.w - G.x - G.w, 0) + Math.max(G.y - r.y, 0) + Math.max(r.y + r.h - G.y - G.h, 0);
+    const cost = (r) => (overlapOf(r, t) + overlapOf(r, SCENE.speed)) * 1000 + outside(r);
     let best = tries[0];
     tries.forEach((r) => { if (cost(r) < cost(best)) best = r; });
     return best;
@@ -200,19 +227,14 @@ function navPlaceOf(settings) {
 function navModeOf(settings) { const m = settings.get('hudNav'); return m === 'off' || m === 'near' ? m : 'route'; }
 
 /**
- * The part of the HUD's 800x480 scene seen through the windshield, measured from car photos by bimmer-lab
- * (github.com/bimmer-lab/apps shared/visible.js, MIT, 2026-11-05; it moves with the driver's eye height).
- */
-const HUD_WINDOW = { x: 120, y: 100, w: 485, h: 278 };
-/**
- * How far a place (placeOf) reaches outside HUD_WINDOW, in px per side ({} when it is all visible). style: Minimal
+ * How far a place (placeOf) reaches outside the part of the scene seen (SCENE.window), in px per side ({} when it is all visible). style: Minimal
  * draws nothing in the picture's top MINIMAL_TOP px (its lights from 26, the D / S / M letter by the gear from
  * about 10), so only what's under them counts at the top.
  */
 const MINIMAL_TOP = 9;
 function outsideGlass(r, style) {
     if (style === 'minimal') { const d = Math.round(MINIMAL_TOP * r.h / IH); r = { x: r.x, y: r.y + d, w: r.w, h: r.h - d }; }
-    const W = HUD_WINDOW, o = {};
+    const W = SCENE.window, o = {};
     if (r.x < W.x) o.left = W.x - r.x;
     if (r.x + r.w > W.x + W.w) o.right = r.x + r.w - (W.x + W.w);
     if (r.y < W.y) o.top = W.y - r.y;
@@ -225,7 +247,7 @@ const M_STYLES = ['arc', 'ramp', 'dial'];
 function gearFontOf(choice, style) {
     if (choice === 'barlow') return 'gear_barlow';
     if (choice === 'ubuntu') return 'gear';
-    return M_STYLES.indexOf(style) >= 0 ? 'gear_barlow' : 'gear';
+    return style === 'ramp' ? 'square' : M_STYLES.indexOf(style) >= 0 ? 'gear_barlow' : 'gear';
 }
 
 const STYLES = ['standard', 'minimal', 'wings', 'digital', 'vfd', 'vector', 'arc', 'ramp', 'dial', 'pill'];
@@ -237,7 +259,7 @@ const STYLES = ['standard', 'minimal', 'wings', 'digital', 'vfd', 'vector', 'arc
  * centre screen uses those too).
  */
 const PROFILE_KEYS = ['hudStyle', 'hudPalette', 'hudGearFont', 'hudLabels', 'hudRpmFormat', 'hudUnlit', 'hudLightStyle',
-    'hudShowBar', 'hudShowGear', 'hudShowMode', 'hudShowRpm', 'hudBoost', 'hudShowTorque', 'hudShowPower', 'hudShowG', 'hudShowKnock',
+    'hudShowBar', 'hudShowGear', 'hudShowMode', 'hudShowSpeed', 'hudShowRpm', 'hudBoost', 'hudShowTorque', 'hudShowPower', 'hudShowG', 'hudShowKnock',
     'hudShowOil', 'hudShowWater', 'hudShowGearbox', 'hudShowOutside', 'hudShowLimit', 'hudTempsMode',
     'hudShowTyres', 'hudShowFuel', 'hudShowBattSoc', 'hudShowBattVolt', 'hudShowHvSoc', 'hudShowHvPower', 'hudShowHvBar', 'hudShowHvTemp', 'hudShowHvVolt',
     'hudChip', 'hudKnockWarn', 'hudLaunch', 'hudPeak', 'hudShake',
@@ -316,7 +338,7 @@ function migrateProfiles(settings) {
     if (v.hudComfort === 'hide') { settings.set('hudComfortMode', 'hide'); did = 'hide'; }
     else if (v.hudComfort === 'lights') {
         const st = profileSnapshot(settings);
-        ['hudShowRpm', 'hudBoost', 'hudShowTorque', 'hudShowPower', 'hudShowG', 'hudShowKnock', 'hudShowOil', 'hudShowWater',
+        ['hudShowSpeed', 'hudShowRpm', 'hudBoost', 'hudShowTorque', 'hudShowPower', 'hudShowG', 'hudShowKnock', 'hudShowOil', 'hudShowWater',
             'hudShowGearbox', 'hudShowOutside', 'hudShowLimit', 'hudPeak', 'hudShake', 'hudLaunch'].forEach((k) => { st[k] = false; });
         st.hudChip = 'off';
         settings.set('hudComfortSetup', st);
@@ -347,6 +369,8 @@ function optsFrom(settings, drive) {
         oil: on('hudShowOil'), coolant: on('hudShowWater'), gearbox: on('hudShowGearbox'),
         // the extra readouts are off unless switched on
         torque: settings.get('hudShowTorque') === true, power: settings.get('hudShowPower') === true,
+        // the speed: off by default (BMW's own HUD shows it); first in the list, so on Ramp it sits under the gear like the G80's
+        speed: settings.get('hudShowSpeed') === true,
         // throttle: off until the accelerator pedal's scaling is checked on a car (readoutsFor keeps it)
         throttle: false, g: settings.get('hudShowG') === true,
         outside: settings.get('hudShowOutside') === true,
@@ -454,6 +478,7 @@ const roundTo = (v, step) => Math.round(v / step) * step;
 function readoutsFor(d, gb, boost, sp, o, x) {
     const items = [];
     x = x || {};
+    if (o.speed && isNum(x.kmh)) items.push({ label: o.mph ? 'MPH' : 'KM/H', value: String(Math.round(Math.max(0, x.kmh) * (o.mph ? 0.621371 : 1))), tone: 'text' });
     // the rpm as a number (the 7-segment layouts have their own digits): to 10, to 50, or in
     // thousands with one decimal (4.5), which reads at a glance like the tach's own numbers
     if (o.rpm && o.style !== 'digital' && o.style !== 'vfd' && isNum(d.rpm)) items.push(rpmItem(d.rpm, o.rpmFormat));
@@ -556,6 +581,8 @@ function demoAt(tMs) {
     const pull = r.down || t >= 8.6 ? 0 : t >= 7.6 ? 0.3 : 1;
     r.pedal = pull * 100; r.torque = pull ? 180 + 220 * clamp(r.boost / 1.3, 0, 1) : 0;
     r.gLong = r.down ? -0.85 : pull * 0.45; r.gLat = 0.1; r.outside = 14;
+    // the speed from the gear and revs (km/h per 1000 rpm, an 8-speed's 2nd to 4th)
+    r.kmh = r.rpm / 1000 * ({ 2: 13.6, 3: 20.6, 4: 27 }[r.gear] || 20);
     // tyres for the previews: front right of target, rear left a little under, rear right well under
     r.tyres = { p: { FL: 2.4, FR: 2.4, RL: 2.5, RR: 2.1 }, tgt: { FL: 2.5, FR: 2.5, RL: 2.7, RR: 2.7 }, t: { FL: 59, FR: 61, RL: 69, RR: 70 } };
     return r;
@@ -584,16 +611,17 @@ function demoFrame(tMs, o, cueState, lead, now) {
     };
 }
 
-/** 800x480 test pattern: border, rulers every 40 px with labels, inset frames at 40/80/120, the tach at its place. */
+/** The scene's test pattern: border, rulers every 40 px with labels, inset frames at 40/80/120 (those that fit), the tach at its place. */
 function drawTestPattern(cv) {
     cv.clear();
+    const SCENE_W = SCENE.w, SCENE_H = SCENE.h;
     const frame = (i, c) => {
         const w = SCENE_W - 2 * i, h = SCENE_H - 2 * i;
         cv.fillRect(i, i, w, 2, c); cv.fillRect(i, i + h - 2, w, 2, c);
         cv.fillRect(i, i, 2, h, c); cv.fillRect(i + w - 2, i, 2, h, c);
     };
     frame(0, WHITE);
-    [[40, CYAN], [80, MAGENTA], [120, YELLOW]].forEach((f) => {
+    [[40, CYAN], [80, MAGENTA], [120, YELLOW]].filter((f) => 2 * f[0] + 40 <= Math.min(SCENE_W, SCENE_H)).forEach((f) => {
         frame(f[0], f[1]);
         cv.text(String(f[0]), f[0] + 6, f[0] + 22, 18, f[1], { font: 'bold' });
     });
@@ -687,6 +715,8 @@ function start(ctx, src) {
     } catch (e) { /* none yet */ }
     let cur = null, prev = null, first = true, lastErr = 0;
     let hiddenLogged = false;     // the HUD is hidden by the driving mode (logged once each way)
+    let offLogged = false;        // no new layer while the car is off or switching on / off (logged once each time)
+    let crStatus = null;          // cluster-render's last status reply { t, text } (the Logs page asks for it)
 
     const safe = (name, fn) => function () {
         try { return fn.apply(null, arguments); } catch (e) {
@@ -766,7 +796,15 @@ function start(ctx, src) {
         if (cr) return;
         if (!ClusterRender) { log.warn('hud: cluster_render_client.js is missing from the app'); return; }
         cr = new ClusterRender('redline');
-        cr.on('ready', safe('ready', () => { first = true; log.info('hud: connected to cluster-render (' + cr.backend + ', targets ' + cr.targets + ')'); }));
+        cr.on('ready', safe('ready', () => {
+            first = true;
+            log.info('hud: connected to cluster-render (' + cr.backend + ', targets ' + cr.targets + ')');
+            // the HUD's size (iDrive 8's is 353x203): the tach moves there with the next frame, the test pattern is drawn again
+            if (useScene(cr.targets)) {
+                log.info('hud: scene ' + SCENE.w + 'x' + SCENE.h);
+                if (shown === 'test') { shown = ''; showTestPattern(); }
+            }
+        }));
         cr.on('disconnected', safe('disconnected', () => log.warn('hud: cluster-render went away, reconnecting')));
         cr.on('target', safe('target', (name, state, holder, reason, guideDisabled, disabled) => {
             if (name !== 'hud') return;
@@ -775,6 +813,8 @@ function start(ctx, src) {
             target = { state: state, holder: holder, disabled: disabled };
             if (s !== lastTarget) { lastTarget = s; log.info('hud: target ' + s); }
         }));
+        // its status reply (the Logs page): the mapping guard's lines among it
+        cr.on('status', safe('status', (text) => { crStatus = { t: Date.now(), text: String(text || '') }; }));
         cr.on('layer', safe('layer', (ref, state, reason) => {
             if (ref === layer) log.info('hud: layer ' + state + (reason ? ' (' + reason + ')' : ''));
             else if (navLayer && ref === navLayer) {
@@ -811,9 +851,9 @@ function start(ctx, src) {
     const showTestPattern = safe('test', () => {
         if (shown === 'test') return;
         dropLayer();
-        layer = cr.image({ target: 'hud', klass: 'overlay', x: 0, y: 0, w: SCENE_W, h: SCENE_H, fps: 1 });
+        layer = cr.image({ target: 'hud', klass: 'overlay', x: 0, y: 0, w: SCENE.w, h: SCENE.h, fps: 1 });
         if (!layer) { log.warn('hud: test layer refused by the client'); return; }
-        const cv = new Canvas(SCENE_W, SCENE_H);
+        const cv = new Canvas(SCENE.w, SCENE.h);
         drawTestPattern(cv);
         const r = rect();
         // where the size and position settings put the tach: drawn there at that size, blended over the pattern
@@ -991,6 +1031,30 @@ function start(ctx, src) {
      * unavailable or disabled by the guard. Drawn in every other state: cluster-render only asks
      * for the target once the layer has content, so idle / acquiring must draw.
      */
+    /**
+     * No new HUD layer while the car is off (vehicle state 5 or lower), its drive readiness is starting (8) or
+     * ending (12); a car that doesn't send its state (or not yet) isn't held back. cluster-render's mapping
+     * guard counts the cluster's display going away within 10 s of the HUD being mapped as a strike, and two turn
+     * the HUD off for good. At switch-off Redline used to map it just then (issue #141). A layer already there stays
+     * at 8; at 12 or 5 and lower it is dropped (switchingOff).
+     */
+    function holdOff() {
+        const d = src.data ? src.data() : {}, c = d.condition;
+        // (a state the car sent that isn't known, "no value" among them: held too, the last known one may be stale)
+        return d.conditionKnown === false || (isNum(c) && (c <= 5 || c === 8 || c === 12));
+    }
+    /**
+     * The car switching off (12) or off (5 or lower): a tach already up is dropped too, so cluster-render has nothing
+     * to map on the HUD as the cluster goes (it maps again by itself when BMW's content or a pop-up lets go).
+     */
+    function switchingOff() {
+        const c = src.data ? src.data().condition : undefined;
+        return isNum(c) && (c <= 5 || c === 12);
+    }
+    // the directions giving way ended with nothing to show (a route ending, as at switch-off): the tach back only after BACK_WAIT_MS,
+    // so the car's state can say first that it's switching off
+    const BACK_WAIT_MS = isNum(ctx.backWaitMs) ? ctx.backWaitMs : 8000;
+    let backAt = 0;
     const paused = () => !!target && (target.disabled || target.state === 'parked' || target.state === 'waiting' || target.state === 'unavailable');
     const tick = safe('tick', () => {
         // cluster-render not up (lost, or not yet back): nothing is drawn, so nothing is read from the car either
@@ -1002,8 +1066,11 @@ function start(ctx, src) {
             const playing = Date.now() < demoUntil;
             nv = navNow(playing);
             // a route without a turn Redline can read: out of the way, so BMW's own card shows (nav.js logs it)
+            // (over with a turn to show: back at once, it's the route going on)
+            if (navGiving && !nv.giveWay && !nv.show) backAt = Date.now() + BACK_WAIT_MS;
             navGiving = nv.giveWay;
-            if (calm(playing) === 'hide' || nv.giveWay) {
+            const off = switchingOff();
+            if (calm(playing) === 'hide' || nv.giveWay || off) {
                 dropNav();
                 if (layer) {
                     cr.drop(layer); layer = 0;
@@ -1015,10 +1082,20 @@ function start(ctx, src) {
                 // nothing of Redline's on the HUD. Comfort's hide: the standing app (Cluster functions) may show. Giving
                 // way: keep the claim, so it's BMW's card that shows, not Cluster functions' map over it (2026-11-09 review)
                 claim.hold(!!nv.giveWay);
-                if (!hiddenLogged && !nv.giveWay) { hiddenLogged = true; log.info('hud: hidden in ' + (src.driveMode ? src.driveMode() : '?') + ' mode'); }
+                if (off) { if (!offLogged) { offLogged = true; log.info('hud: dropped, the car is switching off (state ' + src.data().condition + ')'); } }
+                else if (!hiddenLogged && !nv.giveWay) { hiddenLogged = true; log.info('hud: hidden in ' + (src.driveMode ? src.driveMode() : '?') + ' mode'); }
                 return;
             }
-            if (!layer) { makeLayer(); if (!layer) return; }
+            if (!layer) {
+                if (Date.now() < backAt) { stopReads(true); return; }
+                if (holdOff()) {
+                    stopReads(true);
+                    if (!offLogged) { offLogged = true; log.info('hud: no new layer while the car is off or switching on / off (state ' + (src.data ? src.data().condition : '?') + ')'); }
+                    return;
+                }
+                offLogged = false;
+                makeLayer(); if (!layer) return;
+            }
             claim.hold(true);
             if (hiddenLogged) { hiddenLogged = false; log.info('hud: back on'); }
         }
@@ -1103,7 +1180,8 @@ function start(ctx, src) {
         if (shown === 'tach') { if (layer) { cr.set(layer, r); placedKey = rectKey(r); } if (navLayer) cr.set(navLayer, navPlaceOf(placeView())); return; }
         dropLayer();
         // hidden by the driving mode: no layer yet, the timer makes it when the mode allows
-        const hidden = calm(Date.now() < demoUntil) === 'hide';
+        // (or the car off or switching on / off: the timer makes it once that's over, holdOff)
+        const hidden = calm(Date.now() < demoUntil) === 'hide' || holdOff();
         if (!hidden) { makeLayer(); if (!layer) return; }
         claim.hold(!hidden);
         shown = 'tach';
@@ -1193,6 +1271,7 @@ function start(ctx, src) {
         if (target && target.disabled) return 'HUD: off after display errors';
         if (m === 'test') return 'HUD: test pattern';
         if (shown === 'tach' && !layer && navGiving) return 'HUD: giving way to BMW\'s directions';
+        if (shown === 'tach' && !layer && holdOff()) return 'HUD: waits for the car to be switched on';
         if (shown === 'tach' && !layer) return 'HUD: hidden in Comfort / Eco Pro';
         const st = target ? target.state : '';
         if (st === 'shown') return 'HUD: on';
@@ -1219,8 +1298,12 @@ function start(ctx, src) {
     return { stop: disconnect, status: status, upshift: upshift, lead: leadMs, learned: learned, resetLead: resetLead, frame: frameData,
         play: play, stopPlay: stopPlay, playing: () => Date.now() < demoUntil, corner: () => corner,
         /** Directions on the glass in the last tick or so (the nav log writes only then): drawn each tick while shown. */
-        directionsShown: () => corner === 'nav' && monoMs() - navShownAt < 2000 };
+        directionsShown: () => corner === 'nav' && monoMs() - navShownAt < 2000,
+        /** Ask cluster-render for its status (the reply lands in crStatus); false when it isn't connected. */
+        askStatus: () => { if (!cr || !cr.ready) return false; try { cr.status(); return true; } catch (e) { return false; } },
+        /** cluster-render's last status reply { t, text }, or null. */
+        crStatus: () => crStatus };
 }
 
 // writeAtomic: kept here too (it moved to files.js in 2.0) for code that calls Hud.writeAtomic
-module.exports = { start, revOf, writeAtomic, navPlaceOf, BMW_SPEED, GLASS, optsFrom, PROFILE_KEYS, SETUPS, profileOf, comfortMode, setupMode, profileView, setComfortMode, setSetupMode, migrateProfiles, reactionMs, gearFontOf, M_STYLES, placeOf, outsideGlass, readoutsFor, rpmItem, electricalItems, electricalWants, MAX_READOUTS, METER_STYLES, driveModeOf, calmFor, calmOpts, demoAt, DEMO_MS, demoFrame, shiftCue, drawDown };
+module.exports = { start, revOf, writeAtomic, navPlaceOf, BMW_SPEED, GLASS, sceneOf, useScene, scene: () => SCENE, optsFrom, PROFILE_KEYS, SETUPS, profileOf, comfortMode, setupMode, profileView, setComfortMode, setSetupMode, migrateProfiles, reactionMs, gearFontOf, M_STYLES, placeOf, outsideGlass, readoutsFor, rpmItem, electricalItems, electricalWants, MAX_READOUTS, METER_STYLES, driveModeOf, calmFor, calmOpts, demoAt, DEMO_MS, demoFrame, shiftCue, drawDown };
