@@ -1,13 +1,24 @@
 {
   "id": "ambient_light",
   "title": "Подсветка",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "internet": true,
   "description": "Произвольный RGB-цвет подсветки, реальные зоны, яркость и сохранённые цвета. Закрытый модуль загружается после ввода пароля.",
   "vendor": "custom",
   "loggingId": "OALP",
   "iconGlyph": "AL",
-  "signals": {},
+  "signals": {
+    "com.harman.infotainment.systemfunctions.tasu.tasu.InternalTasu": {
+      "_instances": "SystemFunctionsInternalTasuInst1",
+      "_methods": [
+        "sendTasuRequest"
+      ],
+      "_broadcasts": [
+        "sendTasuResponse"
+      ],
+      "tasuModeStatus": "r"
+    }
+  },
   "screens": [
     {
       "name": "MAIN",

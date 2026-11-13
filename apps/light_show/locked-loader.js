@@ -1,5 +1,5 @@
 'use strict';
-// Node 8 compatible. No vehicle traffic or saved password; the real app owns its
+// Node 8 compatible. Read-only VIN verification, no saved password; the real app owns its
 // existing ctx only after the server has authorised this exact published release.
 const fs = require('fs');
 const path = require('path');
@@ -12,9 +12,9 @@ const names = o => Object.keys(o).sort();
 const plain = o => !!o && typeof o === 'object' && !Array.isArray(o);
 const equal = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
-function fetchBundle(config, password, ca, transport) {
+function fetchBundle(config, password, ca, transport, vin) {
     return new Promise((resolve, reject) => {
-        const body = JSON.stringify({ app: config.key, password: password });
+        const body = JSON.stringify({ app: config.key, password: password, vin: vin });
         let req, timer, done = false;
         const finish = (error, value) => {
             if (done) return;
@@ -37,7 +37,10 @@ function fetchBundle(config, password, ca, transport) {
                 res.on('error', () => finish(Error('Загрузка кода прервана')));
                 res.on('aborted', () => finish(Error('Загрузка кода прервана')));
                 res.on('end', () => {
-                    if (res.statusCode === 401 || res.statusCode === 403) return finish(Error('Неверный пароль'));
+                    if (res.statusCode === 401 || res.statusCode === 403) return finish(Error('Для этого VIN нет доступа к приложению или пароль неверен'));
+                    if (res.statusCode === 410) return finish(Error('Срок доступа к приложению истёк'));
+                    if (res.statusCode === 423) return finish(Error('Доступ к приложению отозван'));
+                    if (res.statusCode === 426) return finish(Error('Обновите приложение в MGU Store для проверки VIN'));
                     if (res.statusCode === 429) return finish(Error('Слишком много попыток. Повторите через 5 минут'));
                     if (res.statusCode !== 200) return finish(Error('Сервер недоступен: HTTP ' + res.statusCode));
                     try { finish(null, JSON.parse(text)); } catch (_) { finish(Error('Некорректный ответ сервера')); }
@@ -136,6 +139,11 @@ function start(ctx, config, dependencies) {
     const speller = d.speller || require('./kit/speller');
     const ca = d.ca || require('./kit/server-ca');
     const installedDir = d.installedDir || __dirname;
+    const vinReader = d.vinReader || require('./license-vin');
+    const signals = d.signals || require('./kit/signals');
+    let closed=false, reading=null;
+    const cancelRead=()=>{if(reading)reading.cancel();};
+    if(ctx.onShutdown)ctx.onShutdown(()=>{closed=true;cancelRead();});
     let phase = 'idle', headline = 'Световое шоу · доступ по паролю';
     let message = 'Откройте приложение и введите пароль от светового шоу.';
     const foreground = () => ctx.ui.isVisible('MAIN') && (!ctx.ui.hasFocus || ctx.ui.hasFocus('MAIN'));
@@ -161,16 +169,28 @@ function start(ctx, config, dependencies) {
     if (ctx.widget && ctx.widget.onChange) ctx.widget.onChange(widgetNotice);
     widgetNotice(); // no second widget loop and no popup on a background start
     async function attempt() {
-        if (!foreground() || ['idle','error','cancelled'].indexOf(phase) < 0) return;
-        phase = 'prompting'; headline = 'Введите пароль'; message = 'Подтвердите пароль на экранной клавиатуре автомобиля.';
+        if (closed || !foreground() || ['idle','error','cancelled'].indexOf(phase) < 0) return;
+        phase = 'reading-vin'; headline = 'Проверка автомобиля'; message = 'Читаем VIN автомобиля для проверки доступа…';
         try {
+            reading=vinReader.begin(signals,{onState:state=>{
+                if(state==='busy')message='TASU занят — ожидаем чтения VIN';
+            }});
+            let vin;
+            try{vin=await reading.promise;}finally{reading=null;}
+            if(closed||!foreground())throw Error('Проверка VIN отменена');
+            phase = 'prompting'; headline = 'Введите пароль'; message = 'Подтвердите пароль на экранной клавиатуре автомобиля.';
             let password = await speller.prompt(ctx.app, {title:'Пароль светового шоу'});
+            if(closed){password=null;return;}
             if (!password) { phase = 'cancelled'; headline = 'Доступ закрыт'; message = 'Пароль не введён. Для запуска нажмите «Выбрать».'; return; }
             phase = 'downloading'; headline = 'Загрузка светового шоу'; message = 'Проверяем доступ и загружаем код приложения с сервера…';
             ctx.log.info('Световое шоу: запрос доступа к версии ' + config.version + '; пароль не сохраняется');
             let bundle;
-            try { bundle = await (d.fetchBundle || fetchBundle)(config, password, ca); }
+            try { bundle = await (d.fetchBundle || fetchBundle)(config, password, ca, undefined, vin); }
             finally { password = null; }
+            if(closed)return;
+            const auth=bundle&&bundle.authorization;
+            if(!auth||auth.schema!==1||auth.app!==config.app||auth.status!=='active'||auth.vinHash!==hash('vin:'+vin))throw Error('Сервер не подтвердил доступ для VIN автомобиля');
+            vin=null;
             const entry = prepare(bundle, config, ctx.dataDir, installedDir);
             const app = require(entry);
             if (!app || typeof app.start !== 'function') throw Error('Отсутствует точка входа приложения');
@@ -182,6 +202,7 @@ function start(ctx, config, dependencies) {
             phase = 'ready';
             ctx.log.info('Световое шоу ' + config.version + ': доступ подтверждён, приложение запущено');
         } catch (error) {
+            if(closed)return;
             // Do not restart a partly started business app and duplicate its
             // subscriptions/commands after an exception in its own start().
             if (phase === 'starting') {
@@ -204,8 +225,8 @@ function start(ctx, config, dependencies) {
         }
     }
     function request() { attempt().catch(() => {}); }
-    ctx.ui.onVisible((name, on) => { if (name === 'MAIN' && on && phase === 'idle') request(); });
-    if (ctx.ui.onFocus) ctx.ui.onFocus((name, on) => { if (name === 'MAIN' && on && phase === 'idle') request(); });
+    ctx.ui.onVisible((name, on) => { if(name==='MAIN'&&!on)cancelRead();if (name === 'MAIN' && on && phase === 'idle') request(); });
+    if (ctx.ui.onFocus) ctx.ui.onFocus((name, on) => { if(name==='MAIN'&&!on)cancelRead();if (name === 'MAIN' && on && phase === 'idle') request(); });
     ctx.ui.onClick('ENTER', request);
     if (ctx.onTap) ctx.onTap(request);
     if (foreground()) request();

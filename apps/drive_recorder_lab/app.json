@@ -1,7 +1,7 @@
 {
   "id": "drive_recorder_lab",
   "title": "Видеорегистратор",
-  "version": "0.4.6",
+  "version": "0.4.7",
   "vendor": "custom",
   "loggingId": "ODR2",
   "iconGlyph": "DR",
@@ -48,6 +48,16 @@
         "setFilterForProvisioningData"
       ],
       "provisioningDataState": "r"
+    },
+    "com.harman.infotainment.systemfunctions.tasu.tasu.InternalTasu": {
+      "_instances": "SystemFunctionsInternalTasuInst1",
+      "_methods": [
+        "sendTasuRequest"
+      ],
+      "_broadcasts": [
+        "sendTasuResponse"
+      ],
+      "tasuModeStatus": "r"
     }
   },
   "screens": [

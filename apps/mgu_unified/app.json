@@ -1,7 +1,7 @@
 {
   "id": "mgu_unified",
   "title": "MGU Tools",
-  "version": "0.1.8",
+  "version": "0.1.10",
   "description": "Единая оболочка MGU — этап интеграции",
   "vendor": "custom",
   "loggingId": "OMGU",
@@ -34,7 +34,8 @@
       ],
       "_broadcasts": [
         "sendTasuResponse"
-      ]
+      ],
+      "tasuModeStatus": "r"
     },
     "de.bmw.infotainment.checkcontrol.CheckControlMaster": {
       "basicList": "rs"
