@@ -126,7 +126,14 @@
       },
       "id": "drive_recorder_lab",
       "kind": "app",
-      "path": "apps/drive_recorder_lab"
+      "path": "apps/drive_recorder_lab",
+      "mguHmi": [
+        "ID7"
+      ],
+      "requires": {
+        "idrive7-renderd": "2.1.10",
+        "mgu-inputgate": "1.0.0"
+      }
     },
     {
       "manifest": "app.json",

@@ -1,7 +1,7 @@
 {
   "id": "drive_recorder_lab",
   "title": "Drive Recorder",
-  "version": "0.4.8",
+  "version": "0.4.9",
   "vendor": "custom",
   "loggingId": "ODR2",
   "iconGlyph": "DR",
