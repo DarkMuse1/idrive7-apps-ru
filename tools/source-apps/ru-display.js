@@ -6,6 +6,10 @@ module.exports = function localizeDisplay(ctx) {
     const make = ctx.canvas;
     ctx.canvas = function (w, h) {
         const cv = make.call(ctx, w, h), text = cv.text, width = cv.textWidth;
+        // The author's Display reuses its Recorder for successive frames.
+        // Wrap it once, rather than nesting another translator every frame.
+        if (cv._mguTranslatedDisplay) return cv;
+        cv._mguTranslatedDisplay = true;
         cv.text = function (s, x, y, size, colour, options) {
             return text.call(this, options && options.literal ? localText(s) : s, x, y, size, colour, options);
         };

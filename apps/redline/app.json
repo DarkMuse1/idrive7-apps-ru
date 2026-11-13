@@ -2,7 +2,7 @@
   "id": "redline",
   "title": "Redline",
   "description": "Full-screen rev tach with shift lights, gear, shift scoring and cold-engine rev guard; HUD by @biscotit",
-  "version": "2.0.42",
+  "version": "2.0.43",
   "vendor": "custom",
   "loggingId": "OA97",
   "iconGlyph": "rpm",
@@ -2034,5 +2034,17 @@
       },
       "group": "Advanced"
     }
-  ]
+  ],
+  "texts": {
+    "ru": {
+      "title": "Redline",
+      "description": "Полноэкранный тахометр с индикаторами переключения, показом передачи, оценкой переключений и ориентиром оборотов для холодного двигателя; HUD от @biscotit"
+    },
+    "zh-CN": {
+      "title": "换挡转速"
+    },
+    "ko": {
+      "title": "레드라인"
+    }
+  }
 }

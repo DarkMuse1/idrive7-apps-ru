@@ -2,7 +2,7 @@
   "id": "edrive",
   "title": "eDrive",
   "description": "Real electric range, live battery power, cells and climate power, HV battery health (SOH) and energy, last charge, charge log, the 12 V battery (charge, voltage, what it does, regen, history) and a home-screen widget; on a 48 V mild hybrid its 48 V battery and DC/DC converter",
-  "version": "2.9.3",
+  "version": "2.9.4",
   "vendor": "custom",
   "loggingId": "OA9C",
   "iconGlyph": "battery",
@@ -1257,6 +1257,15 @@
         "403C",
         "403D"
       ]
+    }
+  },
+  "texts": {
+    "ru": {
+      "title": "eDrive",
+      "description": "Реальный запас хода на электротяге, текущая мощность батареи, данные ячеек и мощность климатической системы, состояние (SOH) и энергия высоковольтной батареи HV, последняя зарядка, журнал зарядок, батарея 12 V (заряд, напряжение, режим работы, рекуперация, история) и виджет главного экрана; на мягком гибриде 48 V — его батарея 48 V и преобразователь DC/DC"
+    },
+    "zh-CN": {
+      "title": "EDrive助手"
     }
   }
 }

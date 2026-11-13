@@ -1,8 +1,8 @@
 {
   "id": "mgu_unified",
   "title": "MGU Tools",
-  "version": "0.1.10",
-  "description": "Единая оболочка MGU — этап интеграции",
+  "version": "0.1.11",
+  "description": "Unified MGU shell — integration phase",
   "vendor": "custom",
   "loggingId": "OMGU",
   "iconGlyph": "M",
@@ -172,19 +172,19 @@
       "buttons": [
         [
           "BTN_PREV",
-          "Назад по меню"
+          "Back through menu"
         ],
         [
           "BTN_NEXT",
-          "Далее"
+          "Next"
         ],
         [
           "BTN_SELECT",
-          "Выбрать"
+          "Select"
         ],
         [
           "BTN_BACK",
-          "Назад"
+          "Back"
         ]
       ]
     },
@@ -196,116 +196,116 @@
       "buttons": [
         [
           "DOOM_BACK",
-          "Шаг назад"
+          "Step back"
         ],
         [
           "DOOM_LEFT",
-          "Влево"
+          "Left"
         ],
         [
           "DOOM_STAND",
-          "Стоять / огонь"
+          "Stand / fire"
         ],
         [
           "DOOM_WALK",
-          "Вперёд"
+          "Forward"
         ],
         [
           "DOOM_RIGHT",
-          "Вправо"
+          "Right"
         ],
         [
           "DOOM_WEAPON",
-          "Оружие"
+          "Weapon"
         ],
         [
           "DOOM_EXIT",
-          "В меню"
+          "To menu"
         ]
       ]
     },
     {
       "name": "LD_MAIN",
       "kind": "canvas",
-      "title": "MGU Tools · Данные автомобиля",
+      "title": "MGU Tools · Vehicle Data",
       "buttons": [
         [
           "LD_BTN_ACTION",
-          "Компоновка"
+          "Layout"
         ],
         [
           "LD_BTN_PAGE",
-          "Следующая"
+          "Next"
         ],
         [
           "LD_BTN_BROWSE",
-          "Обзор"
+          "Browse"
         ],
         [
           "LD_BTN_SETTINGS",
-          "Настройки"
+          "Settings"
         ],
         [
           "LD_RETURN",
-          "В меню MGU Tools"
+          "To MGU Tools menu"
         ]
       ]
     },
     {
       "name": "EC_MAIN",
       "kind": "canvas",
-      "title": "MGU Tools · Управление двигателем",
+      "title": "MGU Tools · Engine Control",
       "buttons": [
         [
           "EC_BTN_OPEN",
-          "Открыть"
+          "Open"
         ],
         [
           "EC_BTN_CLOSE",
-          "Закрыть"
+          "Close"
         ],
         [
           "EC_BTN_OEM",
-          "Штатно"
+          "Factory"
         ],
         [
           "EC_BTN_PAGE",
-          "Следующая"
+          "Next"
         ],
         [
           "EC_BTN_SETTINGS",
-          "Настройки"
+          "Settings"
         ],
         [
           "EC_RETURN",
-          "В меню MGU Tools"
+          "To MGU Tools menu"
         ]
       ]
     },
     {
       "name": "TC_MAIN",
       "kind": "canvas",
-      "title": "MGU Tools · Трансмиссия ZF 8HP",
+      "title": "MGU Tools · ZF 8HP Transmission",
       "buttons": [
         [
           "TC_BTN_PAGE",
-          "Следующая"
+          "Next"
         ],
         [
           "TC_BTN_SELECT",
-          "Следующий пункт"
+          "Next item"
         ],
         [
           "TC_BTN_ACTION",
-          "Просмотр / обновить"
+          "View / refresh"
         ],
         [
           "TC_BTN_SETTINGS",
-          "Настройки"
+          "Settings"
         ],
         [
           "TC_RETURN",
-          "В меню MGU Tools"
+          "To MGU Tools menu"
         ]
       ]
     }
@@ -313,7 +313,7 @@
   "settings": [
     {
       "key": "theme",
-      "label": "Оформление",
+      "label": "Appearance",
       "type": "choice",
       "default": "mgu_tools",
       "options": [
@@ -325,62 +325,62 @@
     },
     {
       "key": "layout",
-      "label": "Компоновка",
+      "label": "Layout",
       "type": "choice",
       "default": "full",
       "reset": 1,
       "options": [
         [
           "full",
-          "Полный экран"
+          "Full screen"
         ],
         [
           "standard",
-          "Стандартная"
+          "Standard"
         ]
       ]
     },
     {
       "key": "renderer",
-      "label": "Отрисовка",
+      "label": "Renderer",
       "type": "choice",
       "default": "software",
       "options": [
         [
           "software",
-          "Программная"
+          "Software"
         ],
         [
           "auto",
-          "GPU, если доступен"
+          "GPU, if available"
         ]
       ]
     },
     {
       "key": "demo",
-      "label": "Демонстрация",
+      "label": "Demo",
       "type": "choice",
       "default": "off",
       "options": [
         [
           "off",
-          "Выключена"
+          "Disabled"
         ],
         [
           "on",
-          "Включена"
+          "Enabled"
         ]
       ]
     },
     {
       "key": "units",
-      "label": "Скорость",
+      "label": "Speed",
       "type": "choice",
       "default": "kmh",
       "options": [
         [
           "kmh",
-          "км/ч"
+          "km/h"
         ],
         [
           "mph",
@@ -390,13 +390,13 @@
     },
     {
       "key": "overview",
-      "label": "Обзор",
+      "label": "Browse",
       "type": "choice",
       "default": "redline",
       "options": [
         [
           "redline",
-          "Тахометр"
+          "Tachometer"
         ],
         [
           "edrive",
@@ -405,44 +405,28 @@
       ]
     },
     {
-      "key": "language",
-      "label": "Язык / Language",
-      "type": "choice",
-      "default": "ru",
-      "options": [
-        [
-          "ru",
-          "Русский"
-        ],
-        [
-          "en",
-          "English"
-        ]
-      ]
-    },
-    {
       "key": "engine",
-      "label": "Тип двигателя",
+      "label": "Engine type",
       "type": "choice",
       "default": "auto",
       "options": [
         [
           "auto",
-          "Авто (по данным автомобиля)"
+          "Auto (from vehicle data)"
         ],
         [
           "diesel",
-          "Дизель"
+          "Diesel"
         ],
         [
           "petrol",
-          "Бензин"
+          "Petrol"
         ]
       ]
     },
     {
       "key": "homeWidget",
-      "label": "Виджет на главном экране",
+      "label": "Home screen widget",
       "type": "choice",
       "default": "edrive",
       "options": [
@@ -452,13 +436,13 @@
         ],
         [
           "live_data",
-          "Live Data · выбранные приборы"
+          "Live Data · selected gauges"
         ]
       ]
     },
     {
       "key": "LD_show",
-      "label": "Данные автомобиля · Страницы блоков показывают",
+      "label": "Vehicle Data · Control unit pages show",
       "type": "choice",
       "default": "known",
       "reset": 2,
@@ -479,7 +463,7 @@
     },
     {
       "key": "LD_names",
-      "label": "Данные автомобиля · Названия",
+      "label": "Vehicle Data · Names",
       "type": "choice",
       "default": "en",
       "options": [
@@ -500,13 +484,13 @@
     },
     {
       "key": "LD_autoScan",
-      "label": "Данные автомобиля · Опрашивать блоки при открытии",
+      "label": "Vehicle Data · Read control units on opening",
       "type": "bool",
       "default": true
     },
     {
       "key": "LD_widget",
-      "label": "Данные автомобиля · Виджет показывает",
+      "label": "Vehicle Data · Widget shows",
       "type": "choice",
       "default": "1",
       "options": [
@@ -538,7 +522,7 @@
     },
     {
       "key": "LD_widgetFit",
-      "label": "Данные автомобиля · Виджет: изображение",
+      "label": "Vehicle Data · Widget: image",
       "type": "choice",
       "default": "medium",
       "options": [
@@ -558,7 +542,7 @@
     },
     {
       "key": "LD_widgetFps",
-      "label": "Данные автомобиля · Виджет: обновлений в секунду",
+      "label": "Vehicle Data · Widget: updates per second",
       "type": "number",
       "unit": "fps",
       "default": 8,
@@ -571,13 +555,13 @@
     },
     {
       "key": "LD_trips",
-      "label": "Данные автомобиля · Бортовой компьютер (каждая поездка)",
+      "label": "Vehicle Data · Trip computer (each journey)",
       "type": "bool",
       "default": true
     },
     {
       "key": "LD_currency",
-      "label": "Данные автомобиля · Валюта",
+      "label": "Vehicle Data · Currency",
       "type": "choice",
       "default": "EUR",
       "options": [
@@ -633,13 +617,13 @@
     },
     {
       "key": "LD_details",
-      "label": "Данные автомобиля · Источники и непроверенные значения",
+      "label": "Vehicle Data · Sources and unverified values",
       "type": "bool",
       "default": false
     },
     {
       "key": "EC_arm",
-      "label": "Управление двигателем · Заслонка выпуска",
+      "label": "Engine Control · Exhaust flap",
       "type": "choice",
       "default": "off",
       "options": [
@@ -655,7 +639,7 @@
     },
     {
       "key": "EC_tuner",
-      "label": "Управление двигателем · Программа тюнинга",
+      "label": "Engine Control · Tuning programme",
       "type": "choice",
       "default": "off",
       "options": [
@@ -675,7 +659,7 @@
     },
     {
       "key": "EC_xdrive",
-      "label": "Управление двигателем · xDrive (эксперимент)",
+      "label": "Engine Control · xDrive (experimental)",
       "type": "choice",
       "default": "off",
       "options": [
@@ -691,7 +675,7 @@
     },
     {
       "key": "TC_variants",
-      "label": "Трансмиссия ZF 8HP · Вариант EGS",
+      "label": "ZF 8HP Transmission · EGS variant",
       "type": "choice",
       "default": "verified",
       "options": [
@@ -707,13 +691,13 @@
     },
     {
       "key": "TC_autoRefresh",
-      "label": "Трансмиссия ZF 8HP · Обновлять, пока страница видна",
+      "label": "ZF 8HP Transmission · Refresh while page is visible",
       "type": "bool",
       "default": true
     },
     {
       "key": "TC_liveInterval",
-      "label": "Трансмиссия ZF 8HP · Интервал обновления",
+      "label": "ZF 8HP Transmission · Refresh interval",
       "type": "number",
       "unit": "s",
       "default": 2,
@@ -727,7 +711,7 @@
     },
     {
       "key": "TC_mapFamily",
-      "label": "Трансмиссия ZF 8HP · Семейство карт переключений",
+      "label": "ZF 8HP Transmission · Shift map family",
       "type": "choice",
       "default": "1",
       "options": [
@@ -751,7 +735,7 @@
     },
     {
       "key": "TC_shiftGroup",
-      "label": "Трансмиссия ZF 8HP · Таблица переключений",
+      "label": "ZF 8HP Transmission · Shift table",
       "type": "choice",
       "default": "up",
       "options": [
@@ -771,7 +755,7 @@
     },
     {
       "key": "TC_tempUnit",
-      "label": "Трансмиссия ZF 8HP · Температура",
+      "label": "ZF 8HP Transmission · Temperature",
       "type": "choice",
       "default": "C",
       "options": [
@@ -786,5 +770,11 @@
       ]
     }
   ],
-  "internet": true
+  "internet": true,
+  "texts": {
+    "ru": {
+      "title": "MGU Tools",
+      "description": "Единая оболочка MGU — этап интеграции"
+    }
+  }
 }

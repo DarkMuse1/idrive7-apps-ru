@@ -1,8 +1,8 @@
 {
   "id": "service",
-  "title": "Обслуживание",
+  "title": "Service",
   "description": "Service requirements from the instrument cluster: oil, brakes, brake fluid, vehicle check, inspection - distance, date, details; brake fluid and vehicle check reset",
-  "version": "1.6.4",
+  "version": "1.6.5",
   "vendor": "custom",
   "loggingId": "OA96",
   "iconGlyph": "wrench",
@@ -145,5 +145,17 @@
         ]
       ]
     }
-  ]
+  ],
+  "texts": {
+    "ru": {
+      "title": "Обслуживание",
+      "description": "Сроки обслуживания из комбинации приборов: масло, тормоза, тормозная жидкость, контроль автомобиля, осмотр — пробег, дата и подробности; сброс интервалов тормозной жидкости и контроля автомобиля"
+    },
+    "zh-CN": {
+      "title": "保养信息"
+    },
+    "ko": {
+      "title": "정비 정보"
+    }
+  }
 }

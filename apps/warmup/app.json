@@ -1,8 +1,8 @@
 {
   "id": "warmup",
-  "title": "Прогрев",
+  "title": "Warm-Up",
   "description": "Oil and coolant warm-up calculator (time to ready), safe rev limit and turbo cool-down",
-  "version": "1.8.1",
+  "version": "1.8.2",
   "vendor": "custom",
   "loggingId": "OA9A",
   "iconGlyph": "temp",
@@ -268,5 +268,17 @@
         ]
       ]
     }
-  ]
+  ],
+  "texts": {
+    "ru": {
+      "title": "Прогрев",
+      "description": "Расчёт прогрева масла и охлаждающей жидкости (время до готовности), безопасного предела оборотов и охлаждения турбины"
+    },
+    "zh-CN": {
+      "title": "暖机助手"
+    },
+    "ko": {
+      "title": "엔진 예열"
+    }
+  }
 }

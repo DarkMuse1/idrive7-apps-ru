@@ -1,0 +1,103 @@
+[
+  {
+    "path": [
+      "title"
+    ],
+    "text": "Видеорегистратор",
+    "english": "Drive Recorder",
+    "anchor": [
+      "title"
+    ]
+  },
+  {
+    "path": [
+      "description"
+    ],
+    "text": "Drive Recorder: экспериментальная запись ICAM, архив и просмотр на стоянке. Доступ по паролю.",
+    "english": "Drive Recorder: experimental ICAM recording, archive and playback while parked. Password access.",
+    "anchor": [
+      "description"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      0,
+      "title"
+    ],
+    "text": "Видеорегистратор",
+    "english": "Drive Recorder",
+    "anchor": [
+      "screen",
+      "MAIN"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      0,
+      "buttons",
+      0,
+      1
+    ],
+    "text": "Назад по пунктам",
+    "english": "Back through items",
+    "anchor": [
+      "screen",
+      "MAIN",
+      "button",
+      "PREV"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      0,
+      "buttons",
+      1,
+      1
+    ],
+    "text": "Далее",
+    "english": "Next",
+    "anchor": [
+      "screen",
+      "MAIN",
+      "button",
+      "NEXT"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      0,
+      "buttons",
+      2,
+      1
+    ],
+    "text": "Выбрать",
+    "english": "Select",
+    "anchor": [
+      "screen",
+      "MAIN",
+      "button",
+      "ENTER"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      0,
+      "buttons",
+      3,
+      1
+    ],
+    "text": "Запись",
+    "english": "Recording",
+    "anchor": [
+      "screen",
+      "MAIN",
+      "button",
+      "HOME"
+    ]
+  }
+]

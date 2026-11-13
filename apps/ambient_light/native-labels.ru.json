@@ -1,0 +1,249 @@
+[
+  {
+    "path": [
+      "title"
+    ],
+    "text": "Подсветка",
+    "english": "Ambient Lighting",
+    "anchor": [
+      "title"
+    ]
+  },
+  {
+    "path": [
+      "description"
+    ],
+    "text": "Произвольный RGB-цвет подсветки, реальные зоны, яркость и сохранённые цвета. Закрытый модуль загружается после ввода пароля.",
+    "english": "Custom RGB ambient lighting, actual zones, brightness and saved colours. The protected module loads after you enter the password.",
+    "anchor": [
+      "description"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      0,
+      "title"
+    ],
+    "text": "Подсветка",
+    "english": "Ambient Lighting",
+    "anchor": [
+      "screen",
+      "MAIN"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      0,
+      "buttons",
+      0,
+      1
+    ],
+    "text": "Назад по меню",
+    "english": "Back through menu",
+    "anchor": [
+      "screen",
+      "MAIN",
+      "button",
+      "BTN_PREV"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      0,
+      "buttons",
+      1,
+      1
+    ],
+    "text": "Далее",
+    "english": "Next",
+    "anchor": [
+      "screen",
+      "MAIN",
+      "button",
+      "BTN_NEXT"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      0,
+      "buttons",
+      2,
+      1
+    ],
+    "text": "Выбрать",
+    "english": "Select",
+    "anchor": [
+      "screen",
+      "MAIN",
+      "button",
+      "BTN_SELECT"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      0,
+      "buttons",
+      3,
+      1
+    ],
+    "text": "Назад",
+    "english": "Back",
+    "anchor": [
+      "screen",
+      "MAIN",
+      "button",
+      "BTN_BACK"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      0,
+      "buttons",
+      4,
+      1
+    ],
+    "text": "Настройки",
+    "english": "Settings",
+    "anchor": [
+      "screen",
+      "MAIN",
+      "button",
+      "BTN_SETTINGS"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      0,
+      "label"
+    ],
+    "text": "Оформление",
+    "english": "Appearance",
+    "anchor": [
+      "setting",
+      "theme"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      0,
+      "options",
+      0,
+      1
+    ],
+    "text": "MGU Tools",
+    "english": "MGU Tools",
+    "anchor": [
+      "setting",
+      "theme"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      0,
+      "options",
+      1,
+      1
+    ],
+    "text": "M Tricolour",
+    "english": "M Tricolour",
+    "anchor": [
+      "setting",
+      "theme"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      1,
+      "label"
+    ],
+    "text": "Компоновка",
+    "english": "Layout",
+    "anchor": [
+      "setting",
+      "layout"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      1,
+      "options",
+      0,
+      1
+    ],
+    "text": "Полный экран",
+    "english": "Full screen",
+    "anchor": [
+      "setting",
+      "layout"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      1,
+      "options",
+      1,
+      1
+    ],
+    "text": "Стандартный",
+    "english": "Standard",
+    "anchor": [
+      "setting",
+      "layout"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      2,
+      "label"
+    ],
+    "text": "Отрисовка",
+    "english": "Renderer",
+    "anchor": [
+      "setting",
+      "renderer"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      2,
+      "options",
+      0,
+      1
+    ],
+    "text": "Автоматически",
+    "english": "Automatic",
+    "anchor": [
+      "setting",
+      "renderer"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      2,
+      "options",
+      1,
+      1
+    ],
+    "text": "Программная",
+    "english": "Software",
+    "anchor": [
+      "setting",
+      "renderer"
+    ]
+  }
+]

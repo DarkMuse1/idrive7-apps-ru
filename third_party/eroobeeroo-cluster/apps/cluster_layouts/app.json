@@ -1,8 +1,8 @@
 {
   "id": "cluster_layouts",
-  "title": "Оформление приборной панели",
-  "description": "Собственное оформление всей приборной панели: шкалы, передача и температуры",
-  "version": "0.28.1",
+  "title": "Cluster Layouts",
+  "description": "Your own layout on the whole instrument cluster (round dials, gear, temperatures), drawn by the cluster itself",
+  "version": "0.28.2",
   "startType": "autostart",
   "vendor": "custom",
   "loggingId": "OA9L",
@@ -1038,5 +1038,11 @@
     "mgu-inputgate": "1.0.0",
     "cluster-render": "0.4.2"
   },
-  "shared": true
+  "shared": true,
+  "texts": {
+    "ru": {
+      "title": "Оформление приборной панели",
+      "description": "Собственное оформление всей приборной панели: шкалы, передача и температуры"
+    }
+  }
 }

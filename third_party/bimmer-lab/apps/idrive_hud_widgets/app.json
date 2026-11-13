@@ -1,8 +1,8 @@
 {
   "id": "idrive_hud_widgets",
-  "title": "Виджеты проекционного дисплея",
+  "title": "HUD Widgets",
   "description": "Gear, shift lights, boost, oil, coolant and intake temperatures, a G-meter and trip figures on the windshield HUD, in Classic, M or Night themes",
-  "version": "0.12.10",
+  "version": "0.12.11",
   "vendor": "custom",
   "loggingId": "OAH1",
   "iconGlyph": "HUD",
@@ -953,5 +953,11 @@
       ]
     },
     "tankLitres": 65
+  },
+  "texts": {
+    "ru": {
+      "title": "Виджеты проекционного дисплея",
+      "description": "Передача, индикаторы переключения, наддув, температуры масла, охлаждающей жидкости и впуска, измеритель перегрузок и данные поездки на проекционном дисплее HUD на лобовом стекле, в темах Classic, M или Night"
+    }
   }
 }

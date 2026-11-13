@@ -2,8 +2,8 @@
   "id": "mgu-ambient-rgb",
   "kind": "tool",
   "version": "0.1.3",
-  "title": "Загрузчик закрытой RGB-подсветки",
-  "description": "Загружает локальную службу из защищённого приложения после ввода пароля; рабочего RGB-кода в этом компоненте нет.",
+  "title": "Ambient Lighting service",
+  "description": "Local RGB lighting service for the Ambient Lighting app. Access is verified by the app.",
   "mguHmi": [
     "ID7"
   ],
@@ -33,5 +33,11 @@
   ],
   "restart": [
     "mgu-ambient-rgb.service"
-  ]
+  ],
+  "texts": {
+    "ru": {
+      "title": "Загрузчик закрытой RGB-подсветки",
+      "description": "Загружает локальную службу из защищённого приложения после ввода пароля; рабочего RGB-кода в этом компоненте нет."
+    }
+  }
 }

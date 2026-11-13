@@ -1,0 +1,1799 @@
+[
+  {
+    "path": [
+      "title"
+    ],
+    "text": "MGU Tools",
+    "english": "MGU Tools",
+    "anchor": [
+      "title"
+    ]
+  },
+  {
+    "path": [
+      "description"
+    ],
+    "text": "Единая оболочка MGU — этап интеграции",
+    "english": "Unified MGU shell — integration phase",
+    "anchor": [
+      "description"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      0,
+      "title"
+    ],
+    "text": "MGU Tools",
+    "english": "MGU Tools",
+    "anchor": [
+      "screen",
+      "MAIN"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      0,
+      "buttons",
+      0,
+      1
+    ],
+    "text": "Назад по меню",
+    "english": "Back through menu",
+    "anchor": [
+      "screen",
+      "MAIN",
+      "button",
+      "BTN_PREV"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      0,
+      "buttons",
+      1,
+      1
+    ],
+    "text": "Далее",
+    "english": "Next",
+    "anchor": [
+      "screen",
+      "MAIN",
+      "button",
+      "BTN_NEXT"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      0,
+      "buttons",
+      2,
+      1
+    ],
+    "text": "Выбрать",
+    "english": "Select",
+    "anchor": [
+      "screen",
+      "MAIN",
+      "button",
+      "BTN_SELECT"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      0,
+      "buttons",
+      3,
+      1
+    ],
+    "text": "Назад",
+    "english": "Back",
+    "anchor": [
+      "screen",
+      "MAIN",
+      "button",
+      "BTN_BACK"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      1,
+      "title"
+    ],
+    "text": "Freedoom",
+    "english": "Freedoom",
+    "anchor": [
+      "screen",
+      "DOOM_GAME"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      1,
+      "buttons",
+      0,
+      1
+    ],
+    "text": "Шаг назад",
+    "english": "Step back",
+    "anchor": [
+      "screen",
+      "DOOM_GAME",
+      "button",
+      "DOOM_BACK"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      1,
+      "buttons",
+      1,
+      1
+    ],
+    "text": "Влево",
+    "english": "Left",
+    "anchor": [
+      "screen",
+      "DOOM_GAME",
+      "button",
+      "DOOM_LEFT"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      1,
+      "buttons",
+      2,
+      1
+    ],
+    "text": "Стоять / огонь",
+    "english": "Stand / fire",
+    "anchor": [
+      "screen",
+      "DOOM_GAME",
+      "button",
+      "DOOM_STAND"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      1,
+      "buttons",
+      3,
+      1
+    ],
+    "text": "Вперёд",
+    "english": "Forward",
+    "anchor": [
+      "screen",
+      "DOOM_GAME",
+      "button",
+      "DOOM_WALK"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      1,
+      "buttons",
+      4,
+      1
+    ],
+    "text": "Вправо",
+    "english": "Right",
+    "anchor": [
+      "screen",
+      "DOOM_GAME",
+      "button",
+      "DOOM_RIGHT"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      1,
+      "buttons",
+      5,
+      1
+    ],
+    "text": "Оружие",
+    "english": "Weapon",
+    "anchor": [
+      "screen",
+      "DOOM_GAME",
+      "button",
+      "DOOM_WEAPON"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      1,
+      "buttons",
+      6,
+      1
+    ],
+    "text": "В меню",
+    "english": "To menu",
+    "anchor": [
+      "screen",
+      "DOOM_GAME",
+      "button",
+      "DOOM_EXIT"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      2,
+      "title"
+    ],
+    "text": "MGU Tools · Данные автомобиля",
+    "english": "MGU Tools · Vehicle Data",
+    "anchor": [
+      "screen",
+      "LD_MAIN"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      2,
+      "buttons",
+      0,
+      1
+    ],
+    "text": "Компоновка",
+    "english": "Layout",
+    "anchor": [
+      "screen",
+      "LD_MAIN",
+      "button",
+      "LD_BTN_ACTION"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      2,
+      "buttons",
+      1,
+      1
+    ],
+    "text": "Следующая",
+    "english": "Next",
+    "anchor": [
+      "screen",
+      "LD_MAIN",
+      "button",
+      "LD_BTN_PAGE"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      2,
+      "buttons",
+      2,
+      1
+    ],
+    "text": "Обзор",
+    "english": "Browse",
+    "anchor": [
+      "screen",
+      "LD_MAIN",
+      "button",
+      "LD_BTN_BROWSE"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      2,
+      "buttons",
+      3,
+      1
+    ],
+    "text": "Настройки",
+    "english": "Settings",
+    "anchor": [
+      "screen",
+      "LD_MAIN",
+      "button",
+      "LD_BTN_SETTINGS"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      2,
+      "buttons",
+      4,
+      1
+    ],
+    "text": "В меню MGU Tools",
+    "english": "To MGU Tools menu",
+    "anchor": [
+      "screen",
+      "LD_MAIN",
+      "button",
+      "LD_RETURN"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      3,
+      "title"
+    ],
+    "text": "MGU Tools · Управление двигателем",
+    "english": "MGU Tools · Engine Control",
+    "anchor": [
+      "screen",
+      "EC_MAIN"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      3,
+      "buttons",
+      0,
+      1
+    ],
+    "text": "Открыть",
+    "english": "Open",
+    "anchor": [
+      "screen",
+      "EC_MAIN",
+      "button",
+      "EC_BTN_OPEN"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      3,
+      "buttons",
+      1,
+      1
+    ],
+    "text": "Закрыть",
+    "english": "Close",
+    "anchor": [
+      "screen",
+      "EC_MAIN",
+      "button",
+      "EC_BTN_CLOSE"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      3,
+      "buttons",
+      2,
+      1
+    ],
+    "text": "Штатно",
+    "english": "Factory",
+    "anchor": [
+      "screen",
+      "EC_MAIN",
+      "button",
+      "EC_BTN_OEM"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      3,
+      "buttons",
+      3,
+      1
+    ],
+    "text": "Следующая",
+    "english": "Next",
+    "anchor": [
+      "screen",
+      "EC_MAIN",
+      "button",
+      "EC_BTN_PAGE"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      3,
+      "buttons",
+      4,
+      1
+    ],
+    "text": "Настройки",
+    "english": "Settings",
+    "anchor": [
+      "screen",
+      "EC_MAIN",
+      "button",
+      "EC_BTN_SETTINGS"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      3,
+      "buttons",
+      5,
+      1
+    ],
+    "text": "В меню MGU Tools",
+    "english": "To MGU Tools menu",
+    "anchor": [
+      "screen",
+      "EC_MAIN",
+      "button",
+      "EC_RETURN"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      4,
+      "title"
+    ],
+    "text": "MGU Tools · Трансмиссия ZF 8HP",
+    "english": "MGU Tools · ZF 8HP Transmission",
+    "anchor": [
+      "screen",
+      "TC_MAIN"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      4,
+      "buttons",
+      0,
+      1
+    ],
+    "text": "Следующая",
+    "english": "Next",
+    "anchor": [
+      "screen",
+      "TC_MAIN",
+      "button",
+      "TC_BTN_PAGE"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      4,
+      "buttons",
+      1,
+      1
+    ],
+    "text": "Следующий пункт",
+    "english": "Next item",
+    "anchor": [
+      "screen",
+      "TC_MAIN",
+      "button",
+      "TC_BTN_SELECT"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      4,
+      "buttons",
+      2,
+      1
+    ],
+    "text": "Просмотр / обновить",
+    "english": "View / refresh",
+    "anchor": [
+      "screen",
+      "TC_MAIN",
+      "button",
+      "TC_BTN_ACTION"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      4,
+      "buttons",
+      3,
+      1
+    ],
+    "text": "Настройки",
+    "english": "Settings",
+    "anchor": [
+      "screen",
+      "TC_MAIN",
+      "button",
+      "TC_BTN_SETTINGS"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      4,
+      "buttons",
+      4,
+      1
+    ],
+    "text": "В меню MGU Tools",
+    "english": "To MGU Tools menu",
+    "anchor": [
+      "screen",
+      "TC_MAIN",
+      "button",
+      "TC_RETURN"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      0,
+      "label"
+    ],
+    "text": "Оформление",
+    "english": "Appearance",
+    "anchor": [
+      "setting",
+      "theme"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      0,
+      "options",
+      0,
+      1
+    ],
+    "text": "MGU Tools",
+    "english": "MGU Tools",
+    "anchor": [
+      "setting",
+      "theme"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      1,
+      "label"
+    ],
+    "text": "Компоновка",
+    "english": "Layout",
+    "anchor": [
+      "setting",
+      "layout"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      1,
+      "options",
+      0,
+      1
+    ],
+    "text": "Полный экран",
+    "english": "Full screen",
+    "anchor": [
+      "setting",
+      "layout"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      1,
+      "options",
+      1,
+      1
+    ],
+    "text": "Стандартная",
+    "english": "Standard",
+    "anchor": [
+      "setting",
+      "layout"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      2,
+      "label"
+    ],
+    "text": "Отрисовка",
+    "english": "Renderer",
+    "anchor": [
+      "setting",
+      "renderer"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      2,
+      "options",
+      0,
+      1
+    ],
+    "text": "Программная",
+    "english": "Software",
+    "anchor": [
+      "setting",
+      "renderer"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      2,
+      "options",
+      1,
+      1
+    ],
+    "text": "GPU, если доступен",
+    "english": "GPU, if available",
+    "anchor": [
+      "setting",
+      "renderer"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      3,
+      "label"
+    ],
+    "text": "Демонстрация",
+    "english": "Demo",
+    "anchor": [
+      "setting",
+      "demo"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      3,
+      "options",
+      0,
+      1
+    ],
+    "text": "Выключена",
+    "english": "Disabled",
+    "anchor": [
+      "setting",
+      "demo"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      3,
+      "options",
+      1,
+      1
+    ],
+    "text": "Включена",
+    "english": "Enabled",
+    "anchor": [
+      "setting",
+      "demo"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      4,
+      "label"
+    ],
+    "text": "Скорость",
+    "english": "Speed",
+    "anchor": [
+      "setting",
+      "units"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      4,
+      "options",
+      0,
+      1
+    ],
+    "text": "км/ч",
+    "english": "km/h",
+    "anchor": [
+      "setting",
+      "units"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      4,
+      "options",
+      1,
+      1
+    ],
+    "text": "mph",
+    "english": "mph",
+    "anchor": [
+      "setting",
+      "units"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      5,
+      "label"
+    ],
+    "text": "Обзор",
+    "english": "Browse",
+    "anchor": [
+      "setting",
+      "overview"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      5,
+      "options",
+      0,
+      1
+    ],
+    "text": "Тахометр",
+    "english": "Tachometer",
+    "anchor": [
+      "setting",
+      "overview"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      5,
+      "options",
+      1,
+      1
+    ],
+    "text": "eDrive",
+    "english": "eDrive",
+    "anchor": [
+      "setting",
+      "overview"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      6,
+      "label"
+    ],
+    "text": "Тип двигателя",
+    "english": "Engine type",
+    "anchor": [
+      "setting",
+      "engine"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      6,
+      "options",
+      0,
+      1
+    ],
+    "text": "Авто (по данным автомобиля)",
+    "english": "Auto (from vehicle data)",
+    "anchor": [
+      "setting",
+      "engine"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      6,
+      "options",
+      1,
+      1
+    ],
+    "text": "Дизель",
+    "english": "Diesel",
+    "anchor": [
+      "setting",
+      "engine"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      6,
+      "options",
+      2,
+      1
+    ],
+    "text": "Бензин",
+    "english": "Petrol",
+    "anchor": [
+      "setting",
+      "engine"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      7,
+      "label"
+    ],
+    "text": "Виджет на главном экране",
+    "english": "Home screen widget",
+    "anchor": [
+      "setting",
+      "homeWidget"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      7,
+      "options",
+      0,
+      1
+    ],
+    "text": "eDrive",
+    "english": "eDrive",
+    "anchor": [
+      "setting",
+      "homeWidget"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      7,
+      "options",
+      1,
+      1
+    ],
+    "text": "Live Data · выбранные приборы",
+    "english": "Live Data · selected gauges",
+    "anchor": [
+      "setting",
+      "homeWidget"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      8,
+      "label"
+    ],
+    "text": "Данные автомобиля · Страницы блоков показывают",
+    "english": "Vehicle Data · Control unit pages show",
+    "anchor": [
+      "setting",
+      "LD_show"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      8,
+      "options",
+      0,
+      1
+    ],
+    "text": "What the unit may have",
+    "english": "What the unit may have",
+    "anchor": [
+      "setting",
+      "LD_show"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      8,
+      "options",
+      1,
+      1
+    ],
+    "text": "Only what answered",
+    "english": "Only what answered",
+    "anchor": [
+      "setting",
+      "LD_show"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      8,
+      "options",
+      2,
+      1
+    ],
+    "text": "Everything it lists",
+    "english": "Everything it lists",
+    "anchor": [
+      "setting",
+      "LD_show"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      9,
+      "label"
+    ],
+    "text": "Данные автомобиля · Названия",
+    "english": "Vehicle Data · Names",
+    "anchor": [
+      "setting",
+      "LD_names"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      9,
+      "options",
+      0,
+      1
+    ],
+    "text": "English",
+    "english": "English",
+    "anchor": [
+      "setting",
+      "LD_names"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      9,
+      "options",
+      1,
+      1
+    ],
+    "text": "German (BMW)",
+    "english": "German (BMW)",
+    "anchor": [
+      "setting",
+      "LD_names"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      9,
+      "options",
+      2,
+      1
+    ],
+    "text": "BMW identifiers",
+    "english": "BMW identifiers",
+    "anchor": [
+      "setting",
+      "LD_names"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      10,
+      "label"
+    ],
+    "text": "Данные автомобиля · Опрашивать блоки при открытии",
+    "english": "Vehicle Data · Read control units on opening",
+    "anchor": [
+      "setting",
+      "LD_autoScan"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      11,
+      "label"
+    ],
+    "text": "Данные автомобиля · Виджет показывает",
+    "english": "Vehicle Data · Widget shows",
+    "anchor": [
+      "setting",
+      "LD_widget"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      11,
+      "options",
+      0,
+      1
+    ],
+    "text": "Gauges 1",
+    "english": "Gauges 1",
+    "anchor": [
+      "setting",
+      "LD_widget"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      11,
+      "options",
+      1,
+      1
+    ],
+    "text": "Gauges 2",
+    "english": "Gauges 2",
+    "anchor": [
+      "setting",
+      "LD_widget"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      11,
+      "options",
+      2,
+      1
+    ],
+    "text": "Gauges 3",
+    "english": "Gauges 3",
+    "anchor": [
+      "setting",
+      "LD_widget"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      11,
+      "options",
+      3,
+      1
+    ],
+    "text": "Gauges 4",
+    "english": "Gauges 4",
+    "anchor": [
+      "setting",
+      "LD_widget"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      11,
+      "options",
+      4,
+      1
+    ],
+    "text": "Gauges 5",
+    "english": "Gauges 5",
+    "anchor": [
+      "setting",
+      "LD_widget"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      11,
+      "options",
+      5,
+      1
+    ],
+    "text": "Gauges 6",
+    "english": "Gauges 6",
+    "anchor": [
+      "setting",
+      "LD_widget"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      12,
+      "label"
+    ],
+    "text": "Данные автомобиля · Виджет: изображение",
+    "english": "Vehicle Data · Widget: image",
+    "anchor": [
+      "setting",
+      "LD_widgetFit"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      12,
+      "options",
+      0,
+      1
+    ],
+    "text": "Small, clear of the edges",
+    "english": "Small, clear of the edges",
+    "anchor": [
+      "setting",
+      "LD_widgetFit"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      12,
+      "options",
+      1,
+      1
+    ],
+    "text": "Medium",
+    "english": "Medium",
+    "anchor": [
+      "setting",
+      "LD_widgetFit"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      12,
+      "options",
+      2,
+      1
+    ],
+    "text": "Fill the widget",
+    "english": "Fill the widget",
+    "anchor": [
+      "setting",
+      "LD_widgetFit"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      13,
+      "label"
+    ],
+    "text": "Данные автомобиля · Виджет: обновлений в секунду",
+    "english": "Vehicle Data · Widget: updates per second",
+    "anchor": [
+      "setting",
+      "LD_widgetFps"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      14,
+      "label"
+    ],
+    "text": "Данные автомобиля · Бортовой компьютер (каждая поездка)",
+    "english": "Vehicle Data · Trip computer (each journey)",
+    "anchor": [
+      "setting",
+      "LD_trips"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      15,
+      "label"
+    ],
+    "text": "Данные автомобиля · Валюта",
+    "english": "Vehicle Data · Currency",
+    "anchor": [
+      "setting",
+      "LD_currency"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      15,
+      "options",
+      0,
+      1
+    ],
+    "text": "EUR",
+    "english": "EUR",
+    "anchor": [
+      "setting",
+      "LD_currency"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      15,
+      "options",
+      1,
+      1
+    ],
+    "text": "USD",
+    "english": "USD",
+    "anchor": [
+      "setting",
+      "LD_currency"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      15,
+      "options",
+      2,
+      1
+    ],
+    "text": "CAD",
+    "english": "CAD",
+    "anchor": [
+      "setting",
+      "LD_currency"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      15,
+      "options",
+      3,
+      1
+    ],
+    "text": "GBP",
+    "english": "GBP",
+    "anchor": [
+      "setting",
+      "LD_currency"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      15,
+      "options",
+      4,
+      1
+    ],
+    "text": "CHF",
+    "english": "CHF",
+    "anchor": [
+      "setting",
+      "LD_currency"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      15,
+      "options",
+      5,
+      1
+    ],
+    "text": "PLN",
+    "english": "PLN",
+    "anchor": [
+      "setting",
+      "LD_currency"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      15,
+      "options",
+      6,
+      1
+    ],
+    "text": "CZK",
+    "english": "CZK",
+    "anchor": [
+      "setting",
+      "LD_currency"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      15,
+      "options",
+      7,
+      1
+    ],
+    "text": "SEK",
+    "english": "SEK",
+    "anchor": [
+      "setting",
+      "LD_currency"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      15,
+      "options",
+      8,
+      1
+    ],
+    "text": "NOK",
+    "english": "NOK",
+    "anchor": [
+      "setting",
+      "LD_currency"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      15,
+      "options",
+      9,
+      1
+    ],
+    "text": "DKK",
+    "english": "DKK",
+    "anchor": [
+      "setting",
+      "LD_currency"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      15,
+      "options",
+      10,
+      1
+    ],
+    "text": "HUF",
+    "english": "HUF",
+    "anchor": [
+      "setting",
+      "LD_currency"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      15,
+      "options",
+      11,
+      1
+    ],
+    "text": "UAH",
+    "english": "UAH",
+    "anchor": [
+      "setting",
+      "LD_currency"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      16,
+      "label"
+    ],
+    "text": "Данные автомобиля · Источники и непроверенные значения",
+    "english": "Vehicle Data · Sources and unverified values",
+    "anchor": [
+      "setting",
+      "LD_details"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      17,
+      "label"
+    ],
+    "text": "Управление двигателем · Заслонка выпуска",
+    "english": "Engine Control · Exhaust flap",
+    "anchor": [
+      "setting",
+      "EC_arm"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      17,
+      "options",
+      0,
+      1
+    ],
+    "text": "Disarmed · simulated (safe)",
+    "english": "Disarmed · simulated (safe)",
+    "anchor": [
+      "setting",
+      "EC_arm"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      17,
+      "options",
+      1,
+      1
+    ],
+    "text": "Armed · actuates the real valve",
+    "english": "Armed · actuates the real valve",
+    "anchor": [
+      "setting",
+      "EC_arm"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      18,
+      "label"
+    ],
+    "text": "Управление двигателем · Программа тюнинга",
+    "english": "Engine Control · Tuning programme",
+    "anchor": [
+      "setting",
+      "EC_tuner"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      18,
+      "options",
+      0,
+      1
+    ],
+    "text": "Off · nothing is sent to the car (safe)",
+    "english": "Off · nothing is sent to the car (safe)",
+    "anchor": [
+      "setting",
+      "EC_tuner"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      18,
+      "options",
+      1,
+      1
+    ],
+    "text": "BM3 · engine map, burbles, ASD",
+    "english": "BM3 · engine map, burbles, ASD",
+    "anchor": [
+      "setting",
+      "EC_tuner"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      18,
+      "options",
+      2,
+      1
+    ],
+    "text": "MHD · engine map, Max Cooling",
+    "english": "MHD · engine map, Max Cooling",
+    "anchor": [
+      "setting",
+      "EC_tuner"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      19,
+      "label"
+    ],
+    "text": "Управление двигателем · xDrive (эксперимент)",
+    "english": "Engine Control · xDrive (experimental)",
+    "anchor": [
+      "setting",
+      "EC_xdrive"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      19,
+      "options",
+      0,
+      1
+    ],
+    "text": "Off · nothing is sent (safe)",
+    "english": "Off · nothing is sent (safe)",
+    "anchor": [
+      "setting",
+      "EC_xdrive"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      19,
+      "options",
+      1,
+      1
+    ],
+    "text": "On · xDrive tab, xDrive off until ignition off",
+    "english": "On · xDrive tab, xDrive off until ignition off",
+    "anchor": [
+      "setting",
+      "EC_xdrive"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      20,
+      "label"
+    ],
+    "text": "Трансмиссия ZF 8HP · Вариант EGS",
+    "english": "ZF 8HP Transmission · EGS variant",
+    "anchor": [
+      "setting",
+      "TC_variants"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      20,
+      "options",
+      0,
+      1
+    ],
+    "text": "Verified only (0F25D0)",
+    "english": "Verified only (0F25D0)",
+    "anchor": [
+      "setting",
+      "TC_variants"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      20,
+      "options",
+      1,
+      1
+    ],
+    "text": "Try any (unverified)",
+    "english": "Try any (unverified)",
+    "anchor": [
+      "setting",
+      "TC_variants"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      21,
+      "label"
+    ],
+    "text": "Трансмиссия ZF 8HP · Обновлять, пока страница видна",
+    "english": "ZF 8HP Transmission · Refresh while page is visible",
+    "anchor": [
+      "setting",
+      "TC_autoRefresh"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      22,
+      "label"
+    ],
+    "text": "Трансмиссия ZF 8HP · Интервал обновления",
+    "english": "ZF 8HP Transmission · Refresh interval",
+    "anchor": [
+      "setting",
+      "TC_liveInterval"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      23,
+      "label"
+    ],
+    "text": "Трансмиссия ZF 8HP · Семейство карт переключений",
+    "english": "ZF 8HP Transmission · Shift map family",
+    "anchor": [
+      "setting",
+      "TC_mapFamily"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      23,
+      "options",
+      0,
+      1
+    ],
+    "text": "KF1",
+    "english": "KF1",
+    "anchor": [
+      "setting",
+      "TC_mapFamily"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      23,
+      "options",
+      1,
+      1
+    ],
+    "text": "KF2",
+    "english": "KF2",
+    "anchor": [
+      "setting",
+      "TC_mapFamily"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      23,
+      "options",
+      2,
+      1
+    ],
+    "text": "Cold KF1",
+    "english": "Cold KF1",
+    "anchor": [
+      "setting",
+      "TC_mapFamily"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      23,
+      "options",
+      3,
+      1
+    ],
+    "text": "Cold KF2",
+    "english": "Cold KF2",
+    "anchor": [
+      "setting",
+      "TC_mapFamily"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      24,
+      "label"
+    ],
+    "text": "Трансмиссия ZF 8HP · Таблица переключений",
+    "english": "ZF 8HP Transmission · Shift table",
+    "anchor": [
+      "setting",
+      "TC_shiftGroup"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      24,
+      "options",
+      0,
+      1
+    ],
+    "text": "Upshifts",
+    "english": "Upshifts",
+    "anchor": [
+      "setting",
+      "TC_shiftGroup"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      24,
+      "options",
+      1,
+      1
+    ],
+    "text": "Downshifts",
+    "english": "Downshifts",
+    "anchor": [
+      "setting",
+      "TC_shiftGroup"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      24,
+      "options",
+      2,
+      1
+    ],
+    "text": "Skip downshifts",
+    "english": "Skip downshifts",
+    "anchor": [
+      "setting",
+      "TC_shiftGroup"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      25,
+      "label"
+    ],
+    "text": "Трансмиссия ZF 8HP · Температура",
+    "english": "ZF 8HP Transmission · Temperature",
+    "anchor": [
+      "setting",
+      "TC_tempUnit"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      25,
+      "options",
+      0,
+      1
+    ],
+    "text": "Celsius",
+    "english": "Celsius",
+    "anchor": [
+      "setting",
+      "TC_tempUnit"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      25,
+      "options",
+      1,
+      1
+    ],
+    "text": "Fahrenheit",
+    "english": "Fahrenheit",
+    "anchor": [
+      "setting",
+      "TC_tempUnit"
+    ]
+  }
+]

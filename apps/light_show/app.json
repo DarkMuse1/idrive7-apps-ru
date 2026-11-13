@@ -1,8 +1,8 @@
 {
   "id": "light_show",
-  "title": "Световое шоу",
-  "description": "Light Show: управление наружным светом на стоянке. Экспериментальная версия по паролю.",
-  "version": "0.4.9",
+  "title": "Light Show",
+  "description": "Light Show: control exterior lighting while parked. Experimental version with password access.",
+  "version": "0.4.10",
   "vendor": "custom",
   "loggingId": "OAL9",
   "iconGlyph": "LS",
@@ -29,28 +29,28 @@
     {
       "name": "MAIN",
       "kind": "canvas",
-      "title": "Световое шоу",
+      "title": "Light Show",
       "chrome": false,
       "buttons": [
         [
           "STOP",
-          "Стоп"
+          "Stop"
         ],
         [
           "PREV",
-          "Назад по пунктам"
+          "Back through items"
         ],
         [
           "NEXT",
-          "Далее"
+          "Next"
         ],
         [
           "ENTER",
-          "Выбрать"
+          "Select"
         ],
         [
           "HOME",
-          "Главная"
+          "Home"
         ]
       ],
       "bar": false,
@@ -60,39 +60,39 @@
   "settings": [
     {
       "key": "pattern",
-      "label": "Рисунок",
+      "label": "Pattern",
       "type": "choice",
       "default": "double",
       "options": [
         [
           "alternate",
-          "Попеременно"
+          "Alternating"
         ],
         [
           "double",
-          "Двойная вспышка"
+          "Double flash"
         ],
         [
           "triple",
-          "Тройная вспышка"
+          "Triple flash"
         ],
         [
           "together",
-          "Одновременно"
+          "Simultaneous"
         ],
         [
           "cross",
-          "Перекрёстный импульс"
+          "Cross pulse"
         ],
         [
           "wave",
-          "Волна"
+          "Wave"
         ]
       ]
     },
     {
       "key": "tempo",
-      "label": "Шаг",
+      "label": "Step",
       "type": "choice",
       "default": "150",
       "options": [
@@ -120,7 +120,7 @@
     },
     {
       "key": "duration",
-      "label": "Длительность",
+      "label": "Duration",
       "type": "choice",
       "default": "15",
       "options": [
@@ -144,7 +144,7 @@
     },
     {
       "key": "theme",
-      "label": "Цвет предпросмотра",
+      "label": "Preview colour",
       "type": "choice",
       "default": "m_tricolour",
       "options": [
@@ -164,7 +164,7 @@
     },
     {
       "key": "renderer",
-      "label": "Отрисовка",
+      "label": "Renderer",
       "type": "choice",
       "default": "auto",
       "options": [
@@ -187,5 +187,11 @@
   "uninstallable": true,
   "requires": {
     "mgu-deploy": "0.7.5"
+  },
+  "texts": {
+    "ru": {
+      "title": "Световое шоу",
+      "description": "Light Show: управление наружным светом на стоянке. Экспериментальная версия по паролю."
+    }
   }
 }

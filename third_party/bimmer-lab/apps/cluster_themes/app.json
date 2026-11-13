@@ -1,8 +1,8 @@
 {
   "id": "cluster_themes",
-  "title": "Темы приборной панели",
+  "title": "Cluster Themes",
   "description": "Redraws the instrument cluster: GT3 race dash, M-style, Sport, Minimal, Roadster, Track, Drag, Rally, Retro 80s, Cruise, Dyno (BMW-coloured readout tiles) or Ribbon (with holiday editions), with shift lights, boost, temps, tyres, a G-meter and a 0-60 timer",
-  "version": "0.15.1",
+  "version": "0.15.2",
   "vendor": "custom",
   "loggingId": "OAC1",
   "iconGlyph": "CLU",
@@ -1154,6 +1154,12 @@
     "engine": {
       "torqueNm": 500,
       "powerKw": 285
+    }
+  },
+  "texts": {
+    "ru": {
+      "title": "Темы приборной панели",
+      "description": "Перерисовка приборной панели: гоночная панель GT3, M-style, Sport, Minimal, Roadster, Track, Drag, Rally, Retro 80s, Cruise, Dyno (плитки показаний в цветах BMW) или Ribbon (с праздничными вариантами), с индикаторами переключения, наддувом, температурами, показаниями шин, измерителем перегрузок и таймером 0-60"
     }
   }
 }

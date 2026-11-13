@@ -1,8 +1,8 @@
 {
   "id": "dtc_scanner",
-  "title": "Диагностика ошибок",
+  "title": "Fault Scanner",
   "description": "Read and clear fault memory of every control unit, plus active Check Control messages",
-  "version": "2.9.10",
+  "version": "2.9.11",
   "vendor": "custom",
   "loggingId": "OA95",
   "iconGlyph": "engine",
@@ -162,5 +162,17 @@
         ]
       ]
     }
-  ]
+  ],
+  "texts": {
+    "ru": {
+      "title": "Диагностика ошибок",
+      "description": "Чтение и очистка памяти ошибок всех электронных блоков, а также активные сообщения Check Control"
+    },
+    "zh-CN": {
+      "title": "故障检测"
+    },
+    "ko": {
+      "title": "고장 진단"
+    }
+  }
 }

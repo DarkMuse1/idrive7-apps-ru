@@ -1,0 +1,485 @@
+[
+  {
+    "path": [
+      "title"
+    ],
+    "text": "Световое шоу",
+    "english": "Light Show",
+    "anchor": [
+      "title"
+    ]
+  },
+  {
+    "path": [
+      "description"
+    ],
+    "text": "Light Show: управление наружным светом на стоянке. Экспериментальная версия по паролю.",
+    "english": "Light Show: control exterior lighting while parked. Experimental version with password access.",
+    "anchor": [
+      "description"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      0,
+      "title"
+    ],
+    "text": "Световое шоу",
+    "english": "Light Show",
+    "anchor": [
+      "screen",
+      "MAIN"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      0,
+      "buttons",
+      0,
+      1
+    ],
+    "text": "Стоп",
+    "english": "Stop",
+    "anchor": [
+      "screen",
+      "MAIN",
+      "button",
+      "STOP"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      0,
+      "buttons",
+      1,
+      1
+    ],
+    "text": "Назад по пунктам",
+    "english": "Back through items",
+    "anchor": [
+      "screen",
+      "MAIN",
+      "button",
+      "PREV"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      0,
+      "buttons",
+      2,
+      1
+    ],
+    "text": "Далее",
+    "english": "Next",
+    "anchor": [
+      "screen",
+      "MAIN",
+      "button",
+      "NEXT"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      0,
+      "buttons",
+      3,
+      1
+    ],
+    "text": "Выбрать",
+    "english": "Select",
+    "anchor": [
+      "screen",
+      "MAIN",
+      "button",
+      "ENTER"
+    ]
+  },
+  {
+    "path": [
+      "screens",
+      0,
+      "buttons",
+      4,
+      1
+    ],
+    "text": "Главная",
+    "english": "Home",
+    "anchor": [
+      "screen",
+      "MAIN",
+      "button",
+      "HOME"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      0,
+      "label"
+    ],
+    "text": "Рисунок",
+    "english": "Pattern",
+    "anchor": [
+      "setting",
+      "pattern"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      0,
+      "options",
+      0,
+      1
+    ],
+    "text": "Попеременно",
+    "english": "Alternating",
+    "anchor": [
+      "setting",
+      "pattern"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      0,
+      "options",
+      1,
+      1
+    ],
+    "text": "Двойная вспышка",
+    "english": "Double flash",
+    "anchor": [
+      "setting",
+      "pattern"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      0,
+      "options",
+      2,
+      1
+    ],
+    "text": "Тройная вспышка",
+    "english": "Triple flash",
+    "anchor": [
+      "setting",
+      "pattern"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      0,
+      "options",
+      3,
+      1
+    ],
+    "text": "Одновременно",
+    "english": "Simultaneous",
+    "anchor": [
+      "setting",
+      "pattern"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      0,
+      "options",
+      4,
+      1
+    ],
+    "text": "Перекрёстный импульс",
+    "english": "Cross pulse",
+    "anchor": [
+      "setting",
+      "pattern"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      0,
+      "options",
+      5,
+      1
+    ],
+    "text": "Волна",
+    "english": "Wave",
+    "anchor": [
+      "setting",
+      "pattern"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      1,
+      "label"
+    ],
+    "text": "Шаг",
+    "english": "Step",
+    "anchor": [
+      "setting",
+      "tempo"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      1,
+      "options",
+      0,
+      1
+    ],
+    "text": "100 ms",
+    "english": "100 ms",
+    "anchor": [
+      "setting",
+      "tempo"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      1,
+      "options",
+      1,
+      1
+    ],
+    "text": "150 ms",
+    "english": "150 ms",
+    "anchor": [
+      "setting",
+      "tempo"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      1,
+      "options",
+      2,
+      1
+    ],
+    "text": "200 ms",
+    "english": "200 ms",
+    "anchor": [
+      "setting",
+      "tempo"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      1,
+      "options",
+      3,
+      1
+    ],
+    "text": "300 ms",
+    "english": "300 ms",
+    "anchor": [
+      "setting",
+      "tempo"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      1,
+      "options",
+      4,
+      1
+    ],
+    "text": "500 ms",
+    "english": "500 ms",
+    "anchor": [
+      "setting",
+      "tempo"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      2,
+      "label"
+    ],
+    "text": "Длительность",
+    "english": "Duration",
+    "anchor": [
+      "setting",
+      "duration"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      2,
+      "options",
+      0,
+      1
+    ],
+    "text": "5 seconds",
+    "english": "5 seconds",
+    "anchor": [
+      "setting",
+      "duration"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      2,
+      "options",
+      1,
+      1
+    ],
+    "text": "15 seconds",
+    "english": "15 seconds",
+    "anchor": [
+      "setting",
+      "duration"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      2,
+      "options",
+      2,
+      1
+    ],
+    "text": "30 seconds",
+    "english": "30 seconds",
+    "anchor": [
+      "setting",
+      "duration"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      2,
+      "options",
+      3,
+      1
+    ],
+    "text": "60 seconds",
+    "english": "60 seconds",
+    "anchor": [
+      "setting",
+      "duration"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      3,
+      "label"
+    ],
+    "text": "Цвет предпросмотра",
+    "english": "Preview colour",
+    "anchor": [
+      "setting",
+      "theme"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      3,
+      "options",
+      0,
+      1
+    ],
+    "text": "M Tricolour",
+    "english": "M Tricolour",
+    "anchor": [
+      "setting",
+      "theme"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      3,
+      "options",
+      1,
+      1
+    ],
+    "text": "Ice White",
+    "english": "Ice White",
+    "anchor": [
+      "setting",
+      "theme"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      3,
+      "options",
+      2,
+      1
+    ],
+    "text": "Night Amber",
+    "english": "Night Amber",
+    "anchor": [
+      "setting",
+      "theme"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      4,
+      "label"
+    ],
+    "text": "Отрисовка",
+    "english": "Renderer",
+    "anchor": [
+      "setting",
+      "renderer"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      4,
+      "options",
+      0,
+      1
+    ],
+    "text": "Automatic",
+    "english": "Automatic",
+    "anchor": [
+      "setting",
+      "renderer"
+    ]
+  },
+  {
+    "path": [
+      "settings",
+      4,
+      "options",
+      1,
+      1
+    ],
+    "text": "Software",
+    "english": "Software",
+    "anchor": [
+      "setting",
+      "renderer"
+    ]
+  }
+]

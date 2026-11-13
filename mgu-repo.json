@@ -9,7 +9,7 @@
       "args": [
         "{id}",
         "--language",
-        "ru"
+        "auto"
       ],
       "sdk": "oap-sdk",
       "output": "dist/{id}@{version}.tgz",
@@ -25,7 +25,9 @@
         "kit/tools/localize.py",
         "kit/tools/locale-revisions.json",
         "kit/tools/oapgen",
-        "oap-sdk"
+        "oap-sdk",
+        "tools/build_official_ru.py",
+        "tools/auto-language"
       ]
     },
     "exclude": [
@@ -80,16 +82,21 @@
         "mgu-ambient-rgb": "0.1.3"
       },
       "build": {
-        "python": "tools/protected-apps/kit/tools/build.py",
+        "python": "tools/build_protected_auto.py",
         "args": [
           "{id}",
           "--language",
-          "ru"
+          "auto"
         ],
         "sdk": "oap-sdk",
         "output": "dist/{id}@{version}.tgz",
-        "network": [
-          "doom"
+        "shared": [
+          "tools/build_protected_auto.py",
+          "tools/auto-language",
+          "tools/protected-apps/kit",
+          "tools/build_light_show.py",
+          "tools/build_drive_recorder.py",
+          "oap-sdk"
         ]
       },
       "id": "ambient_light",
@@ -99,47 +106,27 @@
     {
       "manifest": "app.json",
       "icon": "icon.png",
-      "mguHmi": [
-        "ID7"
-      ],
-      "requires": {
-        "idrive7-renderd": "2.1.10",
-        "mgu-inputgate": "1.0.0"
-      },
       "build": {
-        "python": "tools/build_drive_recorder.py",
+        "python": "tools/build_protected_auto.py",
         "args": [
-          "{id}"
+          "{id}",
+          "--language",
+          "auto"
         ],
         "sdk": "oap-sdk",
-        "output": "dist/{id}@{version}.tgz"
+        "output": "dist/{id}@{version}.tgz",
+        "shared": [
+          "tools/build_protected_auto.py",
+          "tools/auto-language",
+          "tools/protected-apps/kit",
+          "tools/build_light_show.py",
+          "tools/build_drive_recorder.py",
+          "oap-sdk"
+        ]
       },
       "id": "drive_recorder_lab",
       "kind": "app",
       "path": "apps/drive_recorder_lab"
-    },
-    {
-      "id": "light_show",
-      "kind": "app",
-      "path": "apps/light_show",
-      "manifest": "app.json",
-      "icon": "icon.png",
-      "mguHmi": [
-        "ID7",
-        "ID8"
-      ],
-      "uninstallable": true,
-      "requires": {
-        "mgu-deploy": "0.7.5"
-      },
-      "build": {
-        "python": "tools/build_light_show.py",
-        "args": [
-          "{id}"
-        ],
-        "sdk": "oap-sdk",
-        "output": "dist/{id}@{version}.tgz"
-      }
     },
     {
       "manifest": "app.json",
@@ -155,14 +142,22 @@
       "kind": "app",
       "path": "apps/mgu_unified",
       "build": {
-        "python": "tools/protected-apps/kit/tools/build.py",
+        "python": "tools/build_protected_auto.py",
         "args": [
           "{id}",
           "--language",
-          "ru"
+          "auto"
         ],
         "sdk": "oap-sdk",
-        "output": "dist/{id}@{version}.tgz"
+        "output": "dist/{id}@{version}.tgz",
+        "shared": [
+          "tools/build_protected_auto.py",
+          "tools/auto-language",
+          "tools/protected-apps/kit",
+          "tools/build_light_show.py",
+          "tools/build_drive_recorder.py",
+          "oap-sdk"
+        ]
       }
     },
     {
@@ -179,14 +174,22 @@
       "kind": "app",
       "path": "apps/aa_cluster_companion",
       "build": {
-        "python": "tools/protected-apps/kit/tools/build.py",
+        "python": "tools/build_protected_auto.py",
         "args": [
           "{id}",
           "--language",
-          "ru"
+          "auto"
         ],
         "sdk": "oap-sdk",
-        "output": "dist/{id}@{version}.tgz"
+        "output": "dist/{id}@{version}.tgz",
+        "shared": [
+          "tools/build_protected_auto.py",
+          "tools/auto-language",
+          "tools/protected-apps/kit",
+          "tools/build_light_show.py",
+          "tools/build_drive_recorder.py",
+          "oap-sdk"
+        ]
       }
     },
     {
@@ -202,10 +205,17 @@
         "args": [
           "{id}",
           "--language",
-          "ru"
+          "auto"
         ],
         "sdk": "oap-sdk",
-        "output": "dist/{id}@{version}.tgz"
+        "output": "dist/{id}@{version}.tgz",
+        "shared": [
+          "tools/build_source_ru.py",
+          "tools/auto-language",
+          "tools/source-apps",
+          "third_party/eroobeeroo-cluster/kit",
+          "oap-sdk"
+        ]
       },
       "requires": {
         "idrive7-renderd": "2.1.7",
@@ -226,10 +236,17 @@
         "args": [
           "{id}",
           "--language",
-          "ru"
+          "auto"
         ],
         "sdk": "oap-sdk",
-        "output": "dist/{id}@{version}.tgz"
+        "output": "dist/{id}@{version}.tgz",
+        "shared": [
+          "tools/build_source_ru.py",
+          "tools/auto-language",
+          "tools/source-apps",
+          "third_party/eroobeeroo-cluster/kit",
+          "oap-sdk"
+        ]
       },
       "requires": {
         "idrive7-renderd": "2.1.7",
@@ -250,10 +267,17 @@
         "args": [
           "{id}",
           "--language",
-          "ru"
+          "auto"
         ],
         "sdk": "oap-sdk",
-        "output": "dist/{id}@{version}.tgz"
+        "output": "dist/{id}@{version}.tgz",
+        "shared": [
+          "tools/build_source_ru.py",
+          "tools/auto-language",
+          "tools/source-apps",
+          "third_party/eroobeeroo-cluster/kit",
+          "oap-sdk"
+        ]
       },
       "requires": {
         "idrive7-renderd": "2.1.7",
@@ -274,10 +298,17 @@
         "args": [
           "{id}",
           "--language",
-          "ru"
+          "auto"
         ],
         "sdk": "oap-sdk",
-        "output": "dist/{id}@{version}.tgz"
+        "output": "dist/{id}@{version}.tgz",
+        "shared": [
+          "tools/build_source_ru.py",
+          "tools/auto-language",
+          "tools/source-apps",
+          "third_party/bimmer-lab/kit",
+          "oap-sdk"
+        ]
       },
       "icon": "icon.png",
       "requires": {
@@ -299,16 +330,56 @@
         "args": [
           "{id}",
           "--language",
-          "ru"
+          "auto"
         ],
         "sdk": "oap-sdk",
-        "output": "dist/{id}@{version}.tgz"
+        "output": "dist/{id}@{version}.tgz",
+        "shared": [
+          "tools/build_source_ru.py",
+          "tools/auto-language",
+          "tools/source-apps",
+          "third_party/bimmer-lab/kit",
+          "oap-sdk"
+        ]
       },
       "icon": "icon.png",
       "requires": {
         "idrive7-renderd": "2.1.7",
         "mgu-inputgate": "1.0.0",
         "cluster-render": "0.5.1"
+      }
+    },
+    {
+      "id": "light_show",
+      "kind": "app",
+      "path": "apps/light_show",
+      "manifest": "app.json",
+      "icon": "icon.png",
+      "mguHmi": [
+        "ID7",
+        "ID8"
+      ],
+      "uninstallable": true,
+      "requires": {
+        "mgu-deploy": "0.7.5"
+      },
+      "build": {
+        "python": "tools/build_protected_auto.py",
+        "args": [
+          "{id}",
+          "--language",
+          "auto"
+        ],
+        "sdk": "oap-sdk",
+        "output": "dist/{id}@{version}.tgz",
+        "shared": [
+          "tools/build_protected_auto.py",
+          "tools/auto-language",
+          "tools/protected-apps/kit",
+          "tools/build_light_show.py",
+          "tools/build_drive_recorder.py",
+          "oap-sdk"
+        ]
       }
     }
   ]

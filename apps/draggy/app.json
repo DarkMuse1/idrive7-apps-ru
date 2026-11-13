@@ -1,8 +1,8 @@
 {
   "id": "draggy",
-  "title": "Разгон",
+  "title": "Drag Timer",
   "description": "0-100, 100-200 and 1/4 mile timer with best times",
-  "version": "2.5.23",
+  "version": "2.5.24",
   "vendor": "custom",
   "loggingId": "OA94",
   "iconGlyph": "flag",
@@ -213,6 +213,18 @@
         "offset": 0,
         "invalid": 65535
       }
+    }
+  },
+  "texts": {
+    "ru": {
+      "title": "Разгон",
+      "description": "Таймер разгона 0-100, 100-200 и на 1/4 мили с лучшими результатами"
+    },
+    "zh-CN": {
+      "title": "加速计时"
+    },
+    "ko": {
+      "title": "가속 타이머"
     }
   }
 }

@@ -1,8 +1,8 @@
 {
   "id": "live_data",
-  "title": "Живые данные",
+  "title": "Live Data",
   "description": "Read-only live values from the car and its control units, a trip computer with fuel cost, and gauge screens of your own, one of them as the home-screen widget",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "vendor": "custom",
   "loggingId": "OA9D",
   "iconGlyph": "gauge",
@@ -394,5 +394,17 @@
         ]
       ]
     }
-  ]
+  ],
+  "texts": {
+    "ru": {
+      "title": "Живые данные",
+      "description": "Только чтение текущих значений автомобиля и его электронных блоков, бортовой компьютер с расчётом стоимости топлива и собственные экраны приборов, один из которых можно использовать как виджет главного экрана"
+    },
+    "zh-CN": {
+      "title": "实时数据"
+    },
+    "ko": {
+      "title": "실시간 정보"
+    }
+  }
 }

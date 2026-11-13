@@ -1,8 +1,8 @@
 {
   "id": "dyno",
-  "title": "Виртуальный стенд",
+  "title": "Virtual Dyno",
   "description": "Power and torque curves from a full-throttle pull, saved and compared",
-  "version": "1.6.4",
+  "version": "1.6.5",
   "vendor": "custom",
   "loggingId": "OA98",
   "iconGlyph": "dyno",
@@ -282,5 +282,17 @@
         ]
       ]
     }
-  ]
+  ],
+  "texts": {
+    "ru": {
+      "title": "Виртуальный стенд",
+      "description": "Кривые мощности и крутящего момента по разгону на полном газе, с сохранением и сравнением"
+    },
+    "zh-CN": {
+      "title": "虚拟马力机"
+    },
+    "ko": {
+      "title": "가상 다이노"
+    }
+  }
 }

@@ -16,11 +16,12 @@ PROVIDERS = {
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('app', choices=sorted(PROVIDERS))
-    parser.add_argument('--language', choices=['ru'], default='ru')
+    parser.add_argument('--language', choices=['auto', 'ru'], default='auto')
     parser.add_argument('--sdk', default=str(ROOT / 'oap-sdk'))
     parser.add_argument('--dist', default=str(ROOT / 'dist'))
     args = parser.parse_args()
     provider = PROVIDERS[args.app]
+    language = 'en' if args.language == 'auto' else 'ru'
     source = ROOT / 'third_party' / provider
     sys.path.insert(0, str(source / 'kit/tools'))
     import build as author
@@ -40,9 +41,13 @@ def main():
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(LOCAL / 'localization/assets/bimmer-kit/cyrillic-ru.json', destination)
             author.KIT = str(kit)
-            author.build(args.app, 'ru')
+            author.build(args.app, language)
+            if args.language == 'auto':
+                # configure_author_stage runs below, after this temporary kit is
+                # gone; preserve the original author's kit path for resources.
+                author.KIT = str(source / 'kit')
     else:
-        author.build(args.app, 'ru')
+        author.build(args.app, language)
 
     stage = Path(author.DIST) / args.app
     js = stage / 'source/javascript'
@@ -76,6 +81,17 @@ def main():
                     shutil.copyfile(p, dest)
             pack_data.pack(str(hud), str(js / 'hud.pack'))
     shutil.copyfile(LOCAL / 'localization/fonts/OFL-NotoSans.txt', js / 'OFL-NotoSans.txt')
+
+    if args.language == 'auto':
+        sys.path.insert(0, str(ROOT / 'tools/auto-language'))
+        import auto_language
+        spec = json.loads((source / 'apps' / args.app / 'app.json').read_text(encoding='utf-8'))
+        fonts = {}
+        if provider == 'bimmer-lab':
+            fonts['cyrillic'] = assets / 'bimmer-kit/cyrillic-ru.json'
+        auto_language.configure_author_stage(author, args.app, spec, LOCAL / 'localization' / provider, fonts)
+        print('Automatic HU language resources applied; author vehicle logic unchanged.')
+        return
 
     version = json.loads((stage / 'meta.json').read_text(encoding='utf8'))['version']
     with tarfile.open(str(Path(author.DIST) / (args.app + '@' + version + '.mgu')), 'w:gz') as archive:

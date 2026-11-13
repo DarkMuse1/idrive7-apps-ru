@@ -1,1 +1,1 @@
-module.exports={"app":"mgu_unified","key":"mgu_unified_v0_1_10","version":"0.1.10","releaseSha256":"85e30aa7f35f2ed1abae5e3d2e61a2f79732f95a2555b5893de174a4b8691192","vinLicenseSchema":1};
+module.exports={"app":"mgu_unified","key":"mgu_unified_v0_1_11","version":"0.1.11","releaseSha256":"c8d4b6e0f6d6a905a54975c86b7f59d04ea661312cb340d10323d7937dcb6a1d","vinLicenseSchema":1};

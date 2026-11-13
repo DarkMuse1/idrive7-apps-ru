@@ -2,7 +2,7 @@
   "id": "car_vitals",
   "title": "M Vitals",
   "description": "Live engine, thermal, intake / fuel / ignition, tyre and chassis gauges",
-  "version": "2.27.4",
+  "version": "2.27.5",
   "vendor": "custom",
   "loggingId": "OA93",
   "iconGlyph": "gauge",
@@ -1244,6 +1244,18 @@
           "note": "gearbox unit (EGS, 0x18) transmission oil temperature, deg C + 48 (from a forum report, not confirmed on a car: only shown once it changes; the replies go to the log, \"raw EGS\")"
         }
       ]
+    }
+  },
+  "texts": {
+    "ru": {
+      "title": "M Vitals",
+      "description": "Приборы для отображения текущих данных двигателя, температур, впуска, топливной системы, зажигания, шин и шасси"
+    },
+    "zh-CN": {
+      "title": "M 车辆仪表"
+    },
+    "ko": {
+      "title": "M 차량 정보"
     }
   }
 }

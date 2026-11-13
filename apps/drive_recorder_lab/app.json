@@ -1,11 +1,11 @@
 {
   "id": "drive_recorder_lab",
-  "title": "Видеорегистратор",
-  "version": "0.4.7",
+  "title": "Drive Recorder",
+  "version": "0.4.8",
   "vendor": "custom",
   "loggingId": "ODR2",
   "iconGlyph": "DR",
-  "description": "Drive Recorder: экспериментальная запись ICAM, архив и просмотр на стоянке. Доступ по паролю.",
+  "description": "Drive Recorder: experimental ICAM recording, archive and playback while parked. Password access.",
   "signals": {
     "de.bmw.infotainment.video.cameraproxy.ICAM2Proxy": {
       "_instances": "1",
@@ -64,24 +64,24 @@
     {
       "name": "MAIN",
       "kind": "canvas",
-      "title": "Видеорегистратор",
+      "title": "Drive Recorder",
       "chrome": false,
       "buttons": [
         [
           "PREV",
-          "Назад по пунктам"
+          "Back through items"
         ],
         [
           "NEXT",
-          "Далее"
+          "Next"
         ],
         [
           "ENTER",
-          "Выбрать"
+          "Select"
         ],
         [
           "HOME",
-          "Запись"
+          "Recording"
         ]
       ],
       "bar": false,
@@ -90,5 +90,11 @@
   ],
   "settings": [],
   "maxDiskUsage": 268435456,
-  "internet": true
+  "internet": true,
+  "texts": {
+    "ru": {
+      "title": "Видеорегистратор",
+      "description": "Drive Recorder: экспериментальная запись ICAM, архив и просмотр на стоянке. Доступ по паролю."
+    }
+  }
 }

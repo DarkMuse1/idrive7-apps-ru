@@ -7,7 +7,9 @@ module.exports = function displayText(value) {
     const s = String(value == null ? '' : value);
     return s.split(protectedText).map((part, i) => {
         if (i % 2) return part;
-        return i18n.t(part).replace(/\boil(?=\s+-?\d)/g, 'масло')
+        const translated = i18n.t(part);
+        if (i18n.getLanguage() !== 'ru') return translated;
+        return translated.replace(/\boil(?=\s+-?\d)/g, 'масло')
             .replace(/\braw:/g, 'исходное:').replace(/\bpanel:/g, 'панель:')
             .replace(/(\d+) of (?=\d)/g, '$1 из ');
     }).join('');

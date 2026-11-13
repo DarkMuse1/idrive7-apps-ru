@@ -1,8 +1,8 @@
 {
   "id": "cluster_centre",
-  "title": "Центр приборной панели",
-  "description": "Данные двигателя, коробки передач и eDrive, прогрев, охлаждение турбины, индикатор переключения и таймер разгона в центре штатной приборной панели",
-  "version": "0.9.0",
+  "title": "Cluster Centre",
+  "description": "Pages of engine, gearbox and eDrive data, warm-up, turbo cool-down, a shift light and a 0-60 timer in the centre of the factory cluster, drawn by the cluster itself",
+  "version": "0.9.1",
   "startType": "autostart",
   "vendor": "custom",
   "loggingId": "OA9M",
@@ -2558,5 +2558,11 @@
     "mgu-inputgate": "1.0.0",
     "cluster-render": "0.4.2"
   },
-  "shared": true
+  "shared": true,
+  "texts": {
+    "ru": {
+      "title": "Центр приборной панели",
+      "description": "Данные двигателя, коробки передач и eDrive, прогрев, охлаждение турбины, индикатор переключения и таймер разгона в центре штатной приборной панели"
+    }
+  }
 }
