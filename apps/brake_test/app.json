@@ -2,10 +2,18 @@
   "id": "brake_test",
   "title": "Тест тормозов",
   "description": "100-0 and 200-0 braking distance, peak decel and brake-fade tracking",
-  "version": "1.5.22",
+  "version": "1.5.23",
   "vendor": "custom",
   "loggingId": "OA99",
   "iconGlyph": "brake",
+  "mguHmi": [
+    "ID7",
+    "ID8"
+  ],
+  "requires": {
+    "idrive7-renderd": "2.1.18",
+    "mgu-inputgate": "1.1.0"
+  },
   "signals": {
     "de.bmw.infotainment.vehicle.Vehicle2": {
       "statusCarSpeed2": "rs"

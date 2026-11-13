@@ -13,6 +13,8 @@ const SHIFTBAR = `// Segmented shift bar for a cluster-render "effect" layer (GL
 //   u_midAt, u_highAt      where the mid and high zones start (0..1 of the bar)
 //   u_track   unlit segment colour (rgba, straight alpha)
 //   u_flash   1 = at the redline: every lit segment shows the high colour
+//   u_skip    driver camera wings: px from the layer's left (from, to) left empty; then u_segs segments on each
+//             side, mirrored, filling from the outer ends in towards the gap. to <= from: one bar as usual
 // Output is straight alpha. Whether cluster-render blends effect layers as
 // straight or premultiplied alpha is not confirmed yet: check the edges on the car.
 precision mediump float;
@@ -27,13 +29,20 @@ uniform float u_midAt;
 uniform float u_highAt;
 uniform vec4 u_track;
 uniform float u_flash;
+uniform vec2 u_skip;
 
 void main() {
     float gapPx = 3.0;
-    float slot = u_size.x / u_segs;                 // px per segment incl. gap
     float px = v_uv.x * u_size.x;
-    float idx = floor(px / slot);
-    float inSeg = px - idx * slot;                  // px into this slot
+    float slot = u_size.x / u_segs;                 // px per segment incl. gap
+    float local = px;                               // px from where the fill starts
+    if (u_skip.y > u_skip.x) {                      // wings: left from its left end, right mirrored from its right end
+        if (px >= u_skip.x && px < u_skip.y) { gl_FragColor = vec4(0.0); return; }
+        if (px < u_skip.x) slot = u_skip.x / u_segs;
+        else { slot = (u_size.x - u_skip.y) / u_segs; local = u_size.x - px; }
+    }
+    float idx = floor(local / slot);
+    float inSeg = local - idx * slot;               // px into this slot
     float segW = slot - gapPx;
     float py = v_uv.y * u_size.y;           // px from the top
 
@@ -217,7 +226,8 @@ const LIGHTS = `// Shift lights for a cluster-render "effect" layer (GLSL ES 1.0
 // on (they fill from a start rpm up to the shift point); u_strobe 1 = at the shift point: all red.
 // The last u_tail lights are blue instead (the GT3 dash look; 0 = none). u_round 1 = round lights.
 //   u_size px, u_n count, u_lit count (0..u_n), u_tail count, u_strobe 0/1, u_green/u_yellow/u_red/u_blue rgb,
-//   u_off (alpha when off)
+//   u_off (alpha when off), u_skip driver camera wings: px from the layer's left (from, to) left empty, then u_n
+//   lights on each side, mirrored, filling from the outer ends in towards the gap (to <= from: one row as usual)
 precision mediump float;
 varying vec2 v_uv;
 uniform vec2 u_size;
@@ -231,14 +241,21 @@ uniform vec3 u_yellow;
 uniform vec3 u_red;
 uniform vec3 u_blue;
 uniform float u_off;
+uniform vec2 u_skip;
 
 void main() {
     float gapPx = 6.0;
     float slot = (u_size.x + gapPx) / u_n;
     float px = v_uv.x * u_size.x;
     float py = v_uv.y * u_size.y;
-    float idx = floor(px / slot);
-    float inSeg = px - idx * slot;
+    float local = px;                               // px from where the fill starts
+    if (u_skip.y > u_skip.x) {                      // wings: left from its left end, right mirrored from its right end
+        if (px >= u_skip.x && px < u_skip.y) { gl_FragColor = vec4(0.0); return; }
+        if (px < u_skip.x) slot = (u_skip.x + gapPx) / u_n;
+        else { slot = (u_size.x - u_skip.y + gapPx) / u_n; local = u_size.x - px; }
+    }
+    float idx = floor(local / slot);
+    float inSeg = local - idx * slot;
     float segW = slot - gapPx;
     if (inSeg > segW || idx >= u_n) { gl_FragColor = vec4(0.0); return; }
     vec2 hs = vec2(segW, u_size.y) * 0.5;
@@ -1164,6 +1181,8 @@ const REVARC = `// A segmented rev arc for a cluster-render "effect" layer (GLSL
 // to u_r round u_center (layer px, y down), from u_start sweeping u_sweep (radians, clockwise from 12 o'clock), in
 // u_segs segments, the first u_value of it lit: u_low below u_midAt, u_mid up to u_highAt, u_high past it;
 // unlit u_track. u_flash 1: everything lit flashes white (at the redline). v_uv (0,0) is the top-left.
+// u_wing > 0: driver camera wings: the middle 2 x u_wing radians stay empty and u_segs segments sit on each side,
+// mirrored, filling from the two ends in towards the middle.
 precision mediump float;
 varying vec2 v_uv;
 uniform vec2 u_size;
@@ -1181,6 +1200,7 @@ uniform float u_midAt;
 uniform float u_highAt;
 uniform vec4 u_track;
 uniform float u_flash;
+uniform float u_wing;
 
 const float PI = 3.14159265359;
 
@@ -1193,8 +1213,13 @@ void main() {
     float a = atan(d.x, -d.y);                      // clockwise from 12 o'clock
     float rel = mod(a - u_start + 4.0 * PI, 2.0 * PI);
     if (rel > u_sweep) { gl_FragColor = vec4(0.0); return; }
-    float f = rel / u_sweep;
     float slot = u_sweep / u_segs;
+    if (u_wing > 0.0) {
+        float mid = u_sweep * 0.5;
+        if (abs(rel - mid) < u_wing) { gl_FragColor = vec4(0.0); return; }
+        if (rel > mid) rel = u_sweep - rel;         // the right wing, mirrored
+        slot = (mid - u_wing) / u_segs;
+    }
     float i = floor(rel / slot);
     float gap = 5.0 / rr;                           // a 5 px gap between segments at this radius
     float fx = rel - i * slot;
@@ -1279,4 +1304,192 @@ void main() {
 }
 `;
 
-module.exports = { shiftbar: SHIFTBAR, arc: ARC, revbar: REVBAR, lights: LIGHTS, fill: FILL, box: BOX, grid: GRID, segbar: SEGBAR, mdash: MDASH, mtach: MTACH, sdash: SDASH, boxes: BOXES, atext: ATEXT, dial: DIAL, meter: METER, gmeter: GMETER, revarc: REVARC, tiles: TILES };
+const RIBBON = `// The Ribbon theme's rev line (GLSL ES 1.00): one smooth curve under the hood line that fills with the revs, glowing.
+// In panel px (y down; u_org is the layer's top-left on the panel): y(x) = a u^2 + b u + c + dip (1 - u^2), u = (x - cx) / half,
+// u_curve (a, b, c, dip), u_span (x0, x1, cx, half). dip > 0 (the driver camera setting) lowers the middle under the camera
+// and keeps the ends. Lit from x0 up to u_value of the span, coloured by the five-stop gradient u_c0..u_c4 (u_at: where
+// stops 1..4 sit, 0..1), with a soft glow; unlit u_track. Under it u_n + 1 dots at every thousand rpm (the last two in
+// u_red). u_bulbs 1: a string of Christmas bulbs on a wire (u_wire) instead, every 40 px, cycling u_c0..u_c3, the ones
+// past u_at.z in u_red, lit up to u_value. u_flash 1: everything lit in u_red (at the redline).
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+varying vec2 v_uv;
+uniform vec2 u_size;
+uniform vec2 u_org;
+uniform vec4 u_curve;
+uniform vec4 u_span;
+uniform float u_value;
+uniform float u_flash;
+uniform vec3 u_c0;
+uniform vec3 u_c1;
+uniform vec3 u_c2;
+uniform vec3 u_c3;
+uniform vec3 u_c4;
+uniform vec4 u_at;
+uniform vec4 u_track;
+uniform vec3 u_dot;
+uniform vec3 u_red;
+uniform vec3 u_wire;
+uniform float u_n;
+uniform float u_bulbs;
+
+float cy(float x) {
+    float u = (x - u_span.z) / u_span.w;
+    return u_curve.x * u * u + u_curve.y * u + u_curve.z + u_curve.w * (1.0 - u * u);
+}
+// distance from p to the curve between x0 and x1 (round ends)
+float dist(vec2 p, float x0, float x1) {
+    float x = clamp(p.x, x0, x1);
+    if (x != p.x) return length(p - vec2(x, cy(x)));
+    float u = (x - u_span.z) / u_span.w;
+    float s = (2.0 * (u_curve.x - u_curve.w) * u + u_curve.y) / u_span.w;
+    return abs(p.y - cy(x)) / sqrt(1.0 + s * s);
+}
+vec3 grad(float t) {
+    if (t < u_at.x) return mix(u_c0, u_c1, t / u_at.x);
+    if (t < u_at.y) return mix(u_c1, u_c2, (t - u_at.x) / (u_at.y - u_at.x));
+    if (t < u_at.z) return mix(u_c2, u_c3, (t - u_at.y) / (u_at.z - u_at.y));
+    return mix(u_c3, u_c4, clamp((t - u_at.z) / (u_at.w - u_at.z), 0.0, 1.0));
+}
+vec4 over(vec4 dst, vec3 c, float a) { return vec4(mix(dst.rgb, c, a), a + dst.a * (1.0 - a)); }
+
+void main() {
+    vec2 p = v_uv * u_size + u_org;
+    float x0 = u_span.x, x1 = u_span.y, len = x1 - x0;
+    float xe = x0 + u_value * len;
+    vec4 o = vec4(0.0);
+    // thousand dots under the line
+    float k = floor((p.x - x0) / len * u_n + 0.5);
+    if (k >= 0.0 && k <= u_n) {
+        float xk = x0 + k / u_n * len;
+        float dd = length(p - vec2(xk, cy(xk) + 28.0));
+        o = over(o, k >= u_n - 1.0 ? u_red : u_dot, clamp(3.5 - dd, 0.0, 1.0));
+    }
+    if (u_bulbs > 0.5) {
+        o = over(o, u_wire, clamp(2.5 - dist(p, x0, x1), 0.0, 1.0));
+        float j = floor((p.x - x0) / 40.0 + 0.5), bx = x0 + j * 40.0;
+        if (j >= 0.0 && bx <= x1) {
+            float f = (bx - x0) / len, by = cy(bx);
+            bool on = u_value > 0.0 && f <= u_value;
+            vec3 c = j - 4.0 * floor(j / 4.0) < 0.5 ? u_c0 : (j - 4.0 * floor(j / 4.0) < 1.5 ? u_c1 : (j - 4.0 * floor(j / 4.0) < 2.5 ? u_c2 : u_c3));
+            if (f > u_at.z || u_flash > 0.5) c = u_red;
+            vec2 q = p - vec2(bx, by + 12.0);
+            if (on) o = over(o, c, 0.5 * exp(-dot(q, q) / 98.0));
+            if (abs(q.x) < 4.0 && p.y >= by && p.y <= by + 5.0) o = over(o, vec3(0.29, 0.35, 0.31), 1.0);
+            float e = length(q / vec2(6.0, 9.0));
+            o = over(o, on ? c : u_track.rgb, clamp((1.0 - e) * 6.0, 0.0, 1.0));
+        }
+        gl_FragColor = o;
+        return;
+    }
+    // the track, then the glow and the lit core up to xe
+    o = over(o, u_track.rgb, u_track.a * clamp(7.5 - dist(p, x0, x1), 0.0, 1.0));
+    if (u_value > 0.0) {
+        float dl = dist(p, x0, xe);
+        vec3 c = u_flash > 0.5 ? u_red : grad(clamp((p.x - x0) / len, 0.0, u_value));
+        o = over(o, c, 0.55 * exp(-dl * dl / 242.0));
+        o = over(o, c, clamp(5.5 - dl, 0.0, 1.0));
+    }
+    gl_FragColor = o;
+}
+`;
+
+const DECO = `// The Ribbon theme's backdrop (GLSL ES 1.00), one whole-panel layer: u_bg everywhere (it covers BMW's gauges), the
+// gear's rounded frame u_pill (x, y, w, h; 2 px in u_pc), and a holiday's art by u_mode, all static, no loops:
+//   1 snow (white flakes), 2 Halloween (a low moon in u_a, a spider web top left in u_b), 3 Fourth of July (three
+//   fireworks: u_a, u_b, u_c), 4 New Year (bubbles in u_a, confetti u_a / u_b / u_c), 5 Thanksgiving (leaves u_a,
+//   u_b, u_c). Flakes, bubbles, confetti and leaves sit in a grid of cells (one each at most, placed by a hash); one
+//   whose centre is within its size of the u_k0..u_k3 rects (x0, y0, x1, y1: the readouts and BMW's gear box) or of
+//   BMW's bottom strip (y 660) is left out whole. Leaves also stay below the rev line (y 215).
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+varying vec2 v_uv;
+uniform vec2 u_size;
+uniform float u_mode;
+uniform vec4 u_bg;
+uniform vec3 u_a;
+uniform vec3 u_b;
+uniform vec3 u_c;
+uniform vec4 u_pill;
+uniform vec3 u_pc;
+uniform vec4 u_k0;
+uniform vec4 u_k1;
+uniform vec4 u_k2;
+uniform vec4 u_k3;
+
+float h1(vec2 c) { return fract(sin(dot(c, vec2(12.9898, 78.233))) * 43758.5453); }
+bool inR(vec2 p, vec4 r, float m) { return p.x > r.x - m && p.x < r.z + m && p.y > r.y - m && p.y < r.w + m; }
+bool keep(vec2 c, float m) { return inR(c, u_k0, m) || inR(c, u_k1, m) || inR(c, u_k2, m) || inR(c, u_k3, m) || c.y > 660.0 - m; }
+// one firework burst at c, radius r: 28 rays from 0.25 r out to 0.8..1.05 r, a dot at each tip, a faint glow
+float burst(vec2 p, vec2 c, float r) {
+    vec2 d = p - c;
+    float rr = length(d), st = 6.2831853 / 28.0;
+    float i = floor(atan(d.y, d.x) / st + 0.5);
+    float tip = r * (0.8 + 0.25 * h1(vec2(i, r)));
+    float a = 0.0;
+    if (rr > 0.25 * r && rr < tip) a = 0.45 * clamp(1.6 - abs(atan(d.y, d.x) - i * st) * rr, 0.0, 1.0);
+    vec2 t = c + tip * vec2(cos(i * st), sin(i * st)) + vec2(0.0, 4.0);
+    a = max(a, 0.6 * clamp(2.9 - length(p - t), 0.0, 1.0));
+    return max(a, 0.08 * exp(-rr * rr / (0.18 * r * r)));
+}
+
+void main() {
+    vec2 p = v_uv * u_size;
+    vec3 col = u_bg.rgb;
+    if (u_mode > 0.5 && u_mode < 1.5) {                              // snow
+        vec2 cell = floor(p / 48.0), f = p - cell * 48.0;
+        float h = h1(cell), r = 1.0 + 2.2 * h1(cell + 7.0);
+        vec2 c = 6.0 + 36.0 * vec2(h1(cell + 3.0), h1(cell + 5.0));
+        if (h < 0.45 && !keep(cell * 48.0 + c, r)) col = mix(col, vec3(1.0), (0.25 + 0.5 * h1(cell + 9.0)) * clamp(r + 0.5 - length(f - c), 0.0, 1.0));
+    } else if (u_mode > 1.5 && u_mode < 2.5) {                       // Halloween
+        float dm = length(p - vec2(1250.0, 250.0));
+        col = mix(col, u_a, 0.12 * exp(-dm * dm / 7200.0));
+        col = mix(col, mix(vec3(1.0, 0.85, 0.63), u_a, dm / 70.0), 0.22 * clamp(70.5 - dm, 0.0, 1.0));
+        vec2 d = p - vec2(240.0, 150.0);
+        float rr = length(d), th = degrees(atan(d.y, d.x));
+        if (th > 9.0 && th < 81.0 && rr < 216.0) {
+            float s = (th - 10.0) / 14.0, sp = floor(s + 0.5);
+            float a = clamp(1.1 - abs(s - sp) * 0.2443 * rr, 0.0, 1.0);
+            float k = floor(rr / 40.0 + 0.5), t = fract(s);
+            float ring = k * 40.0 * (1.0 - 0.1 * sin(3.14159 * t));
+            if (k >= 1.0 && k <= 5.0) a = max(a, clamp(1.1 - abs(rr - ring), 0.0, 1.0));
+            col = mix(col, u_b, 0.35 * a);
+        }
+    } else if (u_mode > 2.5 && u_mode < 3.5) {                       // Fourth of July
+        col = mix(col, u_a, burst(p, vec2(250.0, 470.0), 110.0));
+        col = mix(col, u_b, burst(p, vec2(1760.0, 500.0), 100.0));
+        col = mix(col, u_c, burst(p, vec2(1500.0, 560.0), 60.0));
+    } else if (u_mode > 3.5 && u_mode < 4.5) {                       // New Year: bubbles and confetti
+        vec2 cell = floor(p / 64.0), f = p - cell * 64.0;
+        float r = 2.0 + 6.0 * h1(cell + 2.0);
+        vec2 c = 10.0 + 44.0 * vec2(h1(cell + 3.0), h1(cell + 4.0));
+        if (h1(cell) < 0.45 && !keep(cell * 64.0 + c, r + 2.0)) col = mix(col, u_a, (0.2 + 0.35 * h1(cell + 6.0)) * clamp(1.2 - abs(length(f - c) - r), 0.0, 1.0));
+        vec2 cl = floor((p + 31.0) / 70.0), cc = cl * 70.0 - 31.0 + 10.0 + 50.0 * vec2(h1(cl + 8.0), h1(cl + 1.0)), g = p - cc;
+        float an = 3.14159 * h1(cl + 5.0), ca = cos(an), sa = sin(an);
+        vec2 q = vec2(ca * g.x + sa * g.y, -sa * g.x + ca * g.y);
+        float pick = h1(cl + 11.0);
+        if (h1(cl + 12.0) < 0.5 && !keep(cc, 6.0) && abs(q.x) < 2.0 && abs(q.y) < 5.0)
+            col = mix(col, pick < 0.34 ? u_a : (pick < 0.67 ? u_b : u_c), 0.35 + 0.3 * h1(cl + 13.0));
+    } else if (u_mode > 4.5 && u_mode < 5.5) {                       // Thanksgiving: maple leaves (five pointed lobes)
+        vec2 lc = floor(p / 120.0) * 120.0 + 60.0 + 30.0 * vec2(h1(floor(p / 120.0) + 1.0) - 0.5, h1(floor(p / 120.0) + 2.0) - 0.5);
+        vec2 cell = floor(p / 120.0), f = p - lc;
+        float sz = 18.0 + 16.0 * h1(cell + 3.0), th = atan(f.y, f.x) + 6.2831853 * h1(cell + 4.0);
+        float edge = sz * (0.55 + 0.45 * pow(abs(cos(2.5 * th)), 1.6)) * (1.0 - 0.18 * pow(abs(sin(7.5 * th)), 8.0));
+        float pick = h1(cell + 5.0);
+        if (h1(cell) < 0.5 && lc.y > 215.0 && !keep(lc, sz)) col = mix(col, pick < 0.34 ? u_a : (pick < 0.67 ? u_b : u_c), 0.5 * clamp(edge - length(f), 0.0, 1.0));
+    }
+    // the gear's frame
+    vec2 hs = u_pill.zw * 0.5, q = abs(p - u_pill.xy - hs) - (hs - hs.y);
+    float dp = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - hs.y;
+    if (u_pill.z > 0.0) col = mix(col, u_pc, clamp(1.5 - abs(dp + 1.0), 0.0, 1.0));
+    gl_FragColor = vec4(col, u_bg.a);
+}
+`;
+
+module.exports = { shiftbar: SHIFTBAR, arc: ARC, revbar: REVBAR, lights: LIGHTS, fill: FILL, box: BOX, grid: GRID, segbar: SEGBAR, mdash: MDASH, mtach: MTACH, sdash: SDASH, boxes: BOXES, atext: ATEXT, dial: DIAL, meter: METER, gmeter: GMETER, revarc: REVARC, tiles: TILES, ribbon: RIBBON, deco: DECO };

@@ -186,7 +186,7 @@ Ready	Готово
 Oil	Масло
 OIL	МАСЛО
 Coolant	Охлаждающая жидкость
-COOLANT	ОХЛАЖДАЮЩАЯ ЖИДКОСТЬ
+COOLANT	ОЖ
 WATER	ОЖ
 RPM	ОБ/МИН
 SPEED	СКОРОСТЬ
@@ -1863,3 +1863,98 @@ no needle yet	Нет данных шкалы eDRIVE
 fast power:	Быстрая мощность:
 full needle	Полная шкала
 (not known)	(неизвестно)
+Choose a 4-digit PIN	Задайте PIN из 4 цифр
+Enter the new PIN again	Повторите новый PIN
+Enter the PIN to turn the lock off	Введите PIN для отключения блокировки
+Engine Map is locked	Настройки двигателя заблокированы
+Burbles is locked	Настройки прострелов заблокированы
+The two PINs didn't match · choose again	PIN не совпали · задайте заново
+Enter the PIN on the touchscreen	Введите PIN на сенсорном экране
+Delete	Удалить
+PIN for Engine Map and Burbles	PIN для настроек двигателя и прострелов
+Engine Map and Burbles PIN	PIN настроек двигателя и прострелов
+Low	Низкое
+High	Высокое
+Refuellings, low quality	Заправки топливом низкого качества
+Refuellings, medium quality	Заправки топливом среднего качества
+Refuellings, high quality	Заправки топливом высокого качества
+GEARBOX HOT - EASE OFF	ПЕРЕГРЕВ КОРОБКИ — СНИЗЬТЕ НАГРУЗКУ
+GEARBOX WARMING UP	ПРОГРЕВ КОРОБКИ
+GEARBOX READY IN	КОРОБКА ПРОГРЕЕТСЯ ЧЕРЕЗ
+GEARBOX	КОРОБКА
+Gearbox oil is warm at	Температура прогрева масла коробки
+Water	Вода
+Wrong PIN · 1 try left	Неверный PIN · осталась 1 попытка
+Wrong PIN · 2 tries left	Неверный PIN · осталось 2 попытки
+Wrong PIN · 3 tries left	Неверный PIN · осталось 3 попытки
+Wrong PIN · 4 tries left	Неверный PIN · осталось 4 попытки
+Too many wrong PINs · try again in 1 s	Слишком много ошибок PIN · повторите через 1 с
+Too many wrong PINs · try again in 2 s	Слишком много ошибок PIN · повторите через 2 с
+Too many wrong PINs · try again in 3 s	Слишком много ошибок PIN · повторите через 3 с
+Too many wrong PINs · try again in 4 s	Слишком много ошибок PIN · повторите через 4 с
+Too many wrong PINs · try again in 5 s	Слишком много ошибок PIN · повторите через 5 с
+Too many wrong PINs · try again in 6 s	Слишком много ошибок PIN · повторите через 6 с
+Too many wrong PINs · try again in 7 s	Слишком много ошибок PIN · повторите через 7 с
+Too many wrong PINs · try again in 8 s	Слишком много ошибок PIN · повторите через 8 с
+Too many wrong PINs · try again in 9 s	Слишком много ошибок PIN · повторите через 9 с
+Too many wrong PINs · try again in 10 s	Слишком много ошибок PIN · повторите через 10 с
+Too many wrong PINs · try again in 11 s	Слишком много ошибок PIN · повторите через 11 с
+Too many wrong PINs · try again in 12 s	Слишком много ошибок PIN · повторите через 12 с
+Too many wrong PINs · try again in 13 s	Слишком много ошибок PIN · повторите через 13 с
+Too many wrong PINs · try again in 14 s	Слишком много ошибок PIN · повторите через 14 с
+Too many wrong PINs · try again in 15 s	Слишком много ошибок PIN · повторите через 15 с
+Too many wrong PINs · try again in 16 s	Слишком много ошибок PIN · повторите через 16 с
+Too many wrong PINs · try again in 17 s	Слишком много ошибок PIN · повторите через 17 с
+Too many wrong PINs · try again in 18 s	Слишком много ошибок PIN · повторите через 18 с
+Too many wrong PINs · try again in 19 s	Слишком много ошибок PIN · повторите через 19 с
+Too many wrong PINs · try again in 20 s	Слишком много ошибок PIN · повторите через 20 с
+Too many wrong PINs · try again in 21 s	Слишком много ошибок PIN · повторите через 21 с
+Too many wrong PINs · try again in 22 s	Слишком много ошибок PIN · повторите через 22 с
+Too many wrong PINs · try again in 23 s	Слишком много ошибок PIN · повторите через 23 с
+Too many wrong PINs · try again in 24 s	Слишком много ошибок PIN · повторите через 24 с
+Too many wrong PINs · try again in 25 s	Слишком много ошибок PIN · повторите через 25 с
+Too many wrong PINs · try again in 26 s	Слишком много ошибок PIN · повторите через 26 с
+Too many wrong PINs · try again in 27 s	Слишком много ошибок PIN · повторите через 27 с
+Too many wrong PINs · try again in 28 s	Слишком много ошибок PIN · повторите через 28 с
+Too many wrong PINs · try again in 29 s	Слишком много ошибок PIN · повторите через 29 с
+Too many wrong PINs · try again in 30 s	Слишком много ошибок PIN · повторите через 30 с
+Too many wrong PINs · try again in 31 s	Слишком много ошибок PIN · повторите через 31 с
+Too many wrong PINs · try again in 32 s	Слишком много ошибок PIN · повторите через 32 с
+Too many wrong PINs · try again in 33 s	Слишком много ошибок PIN · повторите через 33 с
+Too many wrong PINs · try again in 34 s	Слишком много ошибок PIN · повторите через 34 с
+Too many wrong PINs · try again in 35 s	Слишком много ошибок PIN · повторите через 35 с
+Too many wrong PINs · try again in 36 s	Слишком много ошибок PIN · повторите через 36 с
+Too many wrong PINs · try again in 37 s	Слишком много ошибок PIN · повторите через 37 с
+Too many wrong PINs · try again in 38 s	Слишком много ошибок PIN · повторите через 38 с
+Too many wrong PINs · try again in 39 s	Слишком много ошибок PIN · повторите через 39 с
+Too many wrong PINs · try again in 40 s	Слишком много ошибок PIN · повторите через 40 с
+Too many wrong PINs · try again in 41 s	Слишком много ошибок PIN · повторите через 41 с
+Too many wrong PINs · try again in 42 s	Слишком много ошибок PIN · повторите через 42 с
+Too many wrong PINs · try again in 43 s	Слишком много ошибок PIN · повторите через 43 с
+Too many wrong PINs · try again in 44 s	Слишком много ошибок PIN · повторите через 44 с
+Too many wrong PINs · try again in 45 s	Слишком много ошибок PIN · повторите через 45 с
+Too many wrong PINs · try again in 46 s	Слишком много ошибок PIN · повторите через 46 с
+Too many wrong PINs · try again in 47 s	Слишком много ошибок PIN · повторите через 47 с
+Too many wrong PINs · try again in 48 s	Слишком много ошибок PIN · повторите через 48 с
+Too many wrong PINs · try again in 49 s	Слишком много ошибок PIN · повторите через 49 с
+Too many wrong PINs · try again in 50 s	Слишком много ошибок PIN · повторите через 50 с
+Too many wrong PINs · try again in 51 s	Слишком много ошибок PIN · повторите через 51 с
+Too many wrong PINs · try again in 52 s	Слишком много ошибок PIN · повторите через 52 с
+Too many wrong PINs · try again in 53 s	Слишком много ошибок PIN · повторите через 53 с
+Too many wrong PINs · try again in 54 s	Слишком много ошибок PIN · повторите через 54 с
+Too many wrong PINs · try again in 55 s	Слишком много ошибок PIN · повторите через 55 с
+Too many wrong PINs · try again in 56 s	Слишком много ошибок PIN · повторите через 56 с
+Too many wrong PINs · try again in 57 s	Слишком много ошибок PIN · повторите через 57 с
+Too many wrong PINs · try again in 58 s	Слишком много ошибок PIN · повторите через 58 с
+Too many wrong PINs · try again in 59 s	Слишком много ошибок PIN · повторите через 59 с
+Too many wrong PINs · try again in 60 s	Слишком много ошибок PIN · повторите через 60 с
+Refuelling 1, mileage	Заправка 1, пробег
+Refuelling 1, fuel quality	Заправка 1, качество топлива
+Refuelling 2, mileage	Заправка 2, пробег
+Refuelling 2, fuel quality	Заправка 2, качество топлива
+Refuelling 3, mileage	Заправка 3, пробег
+Refuelling 3, fuel quality	Заправка 3, качество топлива
+Refuelling 4, mileage	Заправка 4, пробег
+Refuelling 4, fuel quality	Заправка 4, качество топлива
+Refuelling 5, mileage	Заправка 5, пробег
+Refuelling 5, fuel quality	Заправка 5, качество топлива

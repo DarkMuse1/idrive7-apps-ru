@@ -27,6 +27,12 @@ const HUD_WINDOW = { x: 120, y: 100, w: 560, h: 280 };
  *  its segmented rev band (x ~125..335, y ~245..280, Nov 9 photos). Every layout keeps it clear: [x0, y0, x1, y1]. */
 const HUD_BMW = [120, 235, 350, 380];
 
+/** Newer cars (driver attention camera): the camera sits in the top middle of the cluster, where cars without it show
+ *  the model badge (x ~800..1060, y ~55..105 on our X3, Nov 6 grid photo), and the badge moves under it. Seen on one
+ *  owner's car hiding GT3's middle shift lights (estimate x 740..1160, y 0..100 from an angled photo). Not measured on a
+ *  camera car: the setting "cameraNotch" leaves this gap in the shift lights and rev bars. [x0, y0, x1, y1] */
+const CAMERA = [760, 0, 1160, 110];
+
 /** The first visible y at x on the panel (interpolated along HOOD). */
 function hoodY(x) {
     if (x <= HOOD[0][0]) return HOOD[0][1];
@@ -97,4 +103,4 @@ function check(widgets, target) {
     return out;
 }
 
-module.exports = { HOOD, BLACK_BOX, BELT, HUD_WINDOW, HUD_BMW, hoodY, check };
+module.exports = { HOOD, BLACK_BOX, BELT, HUD_WINDOW, HUD_BMW, CAMERA, hoodY, check };

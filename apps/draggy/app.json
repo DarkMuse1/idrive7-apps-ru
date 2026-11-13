@@ -2,10 +2,18 @@
   "id": "draggy",
   "title": "Разгон",
   "description": "0-100, 100-200 and 1/4 mile timer with best times",
-  "version": "2.5.22",
+  "version": "2.5.23",
   "vendor": "custom",
   "loggingId": "OA94",
   "iconGlyph": "flag",
+  "mguHmi": [
+    "ID7",
+    "ID8"
+  ],
+  "requires": {
+    "idrive7-renderd": "2.1.18",
+    "mgu-inputgate": "1.1.0"
+  },
   "signals": {
     "de.bmw.infotainment.vehicle.Vehicle2": {
       "statusCarSpeed2": "rs"

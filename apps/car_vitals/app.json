@@ -2,10 +2,18 @@
   "id": "car_vitals",
   "title": "M Vitals",
   "description": "Live engine, thermal, intake / fuel / ignition, tyre and chassis gauges",
-  "version": "2.27.3",
+  "version": "2.27.4",
   "vendor": "custom",
   "loggingId": "OA93",
   "iconGlyph": "gauge",
+  "mguHmi": [
+    "ID7",
+    "ID8"
+  ],
+  "requires": {
+    "idrive7-renderd": "2.1.18",
+    "mgu-inputgate": "1.1.0"
+  },
   "signals": {
     "de.bmw.infotainment.vehicle.CDS": {
       "statusEngineSpeed2": "rs",
@@ -743,6 +751,7 @@
       "reset": 1,
       "markDefault": true,
       "steps": [
+        3,
         5,
         10,
         15,

@@ -1,8 +1,8 @@
 {
   "id": "cluster_themes",
   "title": "Темы приборной панели",
-  "description": "Темы приборной панели: GT3, M, Спорт, Минимализм, Родстер, Трек, Дрэг, Ралли, Ретро 80-х, Круиз и Динамометр; индикаторы переключения, наддув, температуры, шины, перегрузки и таймер разгона",
-  "version": "0.14.6",
+  "description": "Redraws the instrument cluster: GT3 race dash, M-style, Sport, Minimal, Roadster, Track, Drag, Rally, Retro 80s, Cruise, Dyno (BMW-coloured readout tiles) or Ribbon (with holiday editions), with shift lights, boost, temps, tyres, a G-meter and a 0-60 timer",
+  "version": "0.15.1",
   "vendor": "custom",
   "loggingId": "OAC1",
   "iconGlyph": "CLU",
@@ -26,7 +26,8 @@
     "badges.js",
     "screen.js",
     "runs.js",
-    "tz.js"
+    "tz.js",
+    "holidays.js"
   ],
   "signals": {
     "de.bmw.infotainment.vehicle.CDS": {
@@ -148,6 +149,10 @@
           "Dyno"
         ],
         [
+          "ribbon",
+          "Ribbon"
+        ],
+        [
           "grid",
           "Calibration grid"
         ],
@@ -216,6 +221,10 @@
         [
           "dyno",
           "Dyno"
+        ],
+        [
+          "ribbon",
+          "Ribbon"
         ]
       ]
     },
@@ -272,6 +281,10 @@
         [
           "dyno",
           "Dyno"
+        ],
+        [
+          "ribbon",
+          "Ribbon"
         ]
       ]
     },
@@ -328,6 +341,10 @@
         [
           "dyno",
           "Dyno"
+        ],
+        [
+          "ribbon",
+          "Ribbon"
         ]
       ]
     },
@@ -580,6 +597,48 @@
       "label": "Leave BMW's bottom strip clear",
       "type": "bool",
       "default": false
+    },
+    {
+      "key": "cameraNotch",
+      "label": "Leave room for the driver camera",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "holiday",
+      "label": "Holiday editions (Ribbon)",
+      "type": "choice",
+      "default": "auto",
+      "options": [
+        [
+          "auto",
+          "Auto, by the date"
+        ],
+        [
+          "off",
+          "Off"
+        ],
+        [
+          "xmas",
+          "Christmas"
+        ],
+        [
+          "halloween",
+          "Halloween"
+        ],
+        [
+          "thanks",
+          "Thanksgiving"
+        ],
+        [
+          "newyear",
+          "New Year"
+        ],
+        [
+          "july4",
+          "Fourth of July"
+        ]
+      ]
     },
     {
       "key": "warnOil",
