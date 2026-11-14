@@ -224,7 +224,8 @@ void main() {
 const LIGHTS = `// Shift lights for a cluster-render "effect" layer (GLSL ES 1.00), after cauliflowermossgrape's Redline
 // app (MIT): u_n rounded lights in a row, green -> yellow -> red from left to right. u_lit of them are
 // on (they fill from a start rpm up to the shift point); u_strobe 1 = at the shift point: all red.
-// The last u_tail lights are blue instead (the GT3 dash look; 0 = none). u_round 1 = round lights.
+// The last u_tail lights are blue instead (the GT3 dash look; 0 = none). u_round 1 = round lights; 2 = a string of
+// holiday bulbs: round, coloured red, green, yellow (gold), blue in turn by their own uniforms (hud_holiday.js).
 //   u_size px, u_n count, u_lit count (0..u_n), u_tail count, u_strobe 0/1, u_green/u_yellow/u_red/u_blue rgb,
 //   u_off (alpha when off), u_skip driver camera wings: px from the layer's left (from, to) left empty, then u_n
 //   lights on each side, mirrored, filling from the outer ends in towards the gap (to <= from: one row as usual)
@@ -269,6 +270,10 @@ void main() {
     float nMain = max(1.0, u_n - u_tail);
     float f = idx / max(1.0, nMain - 1.0);
     vec3 col = idx >= nMain ? u_blue : (f < 0.42 ? u_green : (f < 0.75 ? u_yellow : u_red));
+    if (u_round > 1.5) {
+        float b = mod(idx, 4.0);
+        col = b < 0.5 ? u_red : (b < 1.5 ? u_green : (b < 2.5 ? u_yellow : u_blue));
+    }
     bool on = idx < u_lit;
     if (u_strobe > 0.5) { col = u_red; on = true; }
     gl_FragColor = vec4(col, cover * (on ? 1.0 : u_off));
@@ -768,6 +773,7 @@ uniform vec4 u_hole;      // map window x, y, w, h, already inset (w 0 = none)
 uniform float u_holeR;    // the hole's corner radius px
 uniform vec4 u_strip;     // bottom strip: left end x, top y, height, slant px
 uniform float u_topEnd;   // the top lines run from the bracket to this x (left; mirrored on the right)
+uniform vec4 u_road;      // the road in the middle (BMW's own Sport view draws one): horizon y, px scale, dash phase 0..1, on
 
 const vec3 BLUE_LINE = vec3(0.36, 0.62, 1.0);
 const vec3 BLUE_BAND = vec3(0.13, 0.3, 0.78);
@@ -873,6 +879,20 @@ void main() {
         float hd = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - u_holeR;
         c.a *= clamp(hd + 0.5, 0.0, 1.0);
     } else {
+        // the road while no map shows: a soft blue surface, solid outer lines and dashed lane lines in perspective
+        // from the horizon to the bottom line; the dashes run towards the driver with the speed (u_road.z)
+        if (u_road.w > 0.5 && p.y > u_road.x + 1.0 && p.y < u_geo.z - 3.0) {
+            float dy = p.y - u_road.x;
+            float xw = (p.x - u_size.x * 0.5) * u_road.y / dy;          // across, lanes 1 wide
+            float px = dy / u_road.y;                                   // screen px per lane
+            float fade = smoothstep(0.0, 70.0, dy) * (1.0 - smoothstep(-30.0, 0.0, p.y - u_geo.z + 3.0) * 0.5);
+            c = over(vec4(0.16, 0.36, 0.95, 0.5 * fade * cov((abs(xw) - 1.75) * px) * mix(0.55, 1.0, dy / (u_geo.z - u_road.x))), c);
+            float hw = 1.2 + dy * 0.012;                                // line half width px, wider nearer
+            float edge = cov(abs(abs(xw) - 1.5) * px - hw);
+            float dash = step(fract(u_road.y * 120.0 / dy + u_road.z), 0.5);
+            float lane = cov(abs(abs(xw) - 0.5) * px - hw) * dash;
+            c = over(vec4(0.85, 0.93, 1.0, fade * max(edge, lane)), c);
+        }
         c = bar(p, u_fuelSeg, u_fuel, 0.0, c);
         c = bar(p, u_oilSeg, u_oil, 1.0, c);
     }
@@ -1055,38 +1075,36 @@ void main() {
 `;
 
 const GMETER = `// A G-meter for a cluster-render "effect" layer (GLSL ES 1.00): a bezel with ticks every 30 degrees, rings every
-// u_step g out to u_max (each 0.5 g a little brighter), a crosshair, the grip envelope (the furthest g reached in
+// u_geo.w g out to u_geo.z (each 0.5 g a little brighter), a crosshair, the grip envelope (the furthest g reached in
 // each of 48 directions, as an outline round a faint fill), a fading trail of the last moments, and the dot,
-// white, then amber from u_at.x g, then red from u_at.y g (pinned to the bezel past u_max). Positions in g as
-// drawn: + x right, + y down (hud.js maps the car's signs). Array uniforms (sent with type vec4):
-//   u_trail[i]  two trail points (x, y, x, y), newest first; u_trailN points in use (0..16)
-//   u_env[i]    four envelope radii in g, sector k centred on k * 7.5 degrees counter-clockwise from + x
+// white (u_c1), then amber from 0.5 g, then red (u_c3) from 0.8 g (pinned to the bezel past u_geo.z). Positions in g
+// as drawn: + x right, + y down (hud.js maps the car's signs).
+// 14 uniform vectors (HUD rule: 20 at most; it was 32 before Nov 13 2026): scalars packed into vec4s, the amber and
+// its two thresholds are constants here, and the envelope is an R8 asset instead of 12 vec4s:
+//   u_geo       layer w, h px, range u_max g, ring step g
+//   u_dot       the dot's g (x, y), trail points in use (0..16), envelope on (0 / 1)
+//   u_trail[i]  two trail points (x, y, x, y), newest first (sent with type vec4)
+//   u_env       64 x 1 R8 asset: texel k (0..47) = sector k's radius / u_max, sector k centred on k * 7.5 degrees
+//               counter-clockwise from + x; read at texel centres, so nearest or bilinear sampling reads the same
 // The loops have constant bounds and the arrays are indexed by the loop counter only, as GLSL ES 1.00 requires.
 // The dial fills the smaller side of the layer. v_uv (0,0) is the top-left.
 precision mediump float;
 varying vec2 v_uv;
-uniform vec2 u_size;
-uniform vec2 u_g;
-uniform float u_max;
-uniform float u_step;
+uniform vec4 u_geo;
+uniform vec4 u_dot;
 uniform vec4 u_line;
 uniform vec3 u_c1;
-uniform vec3 u_c2;
 uniform vec3 u_c3;
-uniform vec2 u_at;
 uniform vec3 u_envC;
-uniform float u_envOn;
 uniform vec4 u_trail[8];
-uniform float u_trailN;
-uniform vec4 u_env[12];
+uniform sampler2D u_env;
 
 const float TAU = 6.2831853;
+const vec3 AMBER = vec3(1.0, 0.6901961, 0.1568627);      // [255, 176, 40]: the dot between 0.5 and 0.8 g
+const vec2 AT = vec2(0.5, 0.8);                           // amber from, red from (g)
 
 float envAt(float k) {
-    float slot = floor(k / 4.0), lane = k - slot * 4.0;
-    vec4 v = u_env[0];
-    for (int i = 1; i < 12; i++) if (float(i) == slot) v = u_env[i];
-    return lane < 0.5 ? v.x : lane < 1.5 ? v.y : lane < 2.5 ? v.z : v.w;
+    return texture2D(u_env, vec2((k + 0.5) / 64.0, 0.5)).r * u_geo.z;
 }
 vec2 trailAt(float j) {
     float slot = floor(j / 2.0);
@@ -1095,8 +1113,8 @@ vec2 trailAt(float j) {
     return j - slot * 2.0 < 0.5 ? v.xy : v.zw;
 }
 vec3 heat(float g) {
-    vec3 c = mix(u_c1, u_c2, smoothstep(u_at.x - 0.1, u_at.x, g));
-    return mix(c, u_c3, smoothstep(u_at.y - 0.08, u_at.y, g));
+    vec3 c = mix(u_c1, AMBER, smoothstep(AT.x - 0.1, AT.x, g));
+    return mix(c, u_c3, smoothstep(AT.y - 0.08, AT.y, g));
 }
 vec4 over(vec4 top, vec4 under) {
     float a = top.a + under.a * (1.0 - top.a);
@@ -1105,8 +1123,10 @@ vec4 over(vec4 top, vec4 under) {
 }
 
 void main() {
-    vec2 p = vec2(v_uv.x - 0.5, 0.5 - v_uv.y) * u_size;   // px from the centre, +y up
-    float R = min(u_size.x, u_size.y) * 0.5 - 2.0;
+    vec2 size = u_geo.xy;
+    float u_max = u_geo.z, u_step = u_geo.w;
+    vec2 p = vec2(v_uv.x - 0.5, 0.5 - v_uv.y) * size;     // px from the centre, +y up
+    float R = min(size.x, size.y) * 0.5 - 2.0;
     float d = length(p);
     if (d > R + 1.5) { gl_FragColor = vec4(0.0); return; }
     float k = (R - 5.0) / u_max;                           // px per g (the scale ends inside the bezel)
@@ -1131,11 +1151,11 @@ void main() {
     float cx = clamp(1.2 - abs(p.x), 0.0, 1.0), cy = clamp(1.2 - abs(p.y), 0.0, 1.0);
     if (d > 6.0) col = max(col, vec4(u_line.rgb, u_line.a * 0.4 * max(cx, cy)));
     // the grip envelope: radius between the two nearest sectors
-    if (u_envOn > 0.5) {
+    if (u_dot.w > 0.5) {
         float f = fract(ang / TAU + 1.0) * 48.0;
         float k0 = floor(f), k1 = k0 + 1.0;
         if (k1 > 47.5) k1 = 0.0;
-        float r0 = min(envAt(k0), u_max), r1 = min(envAt(k1), u_max);
+        float r0 = envAt(k0), r1 = envAt(k1);          // stored capped at u_max
         if (r0 > 0.04 || r1 > 0.04) {
             // a direction not reached yet is 0 g, so the outline runs in towards the centre there (a radar
             // chart); the distance is divided by the slope so the steep parts keep their width
@@ -1151,7 +1171,7 @@ void main() {
     float tA = 0.0;
     for (int j = 0; j < 15; j++) {
         float fj = float(j);
-        if (fj + 1.0 >= u_trailN) break;
+        if (fj + 1.0 >= u_dot.z) break;
         vec2 a = clamp(trailAt(fj), vec2(-u_max), vec2(u_max)) * vec2(k, -k);
         vec2 b = clamp(trailAt(fj + 1.0), vec2(-u_max), vec2(u_max)) * vec2(k, -k);
         vec2 ab = b - a;
@@ -1161,7 +1181,7 @@ void main() {
         float wdt = mix(3.2, 0.8, age);
         tA = max(tA, clamp(wdt - dd, 0.0, 1.0) * mix(0.85, 0.08, age));
     }
-    vec2 g = u_g;
+    vec2 g = u_dot.xy;
     float gm = length(g);
     if (tA > 0.0) col = over(vec4(heat(gm), tA), col);
     // the dot with a soft glow, pinned to the bezel past u_max
@@ -1399,7 +1419,7 @@ void main() {
 
 const DECO = `// The Ribbon theme's backdrop (GLSL ES 1.00), one whole-panel layer: u_bg everywhere (it covers BMW's gauges), the
 // gear's rounded frame u_pill (x, y, w, h; 2 px in u_pc), and a holiday's art by u_mode, all static, no loops:
-//   1 snow (white flakes), 2 Halloween (a low moon in u_a, a spider web top left in u_b), 3 Fourth of July (three
+//   1 snow (white flakes), 2 unused (was Halloween), 3 Fourth of July (three
 //   fireworks: u_a, u_b, u_c), 4 New Year (bubbles in u_a, confetti u_a / u_b / u_c), 5 Thanksgiving (leaves u_a,
 //   u_b, u_c). Flakes, bubbles, confetti and leaves sit in a grid of cells (one each at most, placed by a hash); one
 //   whose centre is within its size of the u_k0..u_k3 rects (x0, y0, x1, y1: the readouts and BMW's gear box) or of
@@ -1447,20 +1467,6 @@ void main() {
         float h = h1(cell), r = 1.0 + 2.2 * h1(cell + 7.0);
         vec2 c = 6.0 + 36.0 * vec2(h1(cell + 3.0), h1(cell + 5.0));
         if (h < 0.45 && !keep(cell * 48.0 + c, r)) col = mix(col, vec3(1.0), (0.25 + 0.5 * h1(cell + 9.0)) * clamp(r + 0.5 - length(f - c), 0.0, 1.0));
-    } else if (u_mode > 1.5 && u_mode < 2.5) {                       // Halloween
-        float dm = length(p - vec2(1250.0, 250.0));
-        col = mix(col, u_a, 0.12 * exp(-dm * dm / 7200.0));
-        col = mix(col, mix(vec3(1.0, 0.85, 0.63), u_a, dm / 70.0), 0.22 * clamp(70.5 - dm, 0.0, 1.0));
-        vec2 d = p - vec2(240.0, 150.0);
-        float rr = length(d), th = degrees(atan(d.y, d.x));
-        if (th > 9.0 && th < 81.0 && rr < 216.0) {
-            float s = (th - 10.0) / 14.0, sp = floor(s + 0.5);
-            float a = clamp(1.1 - abs(s - sp) * 0.2443 * rr, 0.0, 1.0);
-            float k = floor(rr / 40.0 + 0.5), t = fract(s);
-            float ring = k * 40.0 * (1.0 - 0.1 * sin(3.14159 * t));
-            if (k >= 1.0 && k <= 5.0) a = max(a, clamp(1.1 - abs(rr - ring), 0.0, 1.0));
-            col = mix(col, u_b, 0.35 * a);
-        }
     } else if (u_mode > 2.5 && u_mode < 3.5) {                       // Fourth of July
         col = mix(col, u_a, burst(p, vec2(250.0, 470.0), 110.0));
         col = mix(col, u_b, burst(p, vec2(1760.0, 500.0), 100.0));

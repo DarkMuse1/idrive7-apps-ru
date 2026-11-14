@@ -84,7 +84,7 @@ def bitmap_assets():
         if not app.is_dir():
             continue
         for p in (app / 'hud/fonts').glob('*.json'):
-            obj = json.loads(p.read_text())
+            obj = json.loads(p.read_text(encoding='utf-8'))
             if sum(c in obj['glyphs'] for c in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') < 12:
                 continue  # Numeric and gear-only faces remain byte-identical.
             old = Image.frombytes('L', (obj['width'], obj['height']), base64.b64decode(obj['alpha']))

@@ -1,7 +1,7 @@
 {
   "id": "ambient_light",
   "title": "Ambient Lighting",
-  "version": "0.3.9",
+  "version": "0.3.10",
   "internet": true,
   "description": "Custom RGB ambient lighting, actual zones, brightness and saved colours. The protected module loads after you enter the password.",
   "vendor": "custom",

@@ -44,6 +44,33 @@
       "color": "hot",
       "align": "center",
       "class": "overlay"
+    },
+    {
+      "id": "nav",
+      "type": "nav",
+      "x": 470,
+      "y": 300,
+      "w": 200,
+      "h": 76,
+      "toggle": "!navDirections=off",
+      "class": "overlay",
+      "z": 20
+    },
+    {
+      "id": "greeting",
+      "type": "text",
+      "z": 10,
+      "x": 390,
+      "y": 300,
+      "w": 260,
+      "h": 20,
+      "text": "{{greeting}}",
+      "font": "label",
+      "color": "greet",
+      "align": "center",
+      "spacing": 1,
+      "navHide": true,
+      "class": "overlay"
     }
   ]
 }

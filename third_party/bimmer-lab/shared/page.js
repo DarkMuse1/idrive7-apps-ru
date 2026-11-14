@@ -142,9 +142,9 @@ class Page {
         cv.clear(C.bg);
         cv.gradientRect(0, 0, W, h, [[0, C.glow], [0.55, '#070a10'], [1, C.bg]]);
         const on = this.hud.activeName && this.hud.activeName !== 'off';
-        const demo = this.hud.car && this.hud.car.data().demo;
+        const dd = this.hud.car && this.hud.car.data(), demo = dd && dd.demo;
         G.frame(cv, this.theme(), [], -1, [
-            demo ? { text: 'DEMO DATA', color: '#ffb020' } : null,
+            demo ? { text: dd.demoShow ? 'DEMO' : 'DEMO DATA', color: '#ffb020' } : null,
             { text: on ? 'ON THE ' + this.cfg.what.toUpperCase() : this.cfg.what.toUpperCase() + ' OFF', color: on ? '#3ddc84' : C.dim },
         ]);
         // the page under an open list takes no taps: the list (and a tap beside it to close) does
@@ -153,12 +153,37 @@ class Page {
         this.rail(cv, bottom);
         const body = { look: this.lookTab, readouts: this.readoutsTab, position: this.positionTab, map: this.mapTab, colours: this.coloursTab, badge: this.badgeTab, alerts: this.alertsTab, gmeter: this.gmeterTab, settings: this.settingsTab }[this.tab];
         if (body) body.call(this, cv, bottom);
+        this.demoButton(cv);
         cv.target = target;
         if (this.picker) this.drawPicker(cv, bottom);
         if (this.confirm) this.drawConfirm(cv, bottom);
         return this.ctx.ui.image('MAIN_GFX', cv);
     }
     theme() { return this.ctx.theme(); }
+
+    /**
+     * "Play demo", top right on every tab: about a minute of a scripted drive on the real HUD / cluster
+     * (hud.playDemo, demo_script.js), only while the car stands; "Stop demo" while it plays.
+     */
+    demoButton(cv) {
+        const hud = this.hud;
+        if (!hud.playDemo) return;
+        const playing = hud.demoPlaying(), why = playing ? null : hud.demoBlocked();
+        const text = playing ? 'Stop demo' : 'Play demo', h = 36, y = 44;
+        const w = cv.textWidth(text, 16, { font: 'bold', literal: true }) + 62, x = CR - w;
+        cv.roundRect(x, y, w, h, h / 2, playing ? '#ffffff14' : why ? '#ffffff12' : C.blue);
+        if (playing) cv.strokeRoundRect(x, y, w, h, h / 2, 1, A(C.blueHi, 0.6));
+        const ic = why ? C.dim : '#ffffff', ix = x + 22, iy = y + h / 2;
+        if (playing) cv.fillRect(ix - 6, iy - 6, 12, 12, ic);
+        else cv.quad([[ix - 5, iy - 8], [ix + 8, iy], [ix + 8, iy], [ix - 5, iy + 8]], ic);
+        cv.text(text, x + 36 + (w - 36) / 2 - 10, y + 24, 16, why ? C.dim : '#ffffff', { align: 'center', font: 'bold', literal: true });
+        const what = this.cfg.what === 'cluster' ? 'cluster' : 'HUD';
+        const info = playing ? 'Playing on the ' + what + ' · ' + Math.ceil(hud.demoLeft() / 1000) + ' s'
+            : why === 'moving' ? 'Stop the car to play the demo' : why === 'off' ? 'Pick a ' + (what === 'HUD' ? 'layout' : 'theme') + ' to play the demo'
+                : why ? 'The ' + what + ' is not drawing yet' : '';
+        if (info) cv.text(info, x - 16, y + 24, 15, playing ? C.blueHi : C.dim, { align: 'right', literal: true });
+        if (!why) cv.target(x, y, w, h, () => { if (hud.demoPlaying()) hud.stopDemo(); else hud.playDemo(); this.kick(); }, 'demo:play', h / 2);
+    }
 
     rail(cv, bottom) {
         cv.fillRect(RAIL.x + RAIL.w + 15, 50, 1, bottom - 56, C.line);
@@ -468,6 +493,29 @@ class Page {
             'Runs the rpm up to the shift point for about 4 seconds: the lights fill, go red and flash.',
             'Only while the car stands. Set a limit to 0 (Off) to turn that warning off.',
         ]);
+        this.cueColumn(cv, CX + w + 24, CW - w - 24);
+    }
+    /** Alerts, right column: how the shift lights work (shift_cue.js), temperatures only when they matter (smart_temps.js)
+     *  and, in HUD Widgets, the turn-by-turn directions ("navDirections"; the nav widget, hud.js). */
+    cueColumn(cv, x, w) {
+        let y = 84;
+        if (this.item('shiftCue')) {
+            label(cv, x, 70, 'Shift lights');
+            y = this.pickRow(cv, x, y, w, 'Shift lights', 'shiftCue', (v) => (v === 'rpm' ? 'Rpm band' : 'Count-in'));
+            note(cv, x, y + 22, this.get('shiftCue') === 'rpm' ? ['From a fixed rpm up to the shift point.'] : ['Fill over the last second, flash early', 'by your reaction time.']);
+            y += 84;
+        }
+        if (this.item('smartTemps')) {
+            label(cv, x, y, 'Temperatures');
+            y = this.toggleRow(cv, x, y + 14, w, 'Only when they matter', 'smartTemps');
+            note(cv, x, y + 22, ['Oil and coolant show only while cold,', 'warming up or hot. Outside: blue at ' + (this.get('units') === 'us' ? '37 °F.' : '3 °C.')]);
+            y += 84;
+        }
+        if (this.item('navDirections')) {
+            label(cv, x, y, 'Directions');
+            y = this.pickRow(cv, x, y + 14, w, this.item('navDirections').label, 'navDirections');
+            note(cv, x, y + 22, ['The next turn, its distance and the lanes.', 'CarPlay with Apple Maps. Waze sends no turns.']);
+        }
     }
 
     /* ---------- G-meter (both) ---------- */
@@ -567,6 +615,10 @@ class Page {
         });
         // what the engine says it is doing (layers, pixel memory, why nothing shows): for checking on the car
         cv.text(this.hud.lastStatus || '', CX, bottom - 6, 15, C.label, { literal: true });
+        // issue #8: the drive mode check (raw signal values) under the right column while "Change with the drive mode" is on
+        const diag = this.hud.modeDiagLines ? this.hud.modeDiagLines() : [];
+        const dy = 84 + (keys.length - per) * 64 + 10;
+        diag.forEach((t, i) => { if (dy + 20 * i < bottom - 16) cv.text(t, CX + colW + 24, dy + 20 * i, 15, C.label, { literal: true }); });
     }
 
     /* ---------- rows ---------- */

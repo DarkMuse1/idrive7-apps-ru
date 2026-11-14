@@ -112,7 +112,8 @@
       "color": "dim",
       "align": "right",
       "spacing": 1.5,
-      "class": "content"
+      "class": "content",
+      "navHide": true
     },
     {
       "id": "g_best",
@@ -126,6 +127,35 @@
       "font": "label",
       "color": "fg",
       "align": "right",
+      "class": "overlay",
+      "navHide": true
+    },
+    {
+      "id": "nav",
+      "type": "nav",
+      "x": 356,
+      "y": 319,
+      "w": 150,
+      "h": 57,
+      "toggle": "!navDirections=off",
+      "class": "overlay",
+      "z": 20,
+      "align": "left"
+    },
+    {
+      "id": "greeting",
+      "type": "text",
+      "z": 10,
+      "x": 290,
+      "y": 212,
+      "w": 155,
+      "h": 17,
+      "text": "{{greeting}}",
+      "font": "small",
+      "color": "greet",
+      "align": "center",
+      "spacing": 1,
+      "navHide": true,
       "class": "overlay"
     }
   ]

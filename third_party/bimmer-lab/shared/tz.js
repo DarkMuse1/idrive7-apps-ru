@@ -24,7 +24,7 @@ const ZONES = {
     10012: ['Central Europe', 60, 'eu', [48, 10]],
     10013: ['Eastern Europe', 120, 'eu', [46, 25]],
 };
-// no zone set (Automatic): the middle of the contiguous US, where most of the apps' users are
+// no zone set ("Not set"): the middle of the contiguous US, where most of the apps' users are
 const FALLBACK = { lat: 39.8, lon: -98.6 };
 
 /** Where to work out sunrise / sunset for a setting value: a zone's middle, or for a plain offset 15 degrees of
@@ -69,7 +69,7 @@ function offset(v, t) {
 
 /** The setting value as the settings row shows it. */
 function name(v) {
-    if (v === AUTO || typeof v !== 'number') return 'Automatic';
+    if (v === AUTO || typeof v !== 'number') return 'Not set (UTC)';   // the head unit's clock is UTC: pick a zone
     if (ZONES[v]) return ZONES[v][0];
     if (v === 0) return 'UTC';
     const a = Math.abs(v), h = Math.floor(a / 60), m = a % 60;

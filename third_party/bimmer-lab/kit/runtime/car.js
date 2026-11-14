@@ -12,7 +12,7 @@
  * Scalings are BMW's own (M Laptimer TypeConverters); an app's app.json
  * "config.scaling" entries override them. The app's app.json "signals" must
  * list the interfaces (see SIGNALS below for the exact entries).
- * Demo: setting "demo" = auto (until the car answers) / on / off.
+ * Demo: setting "demo" = auto (until the car answers) / on (until the car itself drives over 5 km/h) / off.
  * data().stage = the selector position 'P' / 'R' / 'N' / 'D' (gearbox signal), else undefined.
  * data().condition = BMW's vehicle state number ('condition' group; 10 = drive-ready), else undefined.
  */
@@ -182,7 +182,11 @@ class Car {
 
     _wantDemo() {
         const m = this.ctx.settings.get('demo');
-        return m === 'on' || (m !== 'off' && !this.carPresent() && Date.now() - this.t0 > 5000);
+        // "On" gives way to the car's own data for good once the car itself drives (over 5 km/h): never a made-up
+        // speed while driving, not even at the next red light. Set it again (parked) to bring the demo back.
+        if (m !== this.demoMode) { this.demoMode = m; this.drove = false; }
+        if (this.live.speed > 5) this.drove = true;
+        return (m === 'on' && !this.drove) || (m !== 'off' && m !== 'on' && !this.carPresent() && Date.now() - this.t0 > 5000);
     }
 
     data() {

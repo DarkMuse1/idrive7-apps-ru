@@ -76,7 +76,8 @@
  *   mtach     effect layer; the M rev bar: "side" left|right, "max" rpm, and in target px for the LEFT bar
  *             "y0" (0 rpm), "y8" (max), "ym" (the bend), "xm" (outer edge x at the bend; the right bar gives
  *             its own, mirrored), "kTop" / "kBot" (x per y px above / below the bend), "round", "wBot" / "wTop" / "wBend"
- *   sdash     effect layer; the whole Sport theme (shaders.js sdash): "geo" [yTop, yBend, yBottom, xBend] and
+ *   sdash     effect layer; the whole Sport theme (shaders.js sdash), optional "road" [horizonY, scale] (a road in the
+ *             middle while no map shows, its dashes running with the speed): "geo" [yTop, yBend, yBottom, xBend] and
  *             "k" [above, below, round] for the left bracket's outer line (the right one is mirrored), "band"
  *             width, "inner" (the inner line's distance from the outer one), "scale" [y of 0, y of the top mark],
  *             "ticks" [speed, rpm], "rpmMax" (speed follows SPEED_SCALE), "fuelSeg" / "oilSeg" [fullX, fullY,
@@ -135,10 +136,25 @@
  *             Its numbers are text widgets toggled by the virtual setting "ribScale" (thousands on the scale, "c" added
  *             while the camera dip is on: "7", "7c").
  *   deco      effect layer (shaders.js deco): the Ribbon theme's whole backdrop: role "bg" over the panel, a rounded frame
- *             "pill" [x, y, w, h] (role "accent") round the gear, and the theme's holiday art ("deco": 1 snow, 2 Halloween,
+ *             "pill" [x, y, w, h] (role "accent") round the gear, and the theme's holiday art ("deco": 1 snow, 2 unused,
  *             3 Fourth of July, 4 New Year, 5 Thanksgiving; colours "decoColors" [3 rgb]) kept out of "keep" [[x0, y0, x1,
  *             y1] x up to 4]. The holiday comes from the "holiday" setting (shared/holidays.js): a layout whose theme has
  *             "holidays": true is drawn in "<theme>_<holiday>" while one is on.
+ *   nav       image layer, always its own (never packed): turn-by-turn directions, Redline's (cauliflowermossgrape/
+ *             idrive7-apps, MIT; shared/nav.js reads BMW's guidance service, shared/hud_nav.js draws the 200x76 picture:
+ *             arrow, distance, street or lanes, "then", roundabouts). The picture is always 200x76; the widget's w / h
+ *             place it (a smaller box scales it down, bilinear). Drawn in role "color" (fg), right-aligned ("align":
+ *             "left": from its left edge, beside something on its right). Redrawn only when what it
+ *             shows changes (the distance counting down sends only the changed rect), see-through while there is no
+ *             fresh turn. The setting "navDirections": route (while a route runs), near (under 1 km, or lanes), off (no
+ *             layer: the layouts toggle it with "!navDirections=off"). Redline's safety rules hold: no turn older than
+ *             3 s, a reply asked before a route change is dropped, no arrow while two phones claim a route, a direction
+ *             the car's catalog doesn't name is a dot (never a guessed arrow), BMW's event list is asked once a second
+ *             only while a route runs and a nav widget is up with the directions on, with a back-off after failures.
+ *             nav.js and hud_nav.js are loaded only when a layout has a nav widget (Cluster Themes never does).
+ *             Proven by Redline with CarPlay / Apple Maps only; Waze over CarPlay sends the car no turns.
+ *             Any text or badge with "navHide": true is drawn empty while the nav widget shows a turn (a layout with no
+ *             free corner puts the directions over something less needed then).
  * Any image widget: "own": true gives it its own image layer instead of a place in a packed sheet (above).
  * Any widget: "conn": 0..3 puts its layer (or its sheet) on that connection to cluster-render. The 8-layer limit
  *   is per connection, so a second socket from the same app gets another 8 (DukeAPenguin saw 28 layers over four
@@ -165,9 +181,27 @@
  * at the shift point; "coldWhen": "cold" turns it blue while the cold guard lowers the shift point.
  * scale: "over" as revbar; "redFrom": true draws the numbers from the redline on in red.
  * lights: "count" (12), "from" rpm (3000) where the first light comes on, "tail" (0): the last "tail" lights are blue
- *   (the GT3 look); "round": true for dots;
+ *   (the GT3 look); "round": true for dots; with the setting "shiftCue" on "countin" (the default) the lights count in
+ *   over the last second before an early, latched 5 Hz flash instead, and "from" is not used (shift_cue.js);
  * "off" the alpha of an unlit light (0.14).
  * Text "warnFlash": false: no flash over the warning limit (a tile that turns red itself).
+ * Text "showWhen": "abnormal" (or "abnormal:oil" / "abnormal:coolant" on a plain label): empty while that temperature is
+ *   normal and the setting "smartTemps" is on; temperature values take their band's colour, outside blue at 3 C and
+ *   under (smart_temps.js).
+ * Switch-off guard (vehicle_state.js): no new layer while BMW's vehicle state is off / switching on / off, the layers
+ *   dropped at 12 or 5 and under, built again when the car is on.
+ * HUD holiday colours (shared/hud_holiday.js, the "holiday" setting on the HUD target): the theme's accents in the holiday's
+ *   colours, Christmas lights as a string of bulbs, and {{greeting}} (MERRY CHRISTMAS, ...) only while the car stands.
+ *   garland   image layer(s), never written in a layout: the holiday light string (shared/garland.js, Nov 13 2026). While the
+ *             "holiday" setting picks a holiday (holidays.js, either app) every layout gets one at rebuild time, as the
+ *             demo's DEMO tag: glowing C9 bulbs on a thin wire (colours: hud_holiday.js garland()) hung in swags under the
+ *             hood line on the cluster, along the top of the visible window on the HUD (tiny "fairy lights" in the strip
+ *             above a shift bar that fills the top), kept off every widget, the camera notch ("cameraNotch") and BMW's own
+ *             HUD area; split round what is in the way, smaller bulbs where the top is tight, none without room. Not on
+ *             the calibration layouts nor a theme with its own holiday art (Ribbon). Each stretch is its own image layer
+ *             ("own"), all on the first connection with room for them; past 28 layers in all they share one. Drawn on the
+ *             CPU once; while the car stands (under 3 km/h) a few bulbs dim for a moment (at most 4 redraws a second, only
+ *             those bulbs' rects sent), moving nothing changes. The rebuild log line "holiday lights" gives its boxes.
  * Text "colorBy": "verdict" colours it by the last shift's grade. Text "near": ["speed" | "rpm", i] turns it
  * "nearColor" (fg) while scale label i is the one nearest the value (BMW lights up the label by the needle).
  *
@@ -194,6 +228,8 @@
  * sensor) flashes in the shift red while the value is over "warnOil" / "warnCoolant" (C) / "warnBoost" (bar); 0 = off.
  * Shift-light test (testShift(), the page's Alerts tab): for about 4 s the rpm every widget sees climbs from 1500 to just
  * past the shift point and holds there; only while the car stands. Shift scoring keeps the car's own rpm.
+ * Play demo (demo_script.js, the page's button): a scripted one-minute drive on the real HUD / cluster with a DEMO tag,
+ * only while the car stands; it stops past 5 km/h of the car's own speed. this.car is its stand-in for the kit's Car.
  * Night colours (Cluster Themes "nightDim" on Auto): after sunset (sun.js, at _sunPlace(): the time zone's middle) a layout's own theme is
  * built with its whites and greys at 60 %; the minute timer rebuilds at sunset and sunrise.
  *
@@ -226,6 +262,14 @@ const badges = require('./badges');
 const Runs = require('./runs');
 const tz = require('./tz');
 const holidays = require('./holidays');
+const VehicleState = require('./vehicle_state');    // the switch-off guard: no new layer while the car switches off
+const ShiftCue = require('./shift_cue');            // the count-in shift lights (setting "shiftCue")
+const smartTemps = require('./smart_temps');        // "showWhen": "abnormal", temperature colours, slot bumping
+const hudHoliday = require('./hud_holiday');
+const DemoShow = require('./demo_script');
+const Garland = require('./garland');               // the holiday light string (widget type "garland")
+const DEMO_AMBER = [255, 176, 40];      // the DEMO tag's colour
+const CAL_LAYOUTS = { grid: true, wincal: true, mapcal: true };
 // sharing the HUD with other kit apps (Redline, issue #4): kit/runtime/hud_claim.js, from cauliflowermossgrape's kit
 // (MIT). HUD Widgets is a "standing" app, like Cluster functions: it gives way while another app holds a fresh
 // claim, and says it is on so that app hands the HUD back at the car's switch-off.
@@ -235,7 +279,7 @@ const CLAIM_MS = 1000;
 
 const BOOST_SCALE = { factor: 0.01, offset: 0, invalid: 255 }; // see header comment
 // the widget types drawn as pixels (image layers, packed into sheets unless "own": true); the rest are shaders
-const IMAGE_TYPES = { text: true, scale: true, stripe: true, badge: true, gridlabels: true, icon: true, swatchimg: true };
+const IMAGE_TYPES = { text: true, scale: true, stripe: true, badge: true, gridlabels: true, icon: true, swatchimg: true, nav: true, garland: true };
 const STATUS_ASK_MS = 2000;      // after a rebuild: ask cluster-render for its own status text
 // an image layer is "stalled" until its first pixels reach cluster-render, which after a rebuild takes a second or two
 // through the upload budget: normal. Only one still stalled this long is logged as a problem (and its recovery)
@@ -265,8 +309,8 @@ const G_BAD = 3;
 const G_AVG_MS = 150;
 // the G-meter's grip envelope: G_SECTORS directions, a reading also lifts the G_SPREAD sectors either side of it
 // (by the cosine), so the outline closes up between nearby readings; the trail holds G_TRAIL points
-const G_AMBER = [255, 176, 40];         // the dot between 0.5 and 0.8 g
 const G_SECTORS = 48, G_SPREAD = 3, G_TRAIL = 16;
+const G_ENV_TEX = 64;                   // the envelope asset's width (R8, 64 x 1; sectors in texels 0..47)
 // warnings (page.js Alerts): a readout of oil / coolant / boost over its limit flashes in the shift red
 const WARN = { oil: 'warnOil', coolant: 'warnCoolant', boost: 'warnBoost' };
 const WARN_FLASH_MS = 300;
@@ -283,6 +327,9 @@ const TILE_BAR = {
     range: { raw: 'range', min: 0, max: 700 }, hvSoc: { raw: 'hvSoc', min: 0, max: 100 },
 };
 const TILE_MAX = 14;       // half a flash: red, then the normal colour
+// widgets that show the shift cue (the reaction time is learned only while one of them is drawn)
+const ROAD_DASH_M = 12;            // the Sport road: metres per dash and gap (shaders.js sdash u_road)
+const CUE_TYPES = { lights: true, shiftbar: true, revbar: true, revarc: true, ribbon: true, mtach: true, dial: true };
 // the shift-light test (page.js Alerts): rpm climbs from TEST_FROM to just past the shift point, then holds
 const TEST_FROM = 1500, TEST_CLIMB_MS = 2500, TEST_HOLD_MS = 1200;
 // night colours (Cluster Themes "nightDim"): after sunset the theme's whites and greys go to this brightness
@@ -452,6 +499,10 @@ class HudApp {
         this.problem = null;             // why nothing shows (a bad layout), for the status line
         this.statusListeners = [];
         this.lastStatus = null;
+        this.modeDiag = {};              // issue #8 (M cars): the raw drive-mode candidates by short name, shown while byMode is on
+        this.modeDiagLogged = {};        // how many distinct values of each went to the log (20 at most)
+        this.lastDiag = '';
+        this.diagTimer = null;
 
         this.slotsFile = path.join(ctx.dataDir || '.', 'slots.json');
         this.slotPicks = {};             // { layout: { slot id: sensor id } }: the readout slots' picks (page.js Readouts)
@@ -475,6 +526,9 @@ class HudApp {
         this.testAt = null;              // the shift-light test's start (Date.now()), while it runs
         this.nightOn = false;            // the layout was built with the night colours (nightDim)
 
+        this.vstate = new VehicleState(this.log, () => this._guard('vehicle state', () => this._vehicleState()));
+        this.cue = new ShiftCue(ctx.dataDir, this.log);
+        this.slotBumps = {};             // { slot id: sensor id }: a hot temperature shown there for now (smart_temps.js)
         this._setupVehicleData();
         this.layouts.onChange(() => this._rebuild());
         ctx.settings.onChange((key) => {
@@ -489,7 +543,10 @@ class HudApp {
     /* ---------------- readout slots ---------------- */
 
     /** The sensor (sensors.js) slot `id` of `layout` shows: the pick, else the layout's default. */
-    slotSensor(layout, id, slots) {
+    slotSensor(layout, id, slots, own) {
+        // a hot temperature bumped into this slot for now (smart_temps.js); own: the driver's pick regardless
+        const bump = !own && layout === this.activeName && this.slotBumps && this.slotBumps[id];
+        if (bump && sensors.get(bump)) return sensors.get(bump);
         const pick = (this.slotPicks[layout] || {})[id];
         if (pick && sensors.get(pick)) return sensors.get(pick);
         const def = (slots || []).find((x) => x.id === id);
@@ -618,6 +675,8 @@ class HudApp {
 
     _setupVehicleData() {
         const extra = {
+            // BMW's vehicle state, for the switch-off guard (vehicle_state.js)
+            'de.bmw.infrastructure.VehicleCondition': { VehicleCondition: (v) => this.vstate.feed(v) },
             // fuel and range (cauliflowermossgrape's live_data, MIT): litres (255 = none) and km (4095 = none)
             'de.bmw.infotainment.KombiIF': {
                 statusRangeTankStatus: (v) => {
@@ -645,6 +704,8 @@ class HudApp {
             },
             // S / M next to the gear: the gearbox status carries no programme on some cars, the M drive display does
             'de.bmw.infotainment.misc.MDrive': {
+                // issue #8: what an M car keeps here (car_vitals reads xDrive from it), for the drive mode check
+                statusMSystem: (v) => this._diag('MSystem', v),
                 dataDisplayGearbox: (v) => {
                     const raw = v && v.displayProgramGearbox;
                     this.program = PROGRAMS[raw] || null;
@@ -661,6 +722,7 @@ class HudApp {
             },
             'de.bmw.infotainment.drivingexcitement.FES': {
                 statusSwitchDriveDynamicSport2: (v) => {
+                    this._diag('Sport2', v, ['displayBoostPressure', 'displayMaximumValueBoostPressure']);
                     const raw = v && v.displayBoostPressure;
                     if (typeof raw !== 'number' || raw === BOOST_SCALE.invalid) return;
                     this.boostFes = raw * BOOST_SCALE.factor + BOOST_SCALE.offset;
@@ -668,12 +730,14 @@ class HudApp {
                 },
                 // the HMI's sport display: power and torque in % of the car's maximum (car_vitals, MIT); 255 = none
                 statusVehicleDynamicEngine: (v) => {
+                    this._diag('Engine', v, ['displaySportEnginePower', 'displaySportEngineTorque']);
                     const p = v && v.displaySportEnginePower, t = v && v.displaySportEngineTorque;
                     this.sportPower = isNum(p) && p >= 0 && p <= 150 ? p : null;
                     this.sportTorque = isNum(t) && t >= 0 && t <= 150 ? t : null;
                     this.sportAt = Date.now();
                 },
                 statusFESVehicleDynamicSwitchHMI: (v) => {
+                    this._diag('HMI', v);
                     const raw = v && v.actualValueModeDrivingExperience;
                     const m = driveModeOf(raw), variant = m ? driveVariantOf(raw) : null;
                     if (!m) {
@@ -684,6 +748,7 @@ class HudApp {
                         return;
                     }
                     this.driveRaw = null;
+                    if (this.demoKeep) { this.demoKeep.mode = m; this.demoKeep.variant = variant; return; }   // the demo show has the mode; kept for after
                     if (m === this.driveMode && variant === this.driveVariant) return;
                     this.log.info('drive mode ' + MODE_NAME[m] + (variant ? ' ' + variant : '') + ' (' + raw + ')');
                     this.driveMode = m; this.driveVariant = variant;
@@ -692,6 +757,9 @@ class HudApp {
             },
         };
         this.car = new Car(this.ctx, ['rpm', 'speed', 'temps', 'accel', 'gear', 'torque'], extra);
+        // "Play demo": this.car becomes the show's stand-in (the car's own data unless the show plays)
+        this.demo = new DemoShow(this.car, this._demoHooks(), this.log);
+        this.car = this.demo.car;
         this.car.setRedline(this.setting('redline'));
         this.gBuf = [];                  // [t, lat, long] of the last G_AVG_MS
         this.gSm = null;                 // { lat, long, at }: their average
@@ -780,7 +848,8 @@ class HudApp {
         this.tickTimer = setInterval(() => this._guard('tick', () => this._tick()), TICK_MS);
         // Auto theme: check for sunrise / sunset once a minute; the status line too
         this.themeTimer = setInterval(() => this._guard('theme check', () => {
-            if (this._themeName() !== this.themeName || this._nightDim() !== this.nightOn) this._rebuild();
+            if (this._themeName() !== this.themeName || this._nightDim() !== this.nightOn || this._hudHoliday() !== (this.hudHoliday || null) ||
+                this._holidayNow() !== (this.holidayAt || null)) this._rebuild();
             this._status();
             if (this.client.ready) this.client.status();      // the scene ids (scenesApart) can change: guard, update
         }), 60000);
@@ -865,11 +934,14 @@ class HudApp {
         clearInterval(this.dmeTimer);
         clearInterval(this.claimTimer);
         clearTimeout(this.statusAskT);
+        this.vstate.stop();
         this.stallTimers.forEach((t) => clearTimeout(t)); this.stallTimers.clear();
         if (this.waze) this._guard('waze stop', () => this.waze.stop());
+        if (this.directions) this._guard('directions stop', () => this.directions.stop());
         this._guard('screen stop', () => this.screen.stop());
         this.clients.forEach((c) => c.close());
         this.atlases.clear();
+        if (this.gEnvTex) this.gEnvTex.clear();
     }
 
     /**
@@ -910,6 +982,21 @@ class HudApp {
         return n;
     }
 
+    /**
+     * A G-meter's envelope asset (R8, G_ENV_TEX x 1, 128 bytes of pixel memory), kept per connection and widget id across
+     * rebuilds like the glyph atlases (the client re-sends it after a reconnect); the update fills it. Null if refused.
+     */
+    _gEnvAsset(x) {
+        if (!this.gEnvTex) this.gEnvTex = new Map();
+        const key = x.ci + ':' + x.w.id;
+        if (this.gEnvTex.has(key)) return this.gEnvTex.get(key);
+        const ref = x.c.asset({ target: this.target, format: 'r8', w: G_ENV_TEX, h: 1 });
+        if (!ref) { this.log.warn('widget "' + x.w.id + '": envelope asset refused; the G-meter draws without it'); return null; }
+        x.c.pixels(ref, null, Buffer.alloc(G_ENV_TEX, 0));
+        this.gEnvTex.set(key, ref);
+        return ref;
+    }
+
     /** The glyph codes of a text in an atlas widget's cells, aligned; -1 is an empty cell. */
     _atlasCodes(x, s) {
         const a = x.atlas, n = x.cells, text = String(s).slice(0, n);
@@ -938,6 +1025,7 @@ class HudApp {
     _layoutName() {
         if (this.screen && this.screen.yielded) return 'off';
         if (this.claimBy) return 'off';
+        if (this.vstate.hold()) return 'off';           // the switch-off guard (_vehKeep keeps what is up at 8)
         return this._chosenName();
     }
     /** The layout the driver picked for now, before anything that makes us step aside. */
@@ -963,6 +1051,28 @@ class HudApp {
         }
         const want = this._chosenName();
         HudClaim.standing(CLAIM_ID, !!(want && want !== 'off'));
+    }
+
+    /**
+     * The switch-off guard (vehicle_state.js) at a rebuild: true = keep the layers that are up and make none (the car's
+     * drive readiness starting, 8, or a state we don't know); the rebuild waits for the state to clear. Otherwise the
+     * rebuild goes on, and draws nothing while the state holds new layers back (_layoutName 'off').
+     */
+    _vehKeep() {
+        if (this.vstate.hold() && !this.vstate.drop() && this.widgets.size) {
+            if (!this.vehPending) this.log.info('vehicle state ' + this.vstate.text() + ': the layers that are up stay, no new ones until the car is on');
+            this.vehPending = true;
+            return true;
+        }
+        this.vehHeld = this.vstate.hold();
+        if (!this.vehHeld) this.vehPending = false;
+        return false;
+    }
+    /** The vehicle state changed: drop at switch-off, build again once it is back to normal. */
+    _vehicleState() {
+        if (this.vstate.drop()) this._rebuild();
+        else if (!this.vstate.hold() && (this.vehHeld || this.vehPending)) this._rebuild();
+        else this._status();
     }
 
     _layoutLabel(name) {
@@ -1046,12 +1156,13 @@ class HudApp {
         const mode = byMode ? (this.driveRaw ? ' (drive mode not recognised: the car sends ' + this.driveRaw + ')'
             : this.driveMode ? ' (' + MODE_NAME[this.driveMode] + ')' : ' (drive mode not seen yet)') : '';
         const what = this.target === 'panel' ? 'cluster' : 'HUD';
+        if (this.activeName === 'off' && this.vehHeld) return this.label + ' paused: the car is off or switching on / off (vehicle state ' + this.vstate.text() + '); it comes back when the car is on';
         if (this.activeName === 'off' && this.claimBy) return this.label + ' off: ' + this.claimBy.charAt(0).toUpperCase() + this.claimBy.slice(1) + ' has the HUD; it comes back when that app lets go';
         if (this.activeName === 'off' && this.screen.yielded) return this.label + ' off: ' + this.screen.otherName + ' has the screen, pick one here to take it back';
         if (this.activeName === 'off') return this.label + ' off' + mode + ": BMW's own " + what + ' shows';
         const name = this._layoutLabel(this.activeName);
         const d = this.car.data();
-        const demo = d.demo ? ', demo data' : '';
+        const demo = d.demoShow ? ', playing the demo' : d.demo ? ', demo data' : '';
         const drawn = this._drawnNote();
         const conns = this._connCount();
         const layers = ', ' + this._layerCount(this._layerRefs().length) + (conns > 1 ? ' on ' + conns + ' connections' : '')
@@ -1065,9 +1176,35 @@ class HudApp {
     _status() {
         // the Waze map's state rides along while that setting is on (and redraws the page's Map tab when it changes)
         const s = this.statusText() + (this.waze && this.setting('mapInTheme') === true ? '; Waze: ' + this.waze.info().text : '');
-        if (s === this.lastStatus) return;
-        this.lastStatus = s;
+        const d = this.modeDiagLines().join('\n');
+        if (s === this.lastStatus && d === this.lastDiag) return;
+        this.lastStatus = s; this.lastDiag = d;
         this.statusListeners.forEach((fn) => { try { fn(s); } catch (e) { this.log.warn('status listener: ' + e); } });
+    }
+
+    /**
+     * Issue #8: M cars keep FES's drive mode on Comfort whatever their M Setup says, so the real mode is somewhere
+     * else. While "Change with the drive mode" is on, the Settings tab shows the raw contents of the candidates
+     * (FES HMI switch, FES engine display, FES sport display 2, MDrive M system) for a driver to photograph in each
+     * mode. Fields that change all the time while driving (boost, power, torque) are left out. Never throws.
+     */
+    _diag(name, v, drop) {
+        try {
+            let o = v;
+            if (v && typeof v === 'object' && drop) { o = {}; Object.keys(v).forEach((k) => { if (drop.indexOf(k) < 0) o[k] = v[k]; }); }
+            const t = String(JSON.stringify(o)).replace(/"/g, '').slice(0, 84);
+            if (this.modeDiag[name] === t) return;
+            this.modeDiag[name] = t;
+            const n = this.modeDiagLogged[name] = (this.modeDiagLogged[name] || 0) + 1;
+            if (n <= 20) this.log.info('drive mode check ' + name + ': ' + t);
+            // at most two page redraws a second, however often a value changes
+            if (!this.diagTimer) this.diagTimer = setTimeout(() => { this.diagTimer = null; try { this._status(); } catch (e) { /* next status */ } }, 500);
+        } catch (e) { /* a diagnostic never stops the app */ }
+    }
+    /** The drive mode check's lines for the Settings tab (one per signal), [] while byMode is off. */
+    modeDiagLines() {
+        if (this.setting('byMode') !== true) return [];
+        return ['HMI', 'MSystem', 'Engine', 'Sport2'].map((n, i) => (i ? '' : 'Drive mode check: ') + n + '  ' + (this.modeDiag[n] || '--'));
     }
 
 /* ---------------- theme, units, values ---------------- */
@@ -1083,6 +1220,40 @@ class HudApp {
         const t = this.setting('hudTheme');
         if (t !== 'auto') return t;
         return sun.isNight(Date.now(), ...this._sunPlace()) ? 'night' : this.setting('dayTheme');
+    }
+
+    /** The holiday the HUD is drawn in now (hud_holiday.js; the "holiday" setting, as Cluster Themes'), or null. */
+    _hudHoliday() {
+        if (this.target !== 'hud' || !this.ctx.settings.item('holiday')) return null;
+        const d = this._localDate();
+        return holidays.pick(this.setting('holiday'), d.y, d.m, d.d) || null;
+    }
+
+    /** The holiday the "holiday" setting picks today (holidays.js), or null: the light string's, on either target. */
+    _holidayNow() {
+        if (!this.ctx.settings.item('holiday')) return null;
+        const d = this._localDate();
+        return holidays.pick(this.setting('holiday'), d.y, d.m, d.d) || null;
+    }
+
+    /** The holiday whose light string (garland.js) this layout gets, or null: not on a calibration layout, nor on a
+     *  theme with holiday editions of its own (Ribbon hangs its own bulbs). */
+    _garlandHoliday(name, shown) {
+        if (['grid', 'wincal', 'mapcal'].indexOf(name) >= 0 || shown.some((w) => ['grid', 'gridlabels', 'swatch', 'swatchimg'].indexOf(w.type) >= 0)) return null;
+        const base = this.layoutTheme && THEMES[this.layoutTheme];
+        if (base && base.holidays) return null;
+        return this.holidayAt || null;
+    }
+
+    /** The light string's twinkle: while the car stands (under 3 km/h) a few bulbs dim for a moment, only their rects
+     *  sent, at most 4 times a second; while it moves every bulb is lit and nothing is sent. */
+    _garlandTick(x, now) {
+        if (!x.tw) return;
+        const sp = this.car.data().speed;
+        const changed = x.tw.step(now, isNum(sp) && sp < 3);
+        if (!changed.length) return;
+        const rects = x.tw.rects(changed);
+        if (rects.length) this._blit(x, rects, Buffer.concat(rects.map((r) => Garland.paint(x.w, x.tw.lvl, r))));
     }
 
     /** Night colours now: Cluster Themes' "nightDim" on Auto, a theme of the layout's own, and the sun down. */
@@ -1101,6 +1272,57 @@ class HudApp {
         return true;
     }
     shiftTesting() { return this.testAt !== null; }
+
+    /* ---------------- "Play demo" (demo_script.js) ---------------- */
+
+    /** Why the demo can't start now ('moving', 'off': nothing would show, 'notready': cluster-render not connected), else null. */
+    demoBlocked() {
+        if (this.demo.playing()) return null;
+        if (!this.demo.standing()) return 'moving';
+        if (this.screen.yielded || this.claimBy) return 'off';
+        if (!this.client.ready) return 'notready';
+        return this._demoModes().length || this._chosenName() !== 'off' ? null : 'off';
+    }
+    /** Start the show (about a minute; at: ms into it, the bench's screenshots); false when it can't run now. */
+    playDemo(at) { return !this.demoBlocked() && this.demo.start(at); }
+    stopDemo() { this.demo.stop('Stop pressed'); }
+    demoPlaying() { return this.demo.playing(); }
+    /** ms of the show left, 0 when it doesn't play. */
+    demoLeft() { return this.demo.left(); }
+    /** With "Change with the drive mode" on: Comfort then Sport, leaving out one whose layout is off (it would show nothing). */
+    _demoModes() {
+        if (this.setting('byMode') !== true) return [];
+        return ['comfort', 'sport'].filter((m) => { const v = this.setting(MODE_KEY[m]); return v && v !== 'off'; });
+    }
+    /** The show's hooks (demo_script.js): the drive's own shift grade, G-meter and peak boost are put aside while it plays. */
+    _demoHooks() {
+        return {
+            redline: () => this.setting('redline'),
+            shiftPoint: () => this.score.shiftPoint(90).rpm,
+            warnOil: () => Number(this.setting('warnOil')) || 0,
+            modes: () => this._demoModes(),
+            begin: () => {
+                const s = this.score;
+                this.demoSaved = { own: s.own, peak: s.peak, peakT: s.peakT, limiterHits: s.limiterHits, boostPeak: this.boostPeak,
+                    gEnv: this.gEnv.slice(), gBest: Object.assign({}, this.gBest), gTrail: this.gTrail.slice() };
+            },
+            end: () => {
+                const k = this.demoSaved, s = this.score;
+                this.demoSaved = null;
+                if (!k) return;
+                s.own = k.own; s.peak = k.peak; s.peakT = k.peakT; s.limiterHits = k.limiterHits; this.boostPeak = k.boostPeak;
+                this.gEnv = k.gEnv; this.gBest = k.gBest; this.gTrail = k.gTrail; this.gEnvAt = Date.now();
+                this.widgets.forEach((x) => { x.last = null; });
+            },
+            // the drive mode the show is in (null: the car's own again); redrawn when the layout changes, or always with force
+            drive: (m, force) => {
+                if (m && !this.demoKeep) this.demoKeep = { mode: this.driveMode, variant: this.driveVariant };
+                if (m) { this.driveMode = m; this.driveVariant = null; }
+                else if (this.demoKeep) { this.driveMode = this.demoKeep.mode; this.driveVariant = this.demoKeep.variant; this.demoKeep = null; }
+                if (force || this._layoutName() !== this.activeName) this._rebuild(); else this._status();
+            },
+        };
+    }
 
     /** The test's rpm now, or null when no test runs (it ends by itself). */
     _testRpm(now) {
@@ -1136,14 +1358,31 @@ class HudApp {
         const d = this.car.data();
         const sp = this.score.shiftPoint(d.oil);
         const rpm = isNum(this.rpmF) ? this.rpmF : d.rpm;
-        sp.now = isNum(rpm) && rpm >= sp.rpm;
+        // the count-in (setting "shiftCue"): "now" is the cue's early, latched flash (shift_cue.js), else the rpm at the point
+        sp.now = this._countIn() ? this.cue.now.shift : isNum(rpm) && rpm >= sp.rpm;
         sp.oilCold = isNum(d.oil) && d.oil < 80;
         return sp;
+    }
+
+    /** The shift lights count in (setting "shiftCue" on "countin", the default), else the fixed rpm band. */
+    _countIn() { return !this.ctx.settings.item('shiftCue') || this.setting('shiftCue') !== 'rpm'; }
+
+    /** Every tick: the count-in cue from the rpm (the test's while it runs) and the reaction time (shift_cue.js). */
+    _cueTick(now) {
+        const d = this.car.data(), test = this._testRpm(now), testing = isNum(test);
+        if (d.demo !== this.cueDemo) { this.cueDemo = d.demo; this.cue.reset(); }
+        const share = this.score.redline();
+        const sp = this.score.shiftPoint(d.oil).rpm, lead = this.cue.lead(share && share.leadMs);
+        // learned only on the car's own data, not in the test, and only from flashes the driver could see
+        const learn = d.demo || testing || !this._countIn() ? null : { mode: this.gradeMode };
+        const seen = () => this.activeName !== 'off' && !!this.client.ready && Array.from(this.widgets.values()).some((x) => CUE_TYPES[x.w.type]);
+        this.cue.tick(testing ? test : d.rpm, now, sp, this.setting('redline'), lead, testing ? undefined : d.gear, this.rpmF, seen, learn);
     }
 
     /** Boost in bar: the sport display's value while fresh, else the engine unit's, else null. */
     _boost() {
         const now = Date.now();
+        if (this.demo && this.demo.playing()) return this.car.data().boost;
         if (isNum(this.boostFes) && now - this.boostFesAt < FRESH_MS) return this.boostFes;
         if (isNum(this.boostDme) && now - this.boostDmeAt < FRESH_MS) return this.boostDme;
         return null;
@@ -1375,6 +1614,10 @@ class HudApp {
             case 'u:boost': return us ? 'PSI' : 'BAR';
             case 'u:boostLc': return us ? 'psi' : 'bar';
             case 'holiday': return this.theme.greeting || '';
+            case 'greeting': {                  // the HUD's holiday greeting (hud_holiday.js), only while the car stands
+                const sp = this.car.data().speed;
+                return this.theme.hudGreeting && isNum(sp) && sp < 3 ? this.theme.hudGreeting : '';
+            }
             case 'u:temp': return us ? '°F' : '°C';
             case 'u:speedLc': return us ? 'mph' : 'km/h';
             case 'u:distLc': return us ? 'mi' : 'km';
@@ -1518,9 +1761,11 @@ class HudApp {
 
     _rebuildInner() {
         if (!this.client.ready) return; // the 'ready' handler calls us again
+        if (this._vehKeep()) return;
         this._layerRefs().forEach((r) => r.c.drop(r.ref));
         this.placed = [];
         this.widgets.clear();
+        this.navShown = false;           // the nav widget shows a turn ("navHide" texts are empty then)
         this.sheets = [];
         this.pixelBytes = 0;
         this.layerStates.clear();
@@ -1530,6 +1775,7 @@ class HudApp {
         this.car.setRedline(this.setting('redline'));
         const name = this._layoutName();
         this.activeName = name;
+        this.holidayAt = this._holidayNow();     // the light string's holiday (garland.js); the minute timer rebuilds when it changes
         this.mapLayout = false;
         this.mapShown = this.setting('mapUp');
         if (name === 'off') {
@@ -1552,6 +1798,8 @@ class HudApp {
         this.layoutTheme = layout.theme && THEMES[layout.theme] ? layout.theme : null;
         this.themeName = this._themeName();
         this.theme = THEMES[this.themeName] || THEMES.classic;
+        this.hudHoliday = this._hudHoliday();      // the HUD's holiday colours (hud_holiday.js), null for none
+        if (this.hudHoliday) this.theme = hudHoliday.theme(this.theme, this.hudHoliday);
         this.nightOn = this._nightDim();
         if (this.nightOn) this.theme = dimTheme(this.theme, NIGHT_DIM);
         this.log.info('layout "' + layout.name + '", theme ' + this.theme.name + (this.layoutTheme ? '' : ' (' + this.setting('hudTheme') + ')'));
@@ -1567,6 +1815,23 @@ class HudApp {
         // that many times its members' own area, so far-apart readouts don't share one mostly empty sheet (pixel
         // memory); relaxed along with the size limit when the layer budget needs it. Without it: the size limit only.
         let waste = isNum(layout.packWaste) ? layout.packWaste : Infinity;
+        // the demo show's DEMO tag (demo_script.js), at a free spot that costs the fewest layers and pixels. It is in every
+        // layout (drawn empty until the show plays), so pressing Play changes one small image and rebuilds nothing;
+        // the calibration layouts only get it while the show plays (there it would cost a layer)
+        if (this.demo && (this.demo.playing() || !CAL_LAYOUTS[name])) {
+            const tag = DemoShow.tagWidget(this.target, shown, (l) => { const p = this._plan(l, Math.floor(area / SHEET_AREA_FRAC), waste); return { over: over(p), layers: p.length, px: p.reduce((a, e) => a + (e.kind === 'sheet' ? e.w * e.h : 0), 0) }; });
+            if (tag) shown.push(tag);
+        }
+        // the holiday light string (garland.js): its own image layers on a connection with room for them
+        const gk = this._garlandHoliday(name, shown);
+        if (gk) {
+            const gs = Garland.place(this.target, shown, { camera: this._cameraOn(), colors: hudHoliday.garland(gk, this.target, this.nightOn),
+                cost: (l) => ({ counts: this._connCounts(this._plan(l, Math.floor(area / SHEET_AREA_FRAC), waste)) }) });
+            gs.forEach((g) => shown.push(g));
+            this.log.info('holiday lights (' + gk + '): ' + (gs.length ? gs.length + ' stretch' + (gs.length > 1 ? 'es' : '') + ', ' +
+                gs.reduce((a, g) => a + g.g.bulbs.length, 0) + ' bulbs (' + gs.map((g) => g.w + 'x' + g.h + ' at ' + g.x + ',' + g.y + ' scale ' + g.g.s).join(', ') + ')' +
+                ', connection ' + ((gs[0].conn || 0) + 1) : 'no room'));
+        }
         let maxPx = Math.floor(area / SHEET_AREA_FRAC), plan = this._plan(shown, maxPx, waste);
         while (over(plan) && (maxPx !== Infinity || waste !== Infinity)) {
             maxPx = maxPx * 2 >= area ? Infinity : maxPx * 2;
@@ -1616,7 +1881,7 @@ class HudApp {
         };
         widgets.forEach((w) => {
             const klass = w.class || 'content', z = w.z || 0, conn = this._connOf(w);
-            if (!IMAGE_TYPES[w.type] || w.own === true) { plan.push({ kind: 'layer', w, klass, z, conn }); return; }
+            if (!IMAGE_TYPES[w.type] || w.own === true || w.type === 'nav') { plan.push({ kind: 'layer', w, klass, z, conn }); return; }
             let after = -1;
             plan.forEach((e, i) => {
                 if (e.klass !== klass || e.z !== z || e.conn !== conn) return;
@@ -1700,7 +1965,7 @@ class HudApp {
         else {
             c = this._clientAt(this._connOf(w));
             const base = { target: this.target, klass: w.class || 'content', z: w.z || 0, x: w.x, y: w.y, w: w.w, h: w.h };
-            if (IMAGE_TYPES[w.type]) ref = c.image(Object.assign({ iw: w.w, ih: w.h }, base));
+            if (IMAGE_TYPES[w.type]) ref = c.image(Object.assign({ iw: w.w, ih: w.h }, w.type === 'nav' ? this._navImage(w) : null, base));
             else ref = c.effect(Object.assign({ fs: w.type === 'swatch' ? calibration.SWATCH : shaders[w.type] }, base));
             if (!ref) { this.log.warn('widget "' + w.id + '": layer refused'); return; }
             this.placed.push({ c, ref, x: w.x, y: w.y, w: w.w, h: w.h });
@@ -1722,6 +1987,8 @@ class HudApp {
                     ' px; the glyphs keep their shape at w ' + x.cells * a.cellW + ', h ' + a.cellH);
             }
         } else if (w.type === 'gridlabels') this._paintGridLabels(x);
+        else if (w.type === 'nav') this._navCreate(x);
+        else if (w.type === 'garland') { x.tw = new Garland.Twinkle(w); this._blit(x, null, Garland.paint(w, x.tw.lvl, null)); }
         else if (w.type === 'icon') this._blit(x, null, paintIcon(w.icon, w.w, w.h, color(t, w.color || 'fg')));
         else if (w.type === 'sdash') {
             c.uniform(ref, 'u_size', [w.w, w.h]);
@@ -1740,6 +2007,7 @@ class HudApp {
             c.uniform(ref, 'u_holeR', [this._holeRadius(w)]);
             c.uniform(ref, 'u_strip', w.strip);
             c.uniform(ref, 'u_topEnd', [w.topEnd]);
+            c.uniform(ref, 'u_road', w.road ? [w.road[0], w.road[1], 0, 1] : [0, 1, 0, 0]);
         } else if (w.type === 'mdash') {
             const ty = w.tyres || [0, 0, 0], L = w.gaugeL || {}, R = w.gaugeR || {}, b = w.blade || {};
             const bars = Array.isArray(w.segbars) ? w.segbars.slice(0, 4) : [];
@@ -1816,19 +2084,17 @@ class HudApp {
             c.uniform(ref, 'u_face', rgb(color(t, w.face || 'bg')));
             c.uniform(ref, 'u_hot', [0]);
         } else if (w.type === 'gmeter') {
+            // 14 uniform vectors (shaders.js gmeter): u_geo [w, h, range, step] and u_dot [x, y, trail points, envelope
+            // on] go from the update below; the dot's amber [255, 176, 40] and its 0.5 / 0.8 g marks are constants in the shader;
+            // the envelope is the R8 asset _gEnvAsset() bound to u_env
             const L = color(t, w.line || 'dim');
-            c.uniform(ref, 'u_size', [w.w, w.h]);
             c.uniform(ref, 'u_line', rgba([L[0], L[1], L[2], isNum(w.lineAlpha) ? w.lineAlpha : 150]));
             c.uniform(ref, 'u_c1', rgb(color(t, w.dot || 'fg')));
-            c.uniform(ref, 'u_c2', rgb(G_AMBER));
             c.uniform(ref, 'u_c3', rgb(t.hot));
-            c.uniform(ref, 'u_at', [0.5, 0.8]);
             c.uniform(ref, 'u_envC', rgb(color(t, w.envColor || 'fg')));
-            c.uniform(ref, 'u_envOn', [w.envelope === false ? 0 : 1]);
-            c.uniform(ref, 'u_g', [0, 0]);
-            c.uniform(ref, 'u_trailN', [0]);
             c.uniform(ref, 'u_trail', new Array(32).fill(0), { type: 'vec4' });
-            c.uniform(ref, 'u_env', new Array(G_SECTORS).fill(0), { type: 'vec4' });
+            x.gEnv = this._gEnvAsset(x);
+            if (x.gEnv) c.bind(ref, 'u_env', x.gEnv);
         } else if (w.type === 'revarc') {
             const max = this._barMax(), red = this.setting('redline');
             const midAt = t.bar.midAt === 'shift' ? (red - 1500) / max : t.bar.midAt;
@@ -1897,11 +2163,14 @@ class HudApp {
             c.uniform(ref, 'u_n', [wg ? Math.ceil(n / 2) : n]);
             c.uniform(ref, 'u_tail', [wg ? Math.ceil((w.tail || 0) / 2) : w.tail || 0]);
             c.uniform(ref, 'u_skip', wg ? [wg.s, wg.e] : [0, 0]);
-            c.uniform(ref, 'u_round', [w.round ? 1 : 0]);
-            c.uniform(ref, 'u_green', rgb(LIGHTS.green));
-            c.uniform(ref, 'u_yellow', rgb(LIGHTS.yellow));
-            c.uniform(ref, 'u_red', rgb(LIGHTS.red));
-            c.uniform(ref, 'u_blue', rgb(LIGHTS.blue));
+            // a holiday string of bulbs (hud_holiday.js "lightBulbs" [red, green, gold, blue]): u_round 2 = round lights in
+            // those colours in turn, through the same four colour uniforms
+            const B = t.lightBulbs;
+            c.uniform(ref, 'u_round', [B ? 2 : w.round ? 1 : 0]);
+            c.uniform(ref, 'u_green', rgb(B ? B[1] : LIGHTS.green));
+            c.uniform(ref, 'u_yellow', rgb(B ? B[2] : LIGHTS.yellow));
+            c.uniform(ref, 'u_red', rgb(B ? B[0] : LIGHTS.red));
+            c.uniform(ref, 'u_blue', rgb(B ? B[3] : LIGHTS.blue));
             c.uniform(ref, 'u_off', [w.off === undefined ? 0.14 : w.off]);
         } else if (w.type === 'ribbon') {
             const R = t.ribbon || { stops: [t.fg, t.fg, t.fg, t.hot, t.hot], at: [0.5, 0.8, 0.9, 1] };
@@ -2016,6 +2285,8 @@ class HudApp {
     _tick() {
         const now = Date.now();
         this._smoothRpm(now);
+        this._cueTick(now);
+        if (now - (this.bumpAt || 0) >= 1000) { this.bumpAt = now; smartTemps.bumpTick(this); }
         // the 0-60 timer only on the car's own data (the demo drive would set a best time)
         if (!this.car.data().demo) this.runs.update(this.car.data().speed, now, this.setting('units') === 'us' ? 'us' : 'metric');
         this._trip(now);
@@ -2027,6 +2298,8 @@ class HudApp {
         const rpm = this._raw('rpm');
         const flashing = isNum(rpm) && rpm >= this.setting('redline') - 150;
         this.flash = flashing ? Math.floor(now / 62.5) % 2 === 0 : false;
+        // the count-in's latched flash: the shift bars and arcs flash with it at 5 Hz (shift_cue.js)
+        if (!flashing && this._countIn() && this.cue.now.shift) this.flash = this.cue.blink(now);
         this.widgets.forEach((x) => this._guard('widget ' + x.w.id, () => this._update(x, now, false)));
     }
 
@@ -2064,9 +2337,11 @@ class HudApp {
             if (!force && s === x.last) return;
             x.last = s; x.lastPaint = now;
             x.c.uniform(x.ref, 'u_text', this._atlasCodes(x, s), { type: 'vec4' });
-        } else if (w.type === 'text') {
+        } else if (w.type === 'nav') this._navUpdate(x, now, force);
+        else if (w.type === 'garland') this._garlandTick(x, now);
+        else if (w.type === 'text') {
             if (!force && now - x.lastPaint < (w.rate || TEXT_MS)) return;
-            const s = this._resolve(w.text);
+            const s = (w.navHide && this.navShown) || smartTemps.hidden(this, w) ? '' : this._resolve(w.text);   // nav turn showing / "showWhen": "abnormal"
             let role = w.color || 'fg';
             if (w.colorBy === 'verdict' && this.score.last) role = VERDICT[this.score.last.verdict] || role;
             if (w.near && this._nearMark(w.near[0]) === w.near[1]) role = w.nearColor || 'fg';
@@ -2077,6 +2352,7 @@ class HudApp {
                 if (w.coldWhen && sp[w.coldWhen]) role = VERDICT.COLD;
                 if (w.hotWhen && sp[w.hotWhen]) role = 'hot';
             }
+            role = smartTemps.role(this, w, role);       // temperature bands (cold, warming, hot), outside ice
             // over its warning limit: the value flashes in the shift red
             // ("warnFlash": false: not on a tile that turns red itself, the Dyno theme's)
             if (w.warnFlash !== false && this._warning(w) && Math.floor(now / WARN_FLASH_MS) % 2 === 0) role = 'hot';
@@ -2101,8 +2377,9 @@ class HudApp {
             this._blitDiff(x, buf);
         } else if (w.type === 'badge') {
             if (!force && now - x.lastPaint < TEXT_MS) return;
-            const s = this._resolve(w.text);
+            const s = (w.navHide && this.navShown) || (w.tone === 'demo' && !(this.demo && this.demo.playing())) ? '' : this._resolve(w.text);
             let tone = VERDICT.COLD, fresh = false;
+            if (w.tone === 'demo') { tone = DEMO_AMBER; fresh = true; }  // the demo show's DEMO tag
             if (w.tone === 'verdict' && this.score.last) {
                 tone = VERDICT[this.score.last.verdict] || this.theme.fg;
                 fresh = now - this.score.last.at < 2500;
@@ -2146,26 +2423,28 @@ class HudApp {
             const q = (v) => Math.round(v * 50) / 50;
             const qx = isNum(gx) ? q(S[0] * gx) : 0, qy = isNum(gy) ? q(S[1] * gy) : 0;
             const max = this._gRange(w), step = max > 1.2 ? 0.5 : 0.25;
-            const envKey = this.gEnvAt + '|' + S.join(',');
+            const envKey = this.gEnvAt + '|' + S.join(',') + '|' + max;
             const tr = this.gTrail, trKey = tr.length ? qx + ',' + qy + '|' + tr[0][0] + '|' + tr.length + '|' + S.join(',') : 'none';
             const key = qx + '|' + qy + '|' + max + '|' + envKey + '|' + trKey;
             if (!force && key === x.last) return;
             x.last = key;
-            x.c.uniform(x.ref, 'u_g', [qx, qy]);
-            if (force || x.gMax !== max) { x.gMax = max; x.c.uniform(x.ref, 'u_max', [max]); x.c.uniform(x.ref, 'u_step', [step]); }
-            if (force || x.gEnvKey !== envKey) {
+            const n = tr.length ? tr.length + 1 : 0;
+            x.c.uniform(x.ref, 'u_dot', [qx, qy, n, x.w.envelope === false ? 0 : 1]);
+            if (force || x.gMax !== max) { x.gMax = max; x.c.uniform(x.ref, 'u_geo', [x.w.w, x.w.h, max, step]); }
+            if ((force || x.gEnvKey !== envKey) && x.gEnv) {
+                // one byte a sector: its radius capped at the range, / the range (under 0.2 px off on a 210 px meter)
                 x.gEnvKey = envKey;
-                x.c.uniform(x.ref, 'u_env', this._gEnvDrawn(S), { type: 'vec4' });
+                const env = this._gEnvDrawn(S), px = Buffer.alloc(G_ENV_TEX, 0);
+                for (let m = 0; m < G_SECTORS; m++) px[m] = Math.round(Math.min(1, Math.max(0, (env[m] || 0) / max)) * 255);
+                x.c.pixels(x.gEnv, null, px);
             }
             if (force || x.gTrKey !== trKey) {
                 // point 0 is the dot itself, so the trail joins it; then the samples, newest first
                 x.gTrKey = trKey;
                 const pts = [qx, qy];
                 tr.forEach((p) => pts.push(q(S[0] * p[1]), q(S[1] * p[2])));
-                const n = tr.length ? pts.length / 2 : 0;
                 while (pts.length < 32) pts.push(0);
                 x.c.uniform(x.ref, 'u_trail', pts, { type: 'vec4' });
-                x.c.uniform(x.ref, 'u_trailN', [n]);
             }
         } else if (w.type === 'ribbon') {
             const rpm = this._raw('rpm');
@@ -2226,9 +2505,17 @@ class HudApp {
                 q(isNum(fuel) ? fuel : 0),
                 q(isNum(oil) ? (oil - 50) / 100 : 0),
             ];
+            // the road's dashes: one dash and gap per ROAD_DASH_M metres driven, 1/64 steps (so standing still writes nothing)
+            if (w.road) {
+                const now = Date.now(), dt = x.roadT ? Math.min(1, (now - x.roadT) / 1000) : 0;
+                x.roadT = now;
+                x.roadPhase = ((x.roadPhase || 0) + (isNum(sp) ? Math.max(0, sp) / 3.6 : 0) * dt / ROAD_DASH_M) % 1;
+                vals.push(Math.round(x.roadPhase * 64) / 64);
+            }
             const key = vals.join('|');
             if (!force && key === x.last) return;
             x.last = key;
+            if (w.road) x.c.uniform(x.ref, 'u_road', [w.road[0], w.road[1], vals[4], 1]);
             x.c.uniform(x.ref, 'u_speed', [vals[0]]);
             x.c.uniform(x.ref, 'u_rpm', [vals[1]]);
             x.c.uniform(x.ref, 'u_fuel', [vals[2]]);
@@ -2275,15 +2562,69 @@ class HudApp {
             x.c.uniform(x.ref, 'u_shiftNow', [sp.now ? 1 : 0]);
         } else if (w.type === 'lights') {
             const rpm = this._raw('rpm'), sp = this._shift(), n = this._wings(w) ? Math.ceil((w.count || 12) / 2) : w.count || 12;
-            // the lights fill from "from" rpm (3000) up to the shift point; a "from" at or past it means the last 500 rpm
-            const from = Math.min(isNum(w.from) ? w.from : 3000, sp.rpm - 500);
-            const lit = isNum(rpm) ? Math.floor(Math.min(1, Math.max(0, (rpm - from) / (sp.rpm - from))) * n) : 0;
-            const key = lit + '|' + sp.now;
+            let lit, strobe;
+            if (this._countIn()) {
+                // the count-in: lit over the cue's span up to its flash point, then all red at 5 Hz while it is latched
+                lit = Math.floor(this.cue.fraction(rpm) * n);
+                strobe = this.cue.now.shift ? (this.cue.blink(now) ? 1 : 0) : 0;
+                if (this.cue.now.shift && !strobe) lit = 0;
+            } else {
+                // the lights fill from "from" rpm (3000) up to the shift point; a "from" at or past it means the last 500 rpm
+                const from = Math.min(isNum(w.from) ? w.from : 3000, sp.rpm - 500);
+                lit = isNum(rpm) ? Math.floor(Math.min(1, Math.max(0, (rpm - from) / (sp.rpm - from))) * n) : 0;
+                strobe = sp.now ? 1 : 0;
+            }
+            const key = lit + '|' + strobe;
             if (!force && key === x.last) return;
             x.last = key;
             x.c.uniform(x.ref, 'u_lit', [lit]);
-            x.c.uniform(x.ref, 'u_strobe', [sp.now ? 1 : 0]);
+            x.c.uniform(x.ref, 'u_strobe', [strobe]);
         }
+    }
+
+    /* ---------------- directions: the "nav" widget (nav.js, hud_nav.js: Redline's, MIT) ---------------- */
+
+    /** The directions' modules, loaded on the first nav widget (an app without one never loads them). */
+    _navMods() {
+        if (!this.navMods) this.navMods = { Nav: require('./nav'), Pic: require('./hud_nav'), Canvas: require('./kit/canvas').Canvas };
+        return this.navMods;
+    }
+    /** The directions' source (subscriptions, the event list), started with the first nav widget, kept until stop(). */
+    _navSource() {
+        if (!this.directions) {
+            const shown = () => { let on = false; this.widgets.forEach((x) => { if (x.w.type === 'nav') on = true; }); return on; };
+            this.directions = this._navMods().Nav.start(this.ctx, this.log, { wanted: () => this._navMode() !== 'off' && shown() });
+        }
+        return this.directions;
+    }
+    /** "navDirections": 'route' (the default), 'near' or 'off'. */
+    _navMode() { const m = this.setting('navDirections'); return m === 'off' || m === 'near' ? m : 'route'; }
+    /** The nav widget's image: the picture's own size, scaled into the widget's box when that is another size. */
+    _navImage(w) {
+        const P = this._navMods().Pic;
+        return { iw: P.NW, ih: P.NH, sampling: w.w === P.NW && w.h === P.NH ? 'nearest' : 'bilinear' };
+    }
+    _navCreate(x) {
+        const M = this._navMods();
+        x.cv = new M.Canvas(M.Pic.NW, M.Pic.NH);
+        this._navSource();
+    }
+    /** At most every TEXT_MS: what to show now; the picture redrawn only when that changed, only the changed rect sent. */
+    _navUpdate(x, now, force) {
+        if (!force && now - x.lastPaint < TEXT_MS) return;
+        x.lastPaint = now;
+        const M = this._navMods(), v = this._navSource().view(this._navMode()), m = v && v.show;
+        const opts = { color: color(this.theme, x.w.color || 'fg'), align: x.w.align === 'left' ? 'left' : 'right' };
+        this.navShown = !!m;
+        const key = m ? M.Pic.navKey(m, opts) : '';
+        if (!force && key === x.last) return;
+        x.last = key;
+        M.Pic.drawNav(x.cv, m || null, opts);
+        const buf = Buffer.from(x.cv.d), was = x.px;
+        x.px = buf;
+        if (!was) { x.c.pixels(x.ref, null, buf); return; }
+        const c = changes(was, buf, M.Pic.NW, M.Pic.NH);
+        if (c) x.c.pixels(x.ref, [c.rect], c.px);
     }
 
     /** A rounded tag: fill in the tone colour (bright for a fresh grade), text centred on it. Empty text: nothing. */
@@ -2337,7 +2678,7 @@ class HudApp {
     _paintStripe(x) {
         const w = x.w, buf = Buffer.alloc(w.w * w.h * 4, 0);
         for (let px = 0; px < w.w; px++) {
-            const c = M_STRIPE[Math.min(2, Math.floor(px * 3 / w.w))];
+            const c = (this.theme.stripeColors || M_STRIPE)[Math.min(2, Math.floor(px * 3 / w.w))];
             for (let py = 0; py < w.h; py++) c.forEach((v, i) => { buf[(py * w.w + px) * 4 + i] = v; });
         }
         this._blit(x, null, buf);

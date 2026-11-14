@@ -8,6 +8,11 @@ Besides its own code, the app ships with:
    Copyright (c) 2026 cauliflowermossgrape. https://github.com/cauliflowermossgrape/idrive7-apps
    The Redline layout's shift scoring and cold-engine guard (shift_score.js) and its rev bar and
    shift lights (shaders.js) are ported from that repository's Redline app (apps/redline), same licence.
+   The HUD's turn-by-turn directions (nav.js: the guidance decoder, route state and safety rules, with the
+   subscriptions of navlog.js; hud_nav.js: the directions picture, with the thick-path stroke of its
+   kit/runtime/canvas.js) are ported from the same Redline app, directions by its authors, same licence.
+   The count-in shift lights (shift_cue.js) and the switch-off guard (vehicle_state.js) are ported from
+   the same Redline app, same licence.
    Its licence is reproduced at the end of this file.
 
 2. cluster_render_client.js: Mozilla Public License 2.0, Copyright (C) 2026 Robert Nisipeanu.

@@ -2,7 +2,7 @@
   "id": "idrive_hud_widgets",
   "title": "HUD Widgets",
   "description": "Gear, shift lights, boost, oil, coolant and intake temperatures, a G-meter and trip figures on the windshield HUD, in Classic, M or Night themes",
-  "version": "0.12.11",
+  "version": "0.14.1",
   "vendor": "custom",
   "loggingId": "OAH1",
   "iconGlyph": "HUD",
@@ -15,6 +15,7 @@
     "shaders.js",
     "icons.js",
     "shift_score.js",
+    "demo_script.js",
     "sun.js",
     "cluster_render_client.js",
     "calibration.js",
@@ -27,7 +28,14 @@
     "screen.js",
     "runs.js",
     "tz.js",
-    "holidays.js"
+    "holidays.js",
+    "nav.js",
+    "hud_nav.js",
+    "vehicle_state.js",
+    "shift_cue.js",
+    "smart_temps.js",
+    "hud_holiday.js",
+    "garland.js"
   ],
   "signals": {
     "de.bmw.infotainment.vehicle.CDS": {
@@ -64,6 +72,40 @@
     },
     "de.bmw.infrastructure.EnvironmentalInformation": {
       "ExteriorTemperature": "s"
+    },
+    "de.bmw.infotainment.navigation.guiding.Guidance": {
+      "_optional": "directions on the HUD: the route state, BMW navigation's turns and lanes",
+      "_instances": "Main_Instance",
+      "guidanceState": "rs",
+      "guidingProvider": "rs",
+      "conclusiveDart": "rs",
+      "currentLaneGuiding": "rs"
+    },
+    "de.bmw.infotainment.navigation.guiding.GuidanceEventList": {
+      "_optional": "directions on the HUD: the phone's turns (CarPlay, Android Auto)",
+      "_instances": "Main_Instance",
+      "_methods": [
+        "queryContent"
+      ]
+    },
+    "de.bmw.infotainment.navigation.projectedmodeguiding.ProjectedModeGuiding": {
+      "_optional": "directions on the HUD: the phone's lanes",
+      "_instances": "Main_Instance",
+      "currentLaneGuiding": "rs"
+    },
+    "de.bmw.infotainment.a4a.carplay.CarPlayManager": {
+      "_optional": "directions on the HUD: whether CarPlay is guiding",
+      "_instances": "CarPlayManagerInst1",
+      "projectedGuidanceActive": "rs"
+    },
+    "de.bmw.infotainment.sdi.aap.androidautoprojectedmanager.AndroidAutoProjectedManager": {
+      "_optional": "directions on the HUD: whether Android Auto is guiding",
+      "_instances": "AndroidAutoProjectedManagerInst1",
+      "projectedGuidanceActive": "rs"
+    },
+    "de.bmw.infrastructure.VehicleCondition": {
+      "VehicleCondition": "s",
+      "_optional": "the car switching off: no new layer while it does (cluster-render's switch-off guard)"
     }
   },
   "screens": [
@@ -557,7 +599,75 @@
         780,
         810,
         840
-      ]
+      ],
+      "labels": {
+        "-9999": "Not set (UTC)",
+        "10001": "US Eastern",
+        "10002": "US Central",
+        "10003": "US Mountain",
+        "10004": "Arizona",
+        "10005": "US Pacific",
+        "10006": "Alaska",
+        "10007": "Hawaii",
+        "10008": "Canada Atlantic",
+        "10009": "Mexico",
+        "10011": "UK, Ireland, Portugal",
+        "10012": "Central Europe",
+        "10013": "Eastern Europe",
+        "-720": "UTC-12",
+        "-690": "UTC-11:30",
+        "-660": "UTC-11",
+        "-630": "UTC-10:30",
+        "-600": "UTC-10",
+        "-570": "UTC-9:30",
+        "-540": "UTC-9",
+        "-510": "UTC-8:30",
+        "-480": "UTC-8",
+        "-450": "UTC-7:30",
+        "-420": "UTC-7",
+        "-390": "UTC-6:30",
+        "-360": "UTC-6",
+        "-330": "UTC-5:30",
+        "-300": "UTC-5",
+        "-270": "UTC-4:30",
+        "-240": "UTC-4",
+        "-210": "UTC-3:30",
+        "-180": "UTC-3",
+        "-150": "UTC-2:30",
+        "-120": "UTC-2",
+        "-90": "UTC-1:30",
+        "-60": "UTC-1",
+        "-30": "UTC-0:30",
+        "0": "UTC",
+        "30": "UTC+0:30",
+        "60": "UTC+1",
+        "90": "UTC+1:30",
+        "120": "UTC+2",
+        "150": "UTC+2:30",
+        "180": "UTC+3",
+        "210": "UTC+3:30",
+        "240": "UTC+4",
+        "270": "UTC+4:30",
+        "300": "UTC+5",
+        "330": "UTC+5:30",
+        "360": "UTC+6",
+        "390": "UTC+6:30",
+        "420": "UTC+7",
+        "450": "UTC+7:30",
+        "480": "UTC+8",
+        "510": "UTC+8:30",
+        "540": "UTC+9",
+        "570": "UTC+9:30",
+        "600": "UTC+10",
+        "630": "UTC+10:30",
+        "660": "UTC+11",
+        "690": "UTC+11:30",
+        "720": "UTC+12",
+        "750": "UTC+12:30",
+        "780": "UTC+13",
+        "810": "UTC+13:30",
+        "840": "UTC+14"
+      }
     },
     {
       "key": "tankLitres",
@@ -686,6 +796,28 @@
       "default": true
     },
     {
+      "key": "shiftCue",
+      "label": "Shift lights",
+      "type": "choice",
+      "default": "countin",
+      "options": [
+        [
+          "countin",
+          "Count in, by how fast the revs climb"
+        ],
+        [
+          "rpm",
+          "Fixed rpm band, as before"
+        ]
+      ]
+    },
+    {
+      "key": "smartTemps",
+      "label": "Show temperatures only when they matter",
+      "type": "bool",
+      "default": false
+    },
+    {
       "key": "showClock",
       "label": "Show clock",
       "type": "bool",
@@ -708,6 +840,38 @@
       "label": "Show boost (Sport layout)",
       "type": "bool",
       "default": true
+    },
+    {
+      "key": "holiday",
+      "label": "Holiday editions",
+      "type": "choice",
+      "default": "auto",
+      "options": [
+        [
+          "auto",
+          "Auto, by the date"
+        ],
+        [
+          "off",
+          "Off"
+        ],
+        [
+          "xmas",
+          "Christmas"
+        ],
+        [
+          "thanks",
+          "Thanksgiving"
+        ],
+        [
+          "newyear",
+          "New Year"
+        ],
+        [
+          "july4",
+          "Fourth of July"
+        ]
+      ]
     },
     {
       "key": "warnOil",
@@ -822,6 +986,26 @@
         [
           4,
           "4 s"
+        ]
+      ]
+    },
+    {
+      "key": "navDirections",
+      "label": "Directions on the HUD",
+      "type": "choice",
+      "default": "route",
+      "options": [
+        [
+          "route",
+          "While a route runs"
+        ],
+        [
+          "near",
+          "Near turns"
+        ],
+        [
+          "off",
+          "Off"
         ]
       ]
     },

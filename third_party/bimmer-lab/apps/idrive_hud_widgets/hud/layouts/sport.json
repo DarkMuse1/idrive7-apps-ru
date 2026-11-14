@@ -52,7 +52,8 @@
       "align": "left",
       "spacing": 1.5,
       "toggle": "showOil",
-      "class": "content"
+      "class": "content",
+      "showWhen": "abnormal"
     },
     {
       "id": "oil",
@@ -71,7 +72,8 @@
       "fit": [
         "label"
       ],
-      "class": "overlay"
+      "class": "overlay",
+      "showWhen": "abnormal"
     },
     {
       "id": "coolant_label",
@@ -87,7 +89,8 @@
       "align": "left",
       "spacing": 1.5,
       "toggle": "showCoolant",
-      "class": "content"
+      "class": "content",
+      "showWhen": "abnormal"
     },
     {
       "id": "coolant",
@@ -106,7 +109,8 @@
       "fit": [
         "label"
       ],
-      "class": "overlay"
+      "class": "overlay",
+      "showWhen": "abnormal"
     },
     {
       "id": "gear",
@@ -181,6 +185,33 @@
       "spacing": 1.5,
       "toggle": "showBoost",
       "class": "content"
+    },
+    {
+      "id": "nav",
+      "type": "nav",
+      "x": 470,
+      "y": 300,
+      "w": 200,
+      "h": 76,
+      "toggle": "!navDirections=off",
+      "class": "overlay",
+      "z": 20
+    },
+    {
+      "id": "greeting",
+      "type": "text",
+      "z": 10,
+      "x": 360,
+      "y": 330,
+      "w": 300,
+      "h": 20,
+      "text": "{{greeting}}",
+      "font": "label",
+      "color": "greet",
+      "align": "center",
+      "spacing": 1,
+      "navHide": true,
+      "class": "overlay"
     }
   ]
 }

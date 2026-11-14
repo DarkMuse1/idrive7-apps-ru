@@ -2921,5 +2921,7 @@
   "Refuelling 4, mileage": "Заправка 4, пробег",
   "Refuelling 4, fuel quality": "Заправка 4, качество топлива",
   "Refuelling 5, mileage": "Заправка 5, пробег",
-  "Refuelling 5, fuel quality": "Заправка 5, качество топлива"
+  "Refuelling 5, fuel quality": "Заправка 5, качество топлива",
+  "BM3 ROM ": "BM3 ROM ",
+  " has no profile": " — профиль отсутствует"
 }

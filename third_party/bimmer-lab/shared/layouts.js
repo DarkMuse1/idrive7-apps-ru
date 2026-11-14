@@ -42,6 +42,7 @@ const TYPES = {
     revarc: ['center', 'r', 'start', 'sweep'],
     ribbon: ['curve', 'span'],
     deco: [],
+    nav: [],
 };
 const CLASSES = ['ambient', 'content', 'overlay', 'alert'];
 
