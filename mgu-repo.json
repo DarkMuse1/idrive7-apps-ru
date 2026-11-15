@@ -70,6 +70,10 @@
     {
       "id": "iteriodev-drplay",
       "path": "third_party/iteriodev-drive-recorder/player"
+    },
+    {
+      "id": "iteriodev-comfort",
+      "path": "third_party/iteriodev-seats/comfort"
     }
   ],
   "components": [
@@ -360,6 +364,11 @@
       "id": "oap-driverecorder-next",
       "kind": "app",
       "path": "third_party/iteriodev-drive-recorder/app"
+    },
+    {
+      "id": "iteriodev_seats",
+      "kind": "app",
+      "path": "third_party/iteriodev-seats/app"
     }
   ]
 }

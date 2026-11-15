@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application>
+    <container id="1000" type="logical">
+        <layoutGroup id="1100">
+            <component id="1110" type="bookmark"/>
+        </layoutGroup>
+    </container>
+    <container id="3000" type="state" widget="LT_State_Wide_List">
+        <layoutGroup id="3200" name="Titlebar">
+            <component id="3220" type="title">
+                <property id="2" value="1"/>
+            </component>
+        </layoutGroup>
+        <layoutGroup id="3400" name="List">
+            <property id="3" value="1"/>
+        </layoutGroup>
+    </container>
+    <container id="4000" type="state" widget="LT_State_Wide_List">
+        <layoutGroup id="4200" name="Titlebar">
+            <component id="4220" type="title">
+                <property id="2" value="1"/>
+            </component>
+        </layoutGroup>
+        <layoutGroup id="4400" name="List">
+            <property id="3" value="1"/>
+        </layoutGroup>
+    </container>
+</application>

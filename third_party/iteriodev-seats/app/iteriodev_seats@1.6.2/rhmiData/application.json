@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "1.0.0",
+  "application": {
+    "uuid": "55dbe1e5-112d-4661-ab29-95329d30393b",
+    "type": "OnlineApp",
+    "name": "iteriodev_seats",
+    "vendor": "custom",
+    "version": "1.0.0",
+    "defaultLanguage": "en_GB",
+    "uiDescriptions": [
+      {
+        "applicationFilePath": "./uiDescriptions/ID7/application.xml",
+        "uiDescriptionFilePath": "./uiDescriptions/ID7/uiDescription.json",
+        "hmi": [
+          "ID7"
+        ]
+      },
+      {
+        "applicationFilePath": "./uiDescriptions/ID8/application.xml",
+        "uiDescriptionFilePath": "./uiDescriptions/ID8/uiDescription.json",
+        "hmi": [
+          "ID8"
+        ]
+      }
+    ],
+    "stringBundleUuid": "e6150104-4f15-4c48-8fb8-698e1ef700fd",
+    "resourceBundleUuid": "de165809-1d5f-4414-91ac-8ba406cff4b5",
+    "variantGroups": [
+      {
+        "stringsPath": "./variantGroups/Common/texts",
+        "hmi": [
+          "ID7",
+          "ID8"
+        ],
+        "brands": [
+          "BMW"
+        ],
+        "resourcesPath": "./resources"
+      }
+    ],
+    "entryPoints": [
+      {
+        "uuid": "9652ae56-6d1d-47ea-a750-31792388f94f",
+        "textId": "SID_2",
+        "insertionStateId": 20974,
+        "insertionFocusId": 2,
+        "appearance": "DEFAULT",
+        "insertionMode": "INSERT_BELOW",
+        "insertionOrder": 0,
+        "insertionPriority": 0,
+        "insertionGroup": 0,
+        "isGroupHeader": false,
+        "availability": "ENABLED",
+        "icon": "iteriodev_seats_icon.png"
+      }
+    ],
+    "appletId": 20129
+  }
+}
