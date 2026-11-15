@@ -1,1 +1,0 @@
-module.exports={"app":"drive_recorder_lab","key":"drive_recorder_lab_v0_4_9","version":"0.4.9","releaseSha256":"b905c7687d44a974d3af7e73cb86ff53810d9aeef9141026fbfbd8290cfb8326","vinLicenseSchema":1};

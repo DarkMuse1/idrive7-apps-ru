@@ -33,7 +33,6 @@
     "exclude": [
       "ambient_light",
       "light_show",
-      "drive_recorder_lab",
       "mgu_unified",
       "aa_cluster_companion"
     ]
@@ -95,45 +94,12 @@
           "tools/auto-language",
           "tools/protected-apps/kit",
           "tools/build_light_show.py",
-          "tools/build_drive_recorder.py",
           "oap-sdk"
         ]
       },
       "id": "ambient_light",
       "kind": "app",
       "path": "apps/ambient_light"
-    },
-    {
-      "manifest": "app.json",
-      "icon": "icon.png",
-      "build": {
-        "python": "tools/build_protected_auto.py",
-        "args": [
-          "{id}",
-          "--language",
-          "auto"
-        ],
-        "sdk": "oap-sdk",
-        "output": "dist/{id}@{version}.tgz",
-        "shared": [
-          "tools/build_protected_auto.py",
-          "tools/auto-language",
-          "tools/protected-apps/kit",
-          "tools/build_light_show.py",
-          "tools/build_drive_recorder.py",
-          "oap-sdk"
-        ]
-      },
-      "id": "drive_recorder_lab",
-      "kind": "app",
-      "path": "apps/drive_recorder_lab",
-      "mguHmi": [
-        "ID7"
-      ],
-      "requires": {
-        "idrive7-renderd": "2.1.10",
-        "mgu-inputgate": "1.0.0"
-      }
     },
     {
       "manifest": "app.json",
@@ -162,7 +128,6 @@
           "tools/auto-language",
           "tools/protected-apps/kit",
           "tools/build_light_show.py",
-          "tools/build_drive_recorder.py",
           "oap-sdk"
         ]
       }
@@ -194,7 +159,6 @@
           "tools/auto-language",
           "tools/protected-apps/kit",
           "tools/build_light_show.py",
-          "tools/build_drive_recorder.py",
           "oap-sdk"
         ]
       }
@@ -384,7 +348,6 @@
           "tools/auto-language",
           "tools/protected-apps/kit",
           "tools/build_light_show.py",
-          "tools/build_drive_recorder.py",
           "oap-sdk"
         ]
       }

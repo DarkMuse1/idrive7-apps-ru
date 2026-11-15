@@ -12,7 +12,7 @@ from auto_language import apply
 sys.path.insert(0, str(ROOT / 'tools/protected-apps/kit/tools'))
 import build as author
 
-APPS = {'ambient_light', 'light_show', 'drive_recorder_lab', 'mgu_unified', 'aa_cluster_companion'}
+APPS = {'ambient_light', 'light_show', 'mgu_unified', 'aa_cluster_companion'}
 
 
 def read(path):
@@ -80,7 +80,7 @@ def main():
     args = parser.parse_args()
     dist = Path(args.dist or (author.PREVIEW_DIST if args.preview_only else author.DIST)).resolve()
     dist.mkdir(parents=True, exist_ok=True)
-    delegated = {'light_show': 'build_light_show.py', 'drive_recorder_lab': 'build_drive_recorder.py'}
+    delegated = {'light_show': 'build_light_show.py'}
     if args.app in delegated:
         # Keep each app's existing native/input/ID8/archive preparation. Apply
         # language resources to its generated stage before that wrapper packs it.
