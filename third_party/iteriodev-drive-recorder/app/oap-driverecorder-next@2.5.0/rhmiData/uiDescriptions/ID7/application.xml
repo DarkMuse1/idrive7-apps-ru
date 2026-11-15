@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application>
+    <container id="1000" type="logical">
+        <layoutGroup id="1100">
+            <component id="1110" type="bookmark"/>
+        </layoutGroup>
+    </container>
+    <container id="3000" type="state" widget="LT_State_Wide">
+        <layoutGroup id="3200" name="Titlebar">
+            <component id="3220" type="title">
+                <property id="2" value="1"/>
+            </component>
+        </layoutGroup>
+        <layoutGroup id="3400" name="List">
+            <property id="3" value="1"/>
+        </layoutGroup>
+    </container>
+    <container id="4000" type="state" widget="LT_State_Wide">
+        <property id="9" value="3000"/>
+        <layoutGroup id="4200" name="Titlebar">
+            <component id="4220" type="title">
+                <property id="2" value="1"/>
+            </component>
+        </layoutGroup>
+        <layoutGroup id="4400" name="List">
+            <property id="3" value="1"/>
+        </layoutGroup>
+    </container>
+    <container id="5000" type="state" widget="LT_State_Wide">
+        <property id="9" value="3000"/>
+        <layoutGroup id="5200" name="Titlebar">
+            <component id="5220" type="title">
+                <property id="2" value="1"/>
+            </component>
+        </layoutGroup>
+        <layoutGroup id="5400" name="List">
+            <property id="3" value="1"/>
+        </layoutGroup>
+    </container>
+    <container id="6000" type="state" widget="LT_State_Wide">
+        <property id="9" value="3000"/>
+        <layoutGroup id="6200" name="Titlebar">
+            <component id="6220" type="title">
+                <property id="2" value="1"/>
+            </component>
+        </layoutGroup>
+        <layoutGroup id="6400" name="List">
+            <property id="3" value="1"/>
+        </layoutGroup>
+    </container>
+    <container id="7000" type="state" widget="LT_State_Wide">
+        <property id="9" value="3000"/>
+        <layoutGroup id="7200" name="Titlebar">
+            <component id="7220" type="title">
+                <property id="2" value="1"/>
+            </component>
+        </layoutGroup>
+        <layoutGroup id="7400" name="List">
+            <property id="3" value="1"/>
+        </layoutGroup>
+    </container>
+    <container id="8000" type="state" widget="LT_State_Wide">
+        <property id="9" value="3000"/>
+        <layoutGroup id="8200" name="Titlebar">
+            <component id="8220" type="title">
+                <property id="2" value="1"/>
+            </component>
+        </layoutGroup>
+        <layoutGroup id="8400" name="List">
+            <property id="3" value="1"/>
+        </layoutGroup>
+    </container>
+    <container id="9000" type="state" widget="LT_State_Wide">
+        <property id="9" value="3000"/>
+        <layoutGroup id="9200" name="Titlebar">
+            <component id="9220" type="title">
+                <property id="2" value="1"/>
+            </component>
+        </layoutGroup>
+        <layoutGroup id="9400" name="List">
+            <property id="3" value="1"/>
+        </layoutGroup>
+    </container>
+    <container id="10000" type="state" widget="LT_State_Wide">
+        <property id="9" value="3000"/>
+        <layoutGroup id="10200" name="Titlebar">
+            <component id="10220" type="title">
+                <property id="2" value="1"/>
+            </component>
+        </layoutGroup>
+        <layoutGroup id="10400" name="List">
+            <property id="3" value="1"/>
+            <component id="10410" type="label"/>
+            <component id="10420" type="button"/>
+        </layoutGroup>
+    </container>
+</application>

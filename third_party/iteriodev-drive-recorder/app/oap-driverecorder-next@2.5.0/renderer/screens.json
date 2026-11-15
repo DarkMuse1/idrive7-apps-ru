@@ -1,0 +1,3202 @@
+{
+  "design": {
+    "w": 2880,
+    "h": 960
+  },
+  "screens": [
+    {
+      "name": "record",
+      "kind": "gpu",
+      "title": "Drive Recorder",
+      "entry": true,
+      "bg": "#000000",
+      "bgArea": "app",
+      "components": [
+        {
+          "name": "nav",
+          "rtype": "gpu",
+          "gpu": "teleShell",
+          "x": 0,
+          "y": 76,
+          "w": 2880,
+          "h": 172,
+          "opts": {
+            "app": "Drive Recorder",
+            "icon": "camera",
+            "tabs": "Record, Clips, Settings",
+            "sel": 0,
+            "chips": [
+              [
+                "Started with the car",
+                "dim"
+              ],
+              [
+                "Cameras ready",
+                "ok"
+              ]
+            ],
+            "title": "Record",
+            "sub": "The last 30 s are kept in memory",
+            "back": false,
+            "credit": "",
+            "hu": "id8"
+          }
+        },
+        {
+          "name": "recDot",
+          "rtype": "gpu",
+          "gpu": "rect",
+          "x": 44,
+          "y": 268,
+          "w": 28,
+          "h": 28,
+          "opts": {
+            "color": "#ff3b30",
+            "radius": 14
+          }
+        },
+        {
+          "name": "recWord",
+          "rtype": "gpu",
+          "gpu": "text",
+          "x": 88,
+          "y": 267,
+          "w": 1312,
+          "h": 44,
+          "opts": {
+            "text": "RECORDING",
+            "size": 34,
+            "font": "bold",
+            "align": "left",
+            "color": "#f2f2f2",
+            "wrap": false,
+            "spacing": 2
+          }
+        },
+        {
+          "name": "recSub",
+          "rtype": "gpu",
+          "gpu": "text",
+          "x": 40,
+          "y": 322,
+          "w": 1360,
+          "h": 35,
+          "opts": {
+            "text": "All four cameras · each 640 × 480",
+            "size": 27,
+            "font": "label",
+            "align": "left",
+            "color": "#8b9099",
+            "wrap": false
+          }
+        },
+        {
+          "name": "view",
+          "rtype": "gpu",
+          "gpu": "teleSeg",
+          "x": 40,
+          "y": 378,
+          "w": 1360,
+          "h": 84,
+          "opts": {
+            "items": "All cameras, Front + rear",
+            "sel": 0,
+            "disabled": false
+          }
+        },
+        {
+          "name": "viewName",
+          "rtype": "gpu",
+          "gpu": "text",
+          "x": 40,
+          "y": 405,
+          "w": 1360,
+          "h": 44,
+          "opts": {
+            "text": "Rear camera",
+            "size": 34,
+            "font": "label",
+            "align": "left",
+            "color": "#f2f2f2",
+            "wrap": false,
+            "hidden": true
+          }
+        },
+        {
+          "name": "saveHint",
+          "rtype": "gpu",
+          "gpu": "text",
+          "x": 40,
+          "y": 491,
+          "w": 1360,
+          "h": 31,
+          "opts": {
+            "text": "Save clip writes the last 20 s and the next 10 s to the head unit.",
+            "size": 24,
+            "font": "label",
+            "align": "left",
+            "color": "#8b9099",
+            "wrap": false
+          }
+        },
+        {
+          "name": "save",
+          "rtype": "gpu",
+          "gpu": "teleButton",
+          "x": 40,
+          "y": 686,
+          "w": 1360,
+          "h": 130,
+          "opts": {
+            "text": "Save clip",
+            "icon": "arrowDown",
+            "kind": "primary",
+            "disabled": false
+          },
+          "onTap": "event:save"
+        },
+        {
+          "name": "saving",
+          "rtype": "gpu",
+          "gpu": "teleProgress",
+          "x": 40,
+          "y": 716,
+          "w": 1360,
+          "h": 60,
+          "opts": {
+            "label": "Saving clip…",
+            "right": "62 %",
+            "value": 0.62,
+            "color": "",
+            "hidden": true
+          }
+        },
+        {
+          "name": "lastWord",
+          "rtype": "gpu",
+          "gpu": "text",
+          "x": 1480,
+          "y": 257,
+          "w": 600,
+          "h": 31,
+          "opts": {
+            "text": "LAST CLIP",
+            "size": 24,
+            "font": "bold",
+            "align": "left",
+            "color": "#8b9099",
+            "wrap": false,
+            "spacing": 2
+          }
+        },
+        {
+          "name": "lastThumb",
+          "rtype": "gpu",
+          "gpu": "image",
+          "x": 1480,
+          "y": 296,
+          "w": 300,
+          "h": 225,
+          "opts": {
+            "src": "key:t:20261104_134211",
+            "radius": 0
+          }
+        },
+        {
+          "name": "lastDurBg",
+          "rtype": "gpu",
+          "gpu": "rect",
+          "x": 1694,
+          "y": 475,
+          "w": 76,
+          "h": 36,
+          "opts": {
+            "color": "#000000",
+            "radius": 3
+          }
+        },
+        {
+          "name": "lastDur",
+          "rtype": "gpu",
+          "gpu": "text",
+          "x": 1694,
+          "y": 482,
+          "w": 76,
+          "h": 31,
+          "opts": {
+            "text": "0:28",
+            "size": 24,
+            "font": "num",
+            "align": "center",
+            "color": "#f2f2f2",
+            "wrap": false
+          }
+        },
+        {
+          "name": "lastTitle",
+          "rtype": "gpu",
+          "gpu": "text",
+          "x": 1812,
+          "y": 311,
+          "w": 1028,
+          "h": 44,
+          "opts": {
+            "text": "Today 13:42",
+            "size": 34,
+            "font": "label",
+            "align": "left",
+            "color": "#f2f2f2",
+            "wrap": false
+          }
+        },
+        {
+          "name": "lastSub",
+          "rtype": "gpu",
+          "gpu": "text",
+          "x": 1812,
+          "y": 361,
+          "w": 1028,
+          "h": 31,
+          "opts": {
+            "text": "28 s · all cameras · 152 MB",
+            "size": 24,
+            "font": "label",
+            "align": "left",
+            "color": "#8b9099",
+            "wrap": false
+          }
+        },
+        {
+          "name": "lastOk",
+          "rtype": "gpu",
+          "gpu": "text",
+          "x": 1812,
+          "y": 401,
+          "w": 1028,
+          "h": 31,
+          "opts": {
+            "text": "SAVED",
+            "size": 24,
+            "font": "bold",
+            "align": "left",
+            "color": "#5bd68a",
+            "wrap": false,
+            "spacing": 2
+          }
+        },
+        {
+          "name": "lastPlay",
+          "rtype": "gpu",
+          "gpu": "teleButton",
+          "x": 1812,
+          "y": 444,
+          "w": 260,
+          "h": 96,
+          "opts": {
+            "text": "Play",
+            "icon": "play",
+            "kind": "outline",
+            "disabled": false
+          },
+          "onTap": "event:lastPlay"
+        },
+        {
+          "name": "storage",
+          "rtype": "gpu",
+          "gpu": "teleProgress",
+          "x": 1480,
+          "y": 726,
+          "w": 1360,
+          "h": 60,
+          "opts": {
+            "label": "Storage",
+            "right": "610 MB of 4 GB",
+            "value": 0.15,
+            "color": ""
+          }
+        },
+        {
+          "name": "storageSub",
+          "rtype": "gpu",
+          "gpu": "text",
+          "x": 1480,
+          "y": 795,
+          "w": 1360,
+          "h": 31,
+          "opts": {
+            "text": "Over 4 GB the oldest unlocked clips are replaced",
+            "size": 24,
+            "font": "label",
+            "align": "left",
+            "color": "#8b9099",
+            "wrap": false
+          }
+        }
+      ],
+      "id7": {
+        "components": [
+          {
+            "name": "nav",
+            "rtype": "gpu",
+            "gpu": "teleShell",
+            "x": 84,
+            "y": 76,
+            "w": 1836,
+            "h": 154,
+            "opts": {
+              "app": "Drive Recorder",
+              "icon": "camera",
+              "tabs": "Record, Clips, Settings",
+              "sel": 0,
+              "chips": [
+                [
+                  "Started with the car",
+                  "dim"
+                ],
+                [
+                  "Cameras ready",
+                  "ok"
+                ]
+              ],
+              "title": "Record",
+              "sub": "The last 30 s are kept in memory",
+              "back": false,
+              "credit": "",
+              "hu": "id7"
+            }
+          },
+          {
+            "name": "recDot",
+            "rtype": "gpu",
+            "gpu": "rect",
+            "x": 120,
+            "y": 250,
+            "w": 28,
+            "h": 28,
+            "opts": {
+              "color": "#ff3b30",
+              "radius": 14
+            }
+          },
+          {
+            "name": "recWord",
+            "rtype": "gpu",
+            "gpu": "text",
+            "x": 164,
+            "y": 249,
+            "w": 814,
+            "h": 44,
+            "opts": {
+              "text": "RECORDING",
+              "size": 34,
+              "font": "bold",
+              "align": "left",
+              "color": "#f2f2f2",
+              "wrap": false,
+              "spacing": 2
+            }
+          },
+          {
+            "name": "recSub",
+            "rtype": "gpu",
+            "gpu": "text",
+            "x": 116,
+            "y": 307,
+            "w": 862,
+            "h": 31,
+            "opts": {
+              "text": "All four cameras · each 640 × 480",
+              "size": 24,
+              "font": "label",
+              "align": "left",
+              "color": "#8b9099",
+              "wrap": false
+            }
+          },
+          {
+            "name": "view",
+            "rtype": "gpu",
+            "gpu": "teleSeg",
+            "x": 116,
+            "y": 360,
+            "w": 862,
+            "h": 84,
+            "opts": {
+              "items": "All cameras, Front + rear",
+              "sel": 0,
+              "disabled": false
+            }
+          },
+          {
+            "name": "viewName",
+            "rtype": "gpu",
+            "gpu": "text",
+            "x": 116,
+            "y": 387,
+            "w": 862,
+            "h": 44,
+            "opts": {
+              "text": "Rear camera",
+              "size": 34,
+              "font": "label",
+              "align": "left",
+              "color": "#f2f2f2",
+              "wrap": false,
+              "hidden": true
+            }
+          },
+          {
+            "name": "saveHint",
+            "rtype": "gpu",
+            "gpu": "text",
+            "x": 116,
+            "y": 473,
+            "w": 862,
+            "h": 64,
+            "opts": {
+              "text": "Save clip writes the last 20 s and the next 10 s to the head unit.",
+              "size": 24,
+              "font": "label",
+              "align": "left",
+              "color": "#8b9099",
+              "wrap": true
+            }
+          },
+          {
+            "name": "save",
+            "rtype": "gpu",
+            "gpu": "teleButton",
+            "x": 116,
+            "y": 570,
+            "w": 862,
+            "h": 130,
+            "opts": {
+              "text": "Save clip",
+              "icon": "arrowDown",
+              "kind": "primary",
+              "disabled": false
+            },
+            "onTap": "event:save"
+          },
+          {
+            "name": "saving",
+            "rtype": "gpu",
+            "gpu": "teleProgress",
+            "x": 116,
+            "y": 600,
+            "w": 862,
+            "h": 60,
+            "opts": {
+              "label": "Saving clip…",
+              "right": "62 %",
+              "value": 0.62,
+              "color": "",
+              "hidden": true
+            }
+          },
+          {
+            "name": "lastWord",
+            "rtype": "gpu",
+            "gpu": "text",
+            "x": 1026,
+            "y": 239,
+            "w": 600,
+            "h": 31,
+            "opts": {
+              "text": "LAST CLIP",
+              "size": 24,
+              "font": "bold",
+              "align": "left",
+              "color": "#8b9099",
+              "wrap": false,
+              "spacing": 2
+            }
+          },
+          {
+            "name": "lastThumb",
+            "rtype": "gpu",
+            "gpu": "image",
+            "x": 1026,
+            "y": 278,
+            "w": 240,
+            "h": 180,
+            "opts": {
+              "src": "key:t:20261104_134211",
+              "radius": 0
+            }
+          },
+          {
+            "name": "lastDurBg",
+            "rtype": "gpu",
+            "gpu": "rect",
+            "x": 1180,
+            "y": 412,
+            "w": 76,
+            "h": 36,
+            "opts": {
+              "color": "#000000",
+              "radius": 3
+            }
+          },
+          {
+            "name": "lastDur",
+            "rtype": "gpu",
+            "gpu": "text",
+            "x": 1180,
+            "y": 419,
+            "w": 76,
+            "h": 31,
+            "opts": {
+              "text": "0:28",
+              "size": 24,
+              "font": "num",
+              "align": "center",
+              "color": "#f2f2f2",
+              "wrap": false
+            }
+          },
+          {
+            "name": "lastTitle",
+            "rtype": "gpu",
+            "gpu": "text",
+            "x": 1298,
+            "y": 293,
+            "w": 590,
+            "h": 44,
+            "opts": {
+              "text": "Today 13:42",
+              "size": 34,
+              "font": "label",
+              "align": "left",
+              "color": "#f2f2f2",
+              "wrap": false
+            }
+          },
+          {
+            "name": "lastSub",
+            "rtype": "gpu",
+            "gpu": "text",
+            "x": 1298,
+            "y": 343,
+            "w": 590,
+            "h": 31,
+            "opts": {
+              "text": "28 s · all cameras · 152 MB",
+              "size": 24,
+              "font": "label",
+              "align": "left",
+              "color": "#8b9099",
+              "wrap": false
+            }
+          },
+          {
+            "name": "lastOk",
+            "rtype": "gpu",
+            "gpu": "text",
+            "x": 1298,
+            "y": 383,
+            "w": 590,
+            "h": 31,
+            "opts": {
+              "text": "SAVED",
+              "size": 24,
+              "font": "bold",
+              "align": "left",
+              "color": "#5bd68a",
+              "wrap": false,
+              "spacing": 2
+            }
+          },
+          {
+            "name": "lastPlay",
+            "rtype": "gpu",
+            "gpu": "teleButton",
+            "x": 1298,
+            "y": 426,
+            "w": 220,
+            "h": 96,
+            "opts": {
+              "text": "Play",
+              "icon": "play",
+              "kind": "outline",
+              "disabled": false
+            },
+            "onTap": "event:lastPlay"
+          },
+          {
+            "name": "storage",
+            "rtype": "gpu",
+            "gpu": "teleProgress",
+            "x": 1026,
+            "y": 610,
+            "w": 862,
+            "h": 60,
+            "opts": {
+              "label": "Storage",
+              "right": "610 MB of 4 GB",
+              "value": 0.15,
+              "color": ""
+            }
+          },
+          {
+            "name": "storageSub",
+            "rtype": "gpu",
+            "gpu": "text",
+            "x": 1026,
+            "y": 679,
+            "w": 862,
+            "h": 31,
+            "opts": {
+              "text": "Over 4 GB the oldest unlocked clips are replaced",
+              "size": 24,
+              "font": "label",
+              "align": "left",
+              "color": "#8b9099",
+              "wrap": false
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "clips",
+      "kind": "gpu",
+      "title": "Drive Recorder",
+      "bg": "#000000",
+      "bgArea": "app",
+      "components": [
+        {
+          "name": "nav",
+          "rtype": "gpu",
+          "gpu": "teleShell",
+          "x": 0,
+          "y": 76,
+          "w": 2880,
+          "h": 172,
+          "opts": {
+            "app": "Drive Recorder",
+            "icon": "camera",
+            "tabs": "Record, Clips, Settings",
+            "sel": 1,
+            "chips": [
+              [
+                "Started with the car",
+                "dim"
+              ],
+              [
+                "Cameras ready",
+                "ok"
+              ]
+            ],
+            "title": "Clips",
+            "sub": "6 clips · 610 MB of 4 GB · newest first",
+            "back": false,
+            "credit": "",
+            "hu": "id8"
+          }
+        },
+        {
+          "name": "filter",
+          "rtype": "gpu",
+          "gpu": "teleSeg",
+          "x": 40,
+          "y": 248,
+          "w": 420,
+          "h": 72,
+          "opts": {
+            "items": "All, Locked",
+            "sel": 0,
+            "disabled": false
+          }
+        },
+        {
+          "name": "grid",
+          "rtype": "gpu",
+          "gpu": "teleClipGrid",
+          "x": 40,
+          "y": 344,
+          "w": 2800,
+          "h": 472,
+          "opts": {
+            "cols": 3,
+            "rowH": 236,
+            "top": 0,
+            "sel": "",
+            "items": [
+              {
+                "id": "20261104_134211",
+                "thumb": "key:t:20261104_134211",
+                "title": "Today 13:42",
+                "sub": "28 s · all cameras",
+                "sub2": "152 MB",
+                "dur": "0:28",
+                "locked": false
+              },
+              {
+                "id": "20261104_110323",
+                "thumb": "key:t:20261104_110323",
+                "title": "Today 11:03",
+                "sub": "18 s · front + rear",
+                "sub2": "92 MB",
+                "dur": "0:18",
+                "locked": true
+              },
+              {
+                "id": "20261103_180502",
+                "thumb": "key:t:20261103_180502",
+                "title": "Yesterday 18:05",
+                "sub": "30 s · all cameras",
+                "sub2": "160 MB",
+                "dur": "0:30",
+                "locked": false
+              },
+              {
+                "id": "20261103_081207",
+                "thumb": "key:t:20261103_081207",
+                "title": "Yesterday 08:12",
+                "sub": "30 s · all cameras",
+                "sub2": "158 MB",
+                "dur": "0:30",
+                "locked": true
+              },
+              {
+                "id": "20261029_214011",
+                "thumb": "key:t:20261029_214011",
+                "title": "29 Oct 21:40",
+                "sub": "15 s · front + rear",
+                "sub2": "24 MB",
+                "dur": "0:15",
+                "locked": false
+              },
+              {
+                "id": "20261029_170233",
+                "thumb": "key:t:20261029_170233",
+                "title": "29 Oct 17:02",
+                "sub": "30 s · all cameras",
+                "sub2": "24 MB",
+                "dur": "0:30",
+                "locked": false
+              }
+            ],
+            "empty": "No clips yet",
+            "emptyLine": "Save clip on the Record tab keeps the last 20 s and the next 10 s."
+          }
+        }
+      ],
+      "id7": {
+        "components": [
+          {
+            "name": "nav",
+            "rtype": "gpu",
+            "gpu": "teleShell",
+            "x": 84,
+            "y": 76,
+            "w": 1836,
+            "h": 154,
+            "opts": {
+              "app": "Drive Recorder",
+              "icon": "camera",
+              "tabs": "Record, Clips, Settings",
+              "sel": 1,
+              "chips": [
+                [
+                  "Started with the car",
+                  "dim"
+                ],
+                [
+                  "Cameras ready",
+                  "ok"
+                ]
+              ],
+              "title": "Clips",
+              "sub": "6 clips · 610 MB of 4 GB · newest first",
+              "back": false,
+              "credit": "",
+              "hu": "id7"
+            }
+          },
+          {
+            "name": "filter",
+            "rtype": "gpu",
+            "gpu": "teleSeg",
+            "x": 116,
+            "y": 230,
+            "w": 360,
+            "h": 72,
+            "opts": {
+              "items": "All, Locked",
+              "sel": 0,
+              "disabled": false
+            }
+          },
+          {
+            "name": "grid",
+            "rtype": "gpu",
+            "gpu": "teleClipGrid",
+            "x": 116,
+            "y": 326,
+            "w": 1772,
+            "h": 374,
+            "opts": {
+              "cols": 3,
+              "rowH": 187,
+              "top": 0,
+              "sel": "",
+              "items": [
+                {
+                  "id": "20261104_134211",
+                  "thumb": "key:t:20261104_134211",
+                  "title": "Today 13:42",
+                  "sub": "28 s · all cameras",
+                  "sub2": "152 MB",
+                  "dur": "0:28",
+                  "locked": false
+                },
+                {
+                  "id": "20261104_110323",
+                  "thumb": "key:t:20261104_110323",
+                  "title": "Today 11:03",
+                  "sub": "18 s · front + rear",
+                  "sub2": "92 MB",
+                  "dur": "0:18",
+                  "locked": true
+                },
+                {
+                  "id": "20261103_180502",
+                  "thumb": "key:t:20261103_180502",
+                  "title": "Yesterday 18:05",
+                  "sub": "30 s · all cameras",
+                  "sub2": "160 MB",
+                  "dur": "0:30",
+                  "locked": false
+                },
+                {
+                  "id": "20261103_081207",
+                  "thumb": "key:t:20261103_081207",
+                  "title": "Yesterday 08:12",
+                  "sub": "30 s · all cameras",
+                  "sub2": "158 MB",
+                  "dur": "0:30",
+                  "locked": true
+                },
+                {
+                  "id": "20261029_214011",
+                  "thumb": "key:t:20261029_214011",
+                  "title": "29 Oct 21:40",
+                  "sub": "15 s · front + rear",
+                  "sub2": "24 MB",
+                  "dur": "0:15",
+                  "locked": false
+                },
+                {
+                  "id": "20261029_170233",
+                  "thumb": "key:t:20261029_170233",
+                  "title": "29 Oct 17:02",
+                  "sub": "30 s · all cameras",
+                  "sub2": "24 MB",
+                  "dur": "0:30",
+                  "locked": false
+                }
+              ],
+              "empty": "No clips yet",
+              "emptyLine": "Save clip on the Record tab keeps the last 20 s and the next 10 s."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "viewer",
+      "kind": "gpu",
+      "title": "Drive Recorder",
+      "bg": "#000000",
+      "bgArea": "app",
+      "components": [
+        {
+          "name": "nav",
+          "rtype": "gpu",
+          "gpu": "teleShell",
+          "x": 0,
+          "y": 76,
+          "w": 2880,
+          "h": 172,
+          "opts": {
+            "app": "Drive Recorder",
+            "icon": "camera",
+            "tabs": "Record, Clips, Settings",
+            "sel": 1,
+            "chips": "",
+            "title": "Yesterday 18:05",
+            "sub": "30 s · all cameras · 160 MB",
+            "back": true,
+            "credit": "",
+            "hu": "id8"
+          }
+        },
+        {
+          "name": "back",
+          "rtype": "gpu",
+          "gpu": "teleButton",
+          "x": 40,
+          "y": 184,
+          "w": 150,
+          "h": 56,
+          "opts": {
+            "text": "Back",
+            "icon": "back",
+            "kind": "outline",
+            "disabled": false
+          },
+          "onTap": "back"
+        },
+        {
+          "name": "video",
+          "rtype": "gpu",
+          "gpu": "video",
+          "x": 40,
+          "y": 248,
+          "w": 597,
+          "h": 448,
+          "opts": {
+            "stream": 1,
+            "show": true,
+            "text": "",
+            "radius": 0,
+            "parts": 4,
+            "aspect": 1.3333333333333333
+          }
+        },
+        {
+          "name": "gridBack",
+          "rtype": "gpu",
+          "gpu": "teleButton",
+          "x": 56,
+          "y": 264,
+          "w": 300,
+          "h": 96,
+          "opts": {
+            "text": "All cameras",
+            "icon": "back",
+            "kind": "quiet",
+            "disabled": false,
+            "hidden": true
+          },
+          "onTap": "event:gridBack"
+        },
+        {
+          "name": "camName",
+          "rtype": "gpu",
+          "gpu": "text",
+          "x": 321,
+          "y": 305,
+          "w": 300,
+          "h": 31,
+          "opts": {
+            "text": "REAR",
+            "size": 24,
+            "font": "bold",
+            "align": "right",
+            "color": "#f2f2f2",
+            "wrap": false,
+            "spacing": 2,
+            "hidden": true
+          }
+        },
+        {
+          "name": "pause",
+          "rtype": "gpu",
+          "gpu": "teleButton",
+          "x": 40,
+          "y": 720,
+          "w": 96,
+          "h": 96,
+          "opts": {
+            "text": "",
+            "icon": "pause",
+            "kind": "outline",
+            "disabled": false
+          },
+          "onTap": "event:pause"
+        },
+        {
+          "name": "timeline",
+          "rtype": "gpu",
+          "gpu": "teleSlider",
+          "x": 160,
+          "y": 720,
+          "w": 277,
+          "h": 96,
+          "opts": {
+            "min": 0,
+            "max": 30,
+            "value": 11,
+            "decimals": 0,
+            "unit": "",
+            "showValue": false,
+            "disabled": false,
+            "step": 1
+          }
+        },
+        {
+          "name": "time",
+          "rtype": "gpu",
+          "gpu": "text",
+          "x": 447,
+          "y": 756,
+          "w": 190,
+          "h": 35,
+          "opts": {
+            "text": "0:11 / 0:30",
+            "size": 27,
+            "font": "num",
+            "align": "right",
+            "color": "#f2f2f2",
+            "wrap": false
+          }
+        },
+        {
+          "name": "spdWord",
+          "rtype": "gpu",
+          "gpu": "text",
+          "x": 701,
+          "y": 257,
+          "w": 400,
+          "h": 31,
+          "opts": {
+            "text": "SPEED",
+            "size": 24,
+            "font": "bold",
+            "align": "left",
+            "color": "#8b9099",
+            "wrap": false,
+            "spacing": 2
+          }
+        },
+        {
+          "name": "spd",
+          "rtype": "gpu",
+          "gpu": "teleValue",
+          "x": 701,
+          "y": 300,
+          "w": 1038,
+          "h": 130,
+          "opts": {
+            "value": "47",
+            "unit": "km/h",
+            "size": 120,
+            "color": "",
+            "align": "left"
+          }
+        },
+        {
+          "name": "timeWord",
+          "rtype": "gpu",
+          "gpu": "text",
+          "x": 701,
+          "y": 449,
+          "w": 400,
+          "h": 31,
+          "opts": {
+            "text": "TIME",
+            "size": 24,
+            "font": "bold",
+            "align": "left",
+            "color": "#8b9099",
+            "wrap": false,
+            "spacing": 2
+          }
+        },
+        {
+          "name": "clock",
+          "rtype": "gpu",
+          "gpu": "teleValue",
+          "x": 701,
+          "y": 501,
+          "w": 1038,
+          "h": 80,
+          "opts": {
+            "value": "18:05:11",
+            "unit": "",
+            "size": 72,
+            "color": "",
+            "align": "left"
+          }
+        },
+        {
+          "name": "clockSub",
+          "rtype": "gpu",
+          "gpu": "text",
+          "x": 701,
+          "y": 585,
+          "w": 1038,
+          "h": 31,
+          "opts": {
+            "text": "30 Oct 2026",
+            "size": 24,
+            "font": "label",
+            "align": "left",
+            "color": "#8b9099",
+            "wrap": false
+          }
+        },
+        {
+          "name": "hint",
+          "rtype": "gpu",
+          "gpu": "text",
+          "x": 701,
+          "y": 744,
+          "w": 1038,
+          "h": 72,
+          "opts": {
+            "text": "Tap a camera to enlarge it · plays only while the car stands still",
+            "size": 24,
+            "font": "label",
+            "align": "left",
+            "color": "#8b9099",
+            "wrap": true
+          }
+        },
+        {
+          "name": "lock",
+          "rtype": "gpu",
+          "gpu": "teleButton",
+          "x": 1803,
+          "y": 248,
+          "w": 1038,
+          "h": 96,
+          "opts": {
+            "text": "Lock",
+            "icon": "lock",
+            "kind": "outline",
+            "disabled": false
+          },
+          "onTap": "event:lock"
+        },
+        {
+          "name": "export",
+          "rtype": "gpu",
+          "gpu": "teleButton",
+          "x": 1803,
+          "y": 368,
+          "w": 1038,
+          "h": 96,
+          "opts": {
+            "text": "Copy to USB",
+            "icon": "usb",
+            "kind": "outline",
+            "disabled": false
+          },
+          "onTap": "event:export"
+        },
+        {
+          "name": "delete",
+          "rtype": "gpu",
+          "gpu": "teleButton",
+          "x": 1803,
+          "y": 720,
+          "w": 1038,
+          "h": 96,
+          "opts": {
+            "text": "Delete",
+            "icon": "trash",
+            "kind": "dangerOutline",
+            "disabled": false
+          },
+          "onTap": "event:delete"
+        }
+      ],
+      "id7": {
+        "components": [
+          {
+            "name": "nav",
+            "rtype": "gpu",
+            "gpu": "teleShell",
+            "x": 84,
+            "y": 76,
+            "w": 1836,
+            "h": 154,
+            "opts": {
+              "app": "Drive Recorder",
+              "icon": "camera",
+              "tabs": "Record, Clips, Settings",
+              "sel": 1,
+              "chips": "",
+              "title": "Yesterday 18:05",
+              "sub": "30 s · all cameras · 160 MB",
+              "back": true,
+              "credit": "",
+              "hu": "id7"
+            }
+          },
+          {
+            "name": "back",
+            "rtype": "gpu",
+            "gpu": "teleButton",
+            "x": 116,
+            "y": 168,
+            "w": 150,
+            "h": 56,
+            "opts": {
+              "text": "Back",
+              "icon": "back",
+              "kind": "outline",
+              "disabled": false
+            },
+            "onTap": "back"
+          },
+          {
+            "name": "video",
+            "rtype": "gpu",
+            "gpu": "video",
+            "x": 116,
+            "y": 230,
+            "w": 467,
+            "h": 350,
+            "opts": {
+              "stream": 1,
+              "show": true,
+              "text": "",
+              "radius": 0,
+              "parts": 4,
+              "aspect": 1.3333333333333333
+            }
+          },
+          {
+            "name": "gridBack",
+            "rtype": "gpu",
+            "gpu": "teleButton",
+            "x": 132,
+            "y": 246,
+            "w": 300,
+            "h": 96,
+            "opts": {
+              "text": "All cameras",
+              "icon": "back",
+              "kind": "quiet",
+              "disabled": false,
+              "hidden": true
+            },
+            "onTap": "event:gridBack"
+          },
+          {
+            "name": "camName",
+            "rtype": "gpu",
+            "gpu": "text",
+            "x": 267,
+            "y": 287,
+            "w": 300,
+            "h": 31,
+            "opts": {
+              "text": "REAR",
+              "size": 24,
+              "font": "bold",
+              "align": "right",
+              "color": "#f2f2f2",
+              "wrap": false,
+              "spacing": 2,
+              "hidden": true
+            }
+          },
+          {
+            "name": "pause",
+            "rtype": "gpu",
+            "gpu": "teleButton",
+            "x": 116,
+            "y": 604,
+            "w": 96,
+            "h": 96,
+            "opts": {
+              "text": "",
+              "icon": "pause",
+              "kind": "outline",
+              "disabled": false
+            },
+            "onTap": "event:pause"
+          },
+          {
+            "name": "timeline",
+            "rtype": "gpu",
+            "gpu": "teleSlider",
+            "x": 236,
+            "y": 604,
+            "w": 197,
+            "h": 96,
+            "opts": {
+              "min": 0,
+              "max": 30,
+              "value": 11,
+              "decimals": 0,
+              "unit": "",
+              "showValue": false,
+              "disabled": false,
+              "step": 1
+            }
+          },
+          {
+            "name": "time",
+            "rtype": "gpu",
+            "gpu": "text",
+            "x": 453,
+            "y": 640,
+            "w": 130,
+            "h": 35,
+            "opts": {
+              "text": "0:11 / 0:30",
+              "size": 27,
+              "font": "num",
+              "align": "right",
+              "color": "#f2f2f2",
+              "wrap": false
+            }
+          },
+          {
+            "name": "spdWord",
+            "rtype": "gpu",
+            "gpu": "text",
+            "x": 623,
+            "y": 239,
+            "w": 400,
+            "h": 31,
+            "opts": {
+              "text": "SPEED",
+              "size": 24,
+              "font": "bold",
+              "align": "left",
+              "color": "#8b9099",
+              "wrap": false,
+              "spacing": 2
+            }
+          },
+          {
+            "name": "spd",
+            "rtype": "gpu",
+            "gpu": "teleValue",
+            "x": 623,
+            "y": 274,
+            "w": 601,
+            "h": 100,
+            "opts": {
+              "value": "47",
+              "unit": "km/h",
+              "size": 96,
+              "color": "",
+              "align": "left"
+            }
+          },
+          {
+            "name": "timeWord",
+            "rtype": "gpu",
+            "gpu": "text",
+            "x": 1256,
+            "y": 239,
+            "w": 400,
+            "h": 31,
+            "opts": {
+              "text": "TIME",
+              "size": 24,
+              "font": "bold",
+              "align": "left",
+              "color": "#8b9099",
+              "wrap": false,
+              "spacing": 2
+            }
+          },
+          {
+            "name": "clock",
+            "rtype": "gpu",
+            "gpu": "teleValue",
+            "x": 1256,
+            "y": 282,
+            "w": 632,
+            "h": 70,
+            "opts": {
+              "value": "18:05:11",
+              "unit": "",
+              "size": 64,
+              "color": "",
+              "align": "left"
+            }
+          },
+          {
+            "name": "clockSub",
+            "rtype": "gpu",
+            "gpu": "text",
+            "x": 1256,
+            "y": 351,
+            "w": 632,
+            "h": 31,
+            "opts": {
+              "text": "30 Oct 2026",
+              "size": 24,
+              "font": "label",
+              "align": "left",
+              "color": "#8b9099",
+              "wrap": false
+            }
+          },
+          {
+            "name": "hint",
+            "rtype": "gpu",
+            "gpu": "text",
+            "x": 623,
+            "y": 400,
+            "w": 1265,
+            "h": 64,
+            "opts": {
+              "text": "Tap a camera to enlarge it · plays only while the car stands still",
+              "size": 24,
+              "font": "label",
+              "align": "left",
+              "color": "#8b9099",
+              "wrap": true
+            }
+          },
+          {
+            "name": "lock",
+            "rtype": "gpu",
+            "gpu": "teleButton",
+            "x": 623,
+            "y": 488,
+            "w": 622.5,
+            "h": 96,
+            "opts": {
+              "text": "Lock",
+              "icon": "lock",
+              "kind": "outline",
+              "disabled": false
+            },
+            "onTap": "event:lock"
+          },
+          {
+            "name": "export",
+            "rtype": "gpu",
+            "gpu": "teleButton",
+            "x": 1265.5,
+            "y": 488,
+            "w": 622.5,
+            "h": 96,
+            "opts": {
+              "text": "Copy to USB",
+              "icon": "usb",
+              "kind": "outline",
+              "disabled": false
+            },
+            "onTap": "event:export"
+          },
+          {
+            "name": "delete",
+            "rtype": "gpu",
+            "gpu": "teleButton",
+            "x": 623,
+            "y": 604,
+            "w": 1265,
+            "h": 96,
+            "opts": {
+              "text": "Delete",
+              "icon": "trash",
+              "kind": "dangerOutline",
+              "disabled": false
+            },
+            "onTap": "event:delete"
+          }
+        ]
+      }
+    },
+    {
+      "name": "export",
+      "kind": "gpu",
+      "title": "Drive Recorder",
+      "bg": "#000000",
+      "bgArea": "app",
+      "components": [
+        {
+          "name": "nav",
+          "rtype": "gpu",
+          "gpu": "teleShell",
+          "x": 0,
+          "y": 76,
+          "w": 2880,
+          "h": 172,
+          "opts": {
+            "app": "Drive Recorder",
+            "icon": "camera",
+            "tabs": "Record, Clips, Settings",
+            "sel": 1,
+            "chips": "",
+            "title": "Copy to USB",
+            "sub": "Yesterday 18:05 · 30 s · 160 MB",
+            "back": true,
+            "credit": "",
+            "hu": "id8"
+          }
+        },
+        {
+          "name": "back",
+          "rtype": "gpu",
+          "gpu": "teleButton",
+          "x": 40,
+          "y": 184,
+          "w": 150,
+          "h": 56,
+          "opts": {
+            "text": "Back",
+            "icon": "back",
+            "kind": "outline",
+            "disabled": false
+          },
+          "onTap": "back"
+        },
+        {
+          "name": "whatWord",
+          "rtype": "gpu",
+          "gpu": "text",
+          "x": 40,
+          "y": 253,
+          "w": 800,
+          "h": 31,
+          "opts": {
+            "text": "WHAT TO COPY",
+            "size": 24,
+            "font": "bold",
+            "align": "left",
+            "color": "#8b9099",
+            "wrap": false,
+            "spacing": 2
+          }
+        },
+        {
+          "name": "t0",
+          "rtype": "gpu",
+          "gpu": "teleTile",
+          "x": 40,
+          "y": 292,
+          "w": 541,
+          "h": 290,
+          "opts": {
+            "icon": "",
+            "title": "All cameras",
+            "sub": "Whole clip as recorded",
+            "selected": true
+          },
+          "onTap": "event:t0"
+        },
+        {
+          "name": "t0Pic",
+          "rtype": "gpu",
+          "gpu": "image",
+          "x": 183,
+          "y": 308,
+          "w": 256,
+          "h": 192,
+          "opts": {
+            "src": "key:x:all",
+            "radius": 0
+          }
+        },
+        {
+          "name": "t0Check",
+          "rtype": "gpu",
+          "gpu": "teleButton",
+          "x": 523,
+          "y": 516,
+          "w": 40,
+          "h": 40,
+          "opts": {
+            "text": "",
+            "icon": "check",
+            "kind": "primary",
+            "disabled": false
+          }
+        },
+        {
+          "name": "t1",
+          "rtype": "gpu",
+          "gpu": "teleTile",
+          "x": 605,
+          "y": 292,
+          "w": 541,
+          "h": 290,
+          "opts": {
+            "icon": "",
+            "title": "Front",
+            "sub": "MP4 · front camera",
+            "selected": false
+          },
+          "onTap": "event:t1"
+        },
+        {
+          "name": "t1Pic",
+          "rtype": "gpu",
+          "gpu": "image",
+          "x": 748,
+          "y": 308,
+          "w": 256,
+          "h": 192,
+          "opts": {
+            "src": "key:x:front",
+            "radius": 0
+          }
+        },
+        {
+          "name": "t1Check",
+          "rtype": "gpu",
+          "gpu": "teleButton",
+          "x": 1088,
+          "y": 516,
+          "w": 40,
+          "h": 40,
+          "opts": {
+            "text": "",
+            "icon": "",
+            "kind": "quiet",
+            "disabled": false
+          }
+        },
+        {
+          "name": "t2",
+          "rtype": "gpu",
+          "gpu": "teleTile",
+          "x": 1170,
+          "y": 292,
+          "w": 541,
+          "h": 290,
+          "opts": {
+            "icon": "",
+            "title": "Rear",
+            "sub": "MP4 · rear camera",
+            "selected": false
+          },
+          "onTap": "event:t2"
+        },
+        {
+          "name": "t2Pic",
+          "rtype": "gpu",
+          "gpu": "image",
+          "x": 1313,
+          "y": 308,
+          "w": 256,
+          "h": 192,
+          "opts": {
+            "src": "key:x:rear",
+            "radius": 0
+          }
+        },
+        {
+          "name": "t2Check",
+          "rtype": "gpu",
+          "gpu": "teleButton",
+          "x": 1653,
+          "y": 516,
+          "w": 40,
+          "h": 40,
+          "opts": {
+            "text": "",
+            "icon": "",
+            "kind": "quiet",
+            "disabled": false
+          }
+        },
+        {
+          "name": "t3",
+          "rtype": "gpu",
+          "gpu": "teleTile",
+          "x": 1734,
+          "y": 292,
+          "w": 541,
+          "h": 290,
+          "opts": {
+            "icon": "",
+            "title": "Left",
+            "sub": "MP4 · left camera",
+            "selected": false
+          },
+          "onTap": "event:t3"
+        },
+        {
+          "name": "t3Pic",
+          "rtype": "gpu",
+          "gpu": "image",
+          "x": 1877,
+          "y": 308,
+          "w": 256,
+          "h": 192,
+          "opts": {
+            "src": "key:x:left",
+            "radius": 0
+          }
+        },
+        {
+          "name": "t3Check",
+          "rtype": "gpu",
+          "gpu": "teleButton",
+          "x": 2217,
+          "y": 516,
+          "w": 40,
+          "h": 40,
+          "opts": {
+            "text": "",
+            "icon": "",
+            "kind": "quiet",
+            "disabled": false
+          }
+        },
+        {
+          "name": "t4",
+          "rtype": "gpu",
+          "gpu": "teleTile",
+          "x": 2299,
+          "y": 292,
+          "w": 541,
+          "h": 290,
+          "opts": {
+            "icon": "",
+            "title": "Right",
+            "sub": "MP4 · right camera",
+            "selected": false
+          },
+          "onTap": "event:t4"
+        },
+        {
+          "name": "t4Pic",
+          "rtype": "gpu",
+          "gpu": "image",
+          "x": 2442,
+          "y": 308,
+          "w": 256,
+          "h": 192,
+          "opts": {
+            "src": "key:x:right",
+            "radius": 0
+          }
+        },
+        {
+          "name": "t4Check",
+          "rtype": "gpu",
+          "gpu": "teleButton",
+          "x": 2782,
+          "y": 516,
+          "w": 40,
+          "h": 40,
+          "opts": {
+            "text": "",
+            "icon": "",
+            "kind": "quiet",
+            "disabled": false
+          }
+        },
+        {
+          "name": "usb",
+          "rtype": "gpu",
+          "gpu": "teleRow",
+          "x": 40,
+          "y": 712,
+          "w": 1640,
+          "h": 104,
+          "opts": {
+            "icon": "usb",
+            "label": "KINGSTON",
+            "sub": "USB stick · 28.4 GB free · about 160 MB will be copied",
+            "control": "none",
+            "text": ""
+          }
+        },
+        {
+          "name": "bar",
+          "rtype": "gpu",
+          "gpu": "teleProgress",
+          "x": 1732,
+          "y": 732,
+          "w": 700,
+          "h": 60,
+          "opts": {
+            "label": "Copying…",
+            "right": "42 %",
+            "value": 0.42,
+            "color": "",
+            "hidden": true
+          }
+        },
+        {
+          "name": "export",
+          "rtype": "gpu",
+          "gpu": "teleButton",
+          "x": 2480,
+          "y": 720,
+          "w": 360,
+          "h": 96,
+          "opts": {
+            "text": "Export",
+            "icon": "arrowDown",
+            "kind": "primary",
+            "disabled": false
+          },
+          "onTap": "event:export"
+        }
+      ],
+      "id7": {
+        "components": [
+          {
+            "name": "nav",
+            "rtype": "gpu",
+            "gpu": "teleShell",
+            "x": 84,
+            "y": 76,
+            "w": 1836,
+            "h": 154,
+            "opts": {
+              "app": "Drive Recorder",
+              "icon": "camera",
+              "tabs": "Record, Clips, Settings",
+              "sel": 1,
+              "chips": "",
+              "title": "Copy to USB",
+              "sub": "Yesterday 18:05 · 30 s · 160 MB",
+              "back": true,
+              "credit": "",
+              "hu": "id7"
+            }
+          },
+          {
+            "name": "back",
+            "rtype": "gpu",
+            "gpu": "teleButton",
+            "x": 116,
+            "y": 168,
+            "w": 150,
+            "h": 56,
+            "opts": {
+              "text": "Back",
+              "icon": "back",
+              "kind": "outline",
+              "disabled": false
+            },
+            "onTap": "back"
+          },
+          {
+            "name": "whatWord",
+            "rtype": "gpu",
+            "gpu": "text",
+            "x": 116,
+            "y": 235,
+            "w": 800,
+            "h": 31,
+            "opts": {
+              "text": "WHAT TO COPY",
+              "size": 24,
+              "font": "bold",
+              "align": "left",
+              "color": "#8b9099",
+              "wrap": false,
+              "spacing": 2
+            }
+          },
+          {
+            "name": "t0",
+            "rtype": "gpu",
+            "gpu": "teleTile",
+            "x": 116,
+            "y": 274,
+            "w": 343,
+            "h": 250,
+            "opts": {
+              "icon": "",
+              "title": "All cameras",
+              "sub": "Whole clip as recorded",
+              "selected": true
+            },
+            "onTap": "event:t0"
+          },
+          {
+            "name": "t0Pic",
+            "rtype": "gpu",
+            "gpu": "image",
+            "x": 188,
+            "y": 288,
+            "w": 200,
+            "h": 150,
+            "opts": {
+              "src": "key:x:all",
+              "radius": 0
+            }
+          },
+          {
+            "name": "t0Check",
+            "rtype": "gpu",
+            "gpu": "teleButton",
+            "x": 401,
+            "y": 458,
+            "w": 40,
+            "h": 40,
+            "opts": {
+              "text": "",
+              "icon": "check",
+              "kind": "primary",
+              "disabled": false
+            }
+          },
+          {
+            "name": "t1",
+            "rtype": "gpu",
+            "gpu": "teleTile",
+            "x": 473,
+            "y": 274,
+            "w": 343,
+            "h": 250,
+            "opts": {
+              "icon": "",
+              "title": "Front",
+              "sub": "MP4 · front camera",
+              "selected": false
+            },
+            "onTap": "event:t1"
+          },
+          {
+            "name": "t1Pic",
+            "rtype": "gpu",
+            "gpu": "image",
+            "x": 545,
+            "y": 288,
+            "w": 200,
+            "h": 150,
+            "opts": {
+              "src": "key:x:front",
+              "radius": 0
+            }
+          },
+          {
+            "name": "t1Check",
+            "rtype": "gpu",
+            "gpu": "teleButton",
+            "x": 758,
+            "y": 458,
+            "w": 40,
+            "h": 40,
+            "opts": {
+              "text": "",
+              "icon": "",
+              "kind": "quiet",
+              "disabled": false
+            }
+          },
+          {
+            "name": "t2",
+            "rtype": "gpu",
+            "gpu": "teleTile",
+            "x": 830,
+            "y": 274,
+            "w": 343,
+            "h": 250,
+            "opts": {
+              "icon": "",
+              "title": "Rear",
+              "sub": "MP4 · rear camera",
+              "selected": false
+            },
+            "onTap": "event:t2"
+          },
+          {
+            "name": "t2Pic",
+            "rtype": "gpu",
+            "gpu": "image",
+            "x": 902,
+            "y": 288,
+            "w": 200,
+            "h": 150,
+            "opts": {
+              "src": "key:x:rear",
+              "radius": 0
+            }
+          },
+          {
+            "name": "t2Check",
+            "rtype": "gpu",
+            "gpu": "teleButton",
+            "x": 1115,
+            "y": 458,
+            "w": 40,
+            "h": 40,
+            "opts": {
+              "text": "",
+              "icon": "",
+              "kind": "quiet",
+              "disabled": false
+            }
+          },
+          {
+            "name": "t3",
+            "rtype": "gpu",
+            "gpu": "teleTile",
+            "x": 1188,
+            "y": 274,
+            "w": 343,
+            "h": 250,
+            "opts": {
+              "icon": "",
+              "title": "Left",
+              "sub": "MP4 · left camera",
+              "selected": false
+            },
+            "onTap": "event:t3"
+          },
+          {
+            "name": "t3Pic",
+            "rtype": "gpu",
+            "gpu": "image",
+            "x": 1260,
+            "y": 288,
+            "w": 200,
+            "h": 150,
+            "opts": {
+              "src": "key:x:left",
+              "radius": 0
+            }
+          },
+          {
+            "name": "t3Check",
+            "rtype": "gpu",
+            "gpu": "teleButton",
+            "x": 1473,
+            "y": 458,
+            "w": 40,
+            "h": 40,
+            "opts": {
+              "text": "",
+              "icon": "",
+              "kind": "quiet",
+              "disabled": false
+            }
+          },
+          {
+            "name": "t4",
+            "rtype": "gpu",
+            "gpu": "teleTile",
+            "x": 1545,
+            "y": 274,
+            "w": 343,
+            "h": 250,
+            "opts": {
+              "icon": "",
+              "title": "Right",
+              "sub": "MP4 · right camera",
+              "selected": false
+            },
+            "onTap": "event:t4"
+          },
+          {
+            "name": "t4Pic",
+            "rtype": "gpu",
+            "gpu": "image",
+            "x": 1617,
+            "y": 288,
+            "w": 200,
+            "h": 150,
+            "opts": {
+              "src": "key:x:right",
+              "radius": 0
+            }
+          },
+          {
+            "name": "t4Check",
+            "rtype": "gpu",
+            "gpu": "teleButton",
+            "x": 1830,
+            "y": 458,
+            "w": 40,
+            "h": 40,
+            "opts": {
+              "text": "",
+              "icon": "",
+              "kind": "quiet",
+              "disabled": false
+            }
+          },
+          {
+            "name": "usb",
+            "rtype": "gpu",
+            "gpu": "teleRow",
+            "x": 116,
+            "y": 596,
+            "w": 948,
+            "h": 104,
+            "opts": {
+              "icon": "usb",
+              "label": "KINGSTON",
+              "sub": "USB stick · 28.4 GB free · about 160 MB will be copied",
+              "control": "none",
+              "text": ""
+            }
+          },
+          {
+            "name": "bar",
+            "rtype": "gpu",
+            "gpu": "teleProgress",
+            "x": 1096,
+            "y": 616,
+            "w": 460,
+            "h": 60,
+            "opts": {
+              "label": "Copying…",
+              "right": "42 %",
+              "value": 0.42,
+              "color": "",
+              "hidden": true
+            }
+          },
+          {
+            "name": "export",
+            "rtype": "gpu",
+            "gpu": "teleButton",
+            "x": 1588,
+            "y": 604,
+            "w": 300,
+            "h": 96,
+            "opts": {
+              "text": "Export",
+              "icon": "arrowDown",
+              "kind": "primary",
+              "disabled": false
+            },
+            "onTap": "event:export"
+          }
+        ]
+      }
+    },
+    {
+      "name": "settings",
+      "kind": "gpu",
+      "title": "Drive Recorder",
+      "bg": "#000000",
+      "bgArea": "app",
+      "components": [
+        {
+          "name": "nav",
+          "rtype": "gpu",
+          "gpu": "teleShell",
+          "x": 0,
+          "y": 76,
+          "w": 2880,
+          "h": 172,
+          "opts": {
+            "app": "Drive Recorder",
+            "icon": "camera",
+            "tabs": "Record, Clips, Settings",
+            "sel": 2,
+            "chips": "",
+            "title": "Settings",
+            "sub": "Saved on the head unit",
+            "back": false,
+            "credit": "",
+            "hu": "id8"
+          }
+        },
+        {
+          "name": "lenRow",
+          "rtype": "gpu",
+          "gpu": "teleRow",
+          "x": 40,
+          "y": 248,
+          "w": 1800,
+          "h": 120,
+          "opts": {
+            "icon": "clock",
+            "label": "Clip length",
+            "sub": "20 s before the tap · 10 s after · changing it restarts the recording",
+            "control": "chevron",
+            "text": "20 / 10 s",
+            "textColor": "text"
+          },
+          "onTap": "event:len"
+        },
+        {
+          "name": "autoRow",
+          "rtype": "gpu",
+          "gpu": "teleRow",
+          "x": 40,
+          "y": 368,
+          "w": 1800,
+          "h": 120,
+          "opts": {
+            "icon": "camera",
+            "label": "Start with the car",
+            "sub": "Cameras switch to recording at every start",
+            "control": "toggle",
+            "on": true
+          }
+        },
+        {
+          "name": "diagRow",
+          "rtype": "gpu",
+          "gpu": "teleRow",
+          "x": 40,
+          "y": 488,
+          "w": 1800,
+          "h": 120,
+          "opts": {
+            "icon": "wrench",
+            "label": "Diagnostics",
+            "sub": "Provisioning, buffer, camera ECU, player · for support",
+            "control": "chevron",
+            "text": ""
+          },
+          "onTap": "event:diag"
+        }
+      ],
+      "id7": {
+        "components": [
+          {
+            "name": "nav",
+            "rtype": "gpu",
+            "gpu": "teleShell",
+            "x": 84,
+            "y": 76,
+            "w": 1836,
+            "h": 154,
+            "opts": {
+              "app": "Drive Recorder",
+              "icon": "camera",
+              "tabs": "Record, Clips, Settings",
+              "sel": 2,
+              "chips": "",
+              "title": "Settings",
+              "sub": "Saved on the head unit",
+              "back": false,
+              "credit": "",
+              "hu": "id7"
+            }
+          },
+          {
+            "name": "lenRow",
+            "rtype": "gpu",
+            "gpu": "teleRow",
+            "x": 116,
+            "y": 230,
+            "w": 1772,
+            "h": 120,
+            "opts": {
+              "icon": "clock",
+              "label": "Clip length",
+              "sub": "20 s before the tap · 10 s after · changing it restarts the recording",
+              "control": "chevron",
+              "text": "20 / 10 s",
+              "textColor": "text"
+            },
+            "onTap": "event:len"
+          },
+          {
+            "name": "autoRow",
+            "rtype": "gpu",
+            "gpu": "teleRow",
+            "x": 116,
+            "y": 350,
+            "w": 1772,
+            "h": 120,
+            "opts": {
+              "icon": "camera",
+              "label": "Start with the car",
+              "sub": "Cameras switch to recording at every start",
+              "control": "toggle",
+              "on": true
+            }
+          },
+          {
+            "name": "diagRow",
+            "rtype": "gpu",
+            "gpu": "teleRow",
+            "x": 116,
+            "y": 470,
+            "w": 1772,
+            "h": 120,
+            "opts": {
+              "icon": "wrench",
+              "label": "Diagnostics",
+              "sub": "Provisioning, buffer, camera ECU, player · for support",
+              "control": "chevron",
+              "text": ""
+            },
+            "onTap": "event:diag"
+          }
+        ]
+      }
+    },
+    {
+      "name": "confirm",
+      "kind": "gpu",
+      "title": "Drive Recorder",
+      "bg": "#000000",
+      "bgArea": "app",
+      "components": [
+        {
+          "name": "nav",
+          "rtype": "gpu",
+          "gpu": "teleShell",
+          "x": 0,
+          "y": 76,
+          "w": 2880,
+          "h": 172,
+          "opts": {
+            "app": "Drive Recorder",
+            "icon": "camera",
+            "tabs": "Record, Clips, Settings",
+            "sel": 1,
+            "chips": "",
+            "title": "Yesterday 18:05",
+            "sub": "30 s · all cameras · 160 MB",
+            "back": true,
+            "credit": "",
+            "hu": "id8"
+          }
+        },
+        {
+          "name": "back",
+          "rtype": "gpu",
+          "gpu": "teleButton",
+          "x": 40,
+          "y": 184,
+          "w": 150,
+          "h": 56,
+          "opts": {
+            "text": "Back",
+            "icon": "back",
+            "kind": "outline",
+            "disabled": false
+          },
+          "onTap": "back"
+        },
+        {
+          "name": "video",
+          "rtype": "gpu",
+          "gpu": "video",
+          "x": 40,
+          "y": 248,
+          "w": 597,
+          "h": 448,
+          "opts": {
+            "stream": 1,
+            "show": true,
+            "text": "",
+            "radius": 0,
+            "parts": 4,
+            "aspect": 1.3333333333333333
+          }
+        },
+        {
+          "name": "gridBack",
+          "rtype": "gpu",
+          "gpu": "teleButton",
+          "x": 56,
+          "y": 264,
+          "w": 300,
+          "h": 96,
+          "opts": {
+            "text": "All cameras",
+            "icon": "back",
+            "kind": "quiet",
+            "disabled": false,
+            "hidden": true
+          },
+          "onTap": "event:gridBack"
+        },
+        {
+          "name": "camName",
+          "rtype": "gpu",
+          "gpu": "text",
+          "x": 321,
+          "y": 305,
+          "w": 300,
+          "h": 31,
+          "opts": {
+            "text": "REAR",
+            "size": 24,
+            "font": "bold",
+            "align": "right",
+            "color": "#f2f2f2",
+            "wrap": false,
+            "spacing": 2,
+            "hidden": true
+          }
+        },
+        {
+          "name": "pause",
+          "rtype": "gpu",
+          "gpu": "teleButton",
+          "x": 40,
+          "y": 720,
+          "w": 96,
+          "h": 96,
+          "opts": {
+            "text": "",
+            "icon": "pause",
+            "kind": "outline",
+            "disabled": false
+          },
+          "onTap": "event:pause"
+        },
+        {
+          "name": "timeline",
+          "rtype": "gpu",
+          "gpu": "teleSlider",
+          "x": 160,
+          "y": 720,
+          "w": 277,
+          "h": 96,
+          "opts": {
+            "min": 0,
+            "max": 30,
+            "value": 11,
+            "decimals": 0,
+            "unit": "",
+            "showValue": false,
+            "disabled": false,
+            "step": 1
+          }
+        },
+        {
+          "name": "time",
+          "rtype": "gpu",
+          "gpu": "text",
+          "x": 447,
+          "y": 756,
+          "w": 190,
+          "h": 35,
+          "opts": {
+            "text": "0:11 / 0:30",
+            "size": 27,
+            "font": "num",
+            "align": "right",
+            "color": "#f2f2f2",
+            "wrap": false
+          }
+        },
+        {
+          "name": "spdWord",
+          "rtype": "gpu",
+          "gpu": "text",
+          "x": 701,
+          "y": 257,
+          "w": 400,
+          "h": 31,
+          "opts": {
+            "text": "SPEED",
+            "size": 24,
+            "font": "bold",
+            "align": "left",
+            "color": "#8b9099",
+            "wrap": false,
+            "spacing": 2
+          }
+        },
+        {
+          "name": "spd",
+          "rtype": "gpu",
+          "gpu": "teleValue",
+          "x": 701,
+          "y": 300,
+          "w": 1038,
+          "h": 130,
+          "opts": {
+            "value": "47",
+            "unit": "km/h",
+            "size": 120,
+            "color": "",
+            "align": "left"
+          }
+        },
+        {
+          "name": "timeWord",
+          "rtype": "gpu",
+          "gpu": "text",
+          "x": 701,
+          "y": 449,
+          "w": 400,
+          "h": 31,
+          "opts": {
+            "text": "TIME",
+            "size": 24,
+            "font": "bold",
+            "align": "left",
+            "color": "#8b9099",
+            "wrap": false,
+            "spacing": 2
+          }
+        },
+        {
+          "name": "clock",
+          "rtype": "gpu",
+          "gpu": "teleValue",
+          "x": 701,
+          "y": 501,
+          "w": 1038,
+          "h": 80,
+          "opts": {
+            "value": "18:05:11",
+            "unit": "",
+            "size": 72,
+            "color": "",
+            "align": "left"
+          }
+        },
+        {
+          "name": "clockSub",
+          "rtype": "gpu",
+          "gpu": "text",
+          "x": 701,
+          "y": 585,
+          "w": 1038,
+          "h": 31,
+          "opts": {
+            "text": "30 Oct 2026",
+            "size": 24,
+            "font": "label",
+            "align": "left",
+            "color": "#8b9099",
+            "wrap": false
+          }
+        },
+        {
+          "name": "hint",
+          "rtype": "gpu",
+          "gpu": "text",
+          "x": 701,
+          "y": 744,
+          "w": 1038,
+          "h": 72,
+          "opts": {
+            "text": "Tap a camera to enlarge it · plays only while the car stands still",
+            "size": 24,
+            "font": "label",
+            "align": "left",
+            "color": "#8b9099",
+            "wrap": true
+          }
+        },
+        {
+          "name": "lock",
+          "rtype": "gpu",
+          "gpu": "teleButton",
+          "x": 1803,
+          "y": 248,
+          "w": 1038,
+          "h": 96,
+          "opts": {
+            "text": "Lock",
+            "icon": "lock",
+            "kind": "outline",
+            "disabled": false
+          },
+          "onTap": "event:lock"
+        },
+        {
+          "name": "export",
+          "rtype": "gpu",
+          "gpu": "teleButton",
+          "x": 1803,
+          "y": 368,
+          "w": 1038,
+          "h": 96,
+          "opts": {
+            "text": "Copy to USB",
+            "icon": "usb",
+            "kind": "outline",
+            "disabled": false
+          },
+          "onTap": "event:export"
+        },
+        {
+          "name": "delete",
+          "rtype": "gpu",
+          "gpu": "teleButton",
+          "x": 1803,
+          "y": 720,
+          "w": 1038,
+          "h": 96,
+          "opts": {
+            "text": "Delete",
+            "icon": "trash",
+            "kind": "dangerOutline",
+            "disabled": false
+          },
+          "onTap": "event:delete"
+        },
+        {
+          "name": "dialog",
+          "rtype": "gpu",
+          "gpu": "teleDialog",
+          "x": 0,
+          "y": 76,
+          "w": 2880,
+          "h": 764,
+          "opts": {
+            "title": "Delete this clip?",
+            "body": "Yesterday 18:05 · 30 s · 160 MB",
+            "body2": "It is removed from the head unit.",
+            "danger": true
+          }
+        },
+        {
+          "name": "no",
+          "rtype": "gpu",
+          "gpu": "teleButton",
+          "x": 838,
+          "y": 504,
+          "w": 590,
+          "h": 96,
+          "opts": {
+            "text": "Cancel",
+            "icon": "",
+            "kind": "outline",
+            "disabled": false
+          },
+          "onTap": "event:no"
+        },
+        {
+          "name": "yes",
+          "rtype": "gpu",
+          "gpu": "teleButton",
+          "x": 1452,
+          "y": 504,
+          "w": 590,
+          "h": 96,
+          "opts": {
+            "text": "Delete",
+            "icon": "trash",
+            "kind": "danger",
+            "disabled": false
+          },
+          "onTap": "event:yes"
+        }
+      ],
+      "id7": {
+        "components": [
+          {
+            "name": "nav",
+            "rtype": "gpu",
+            "gpu": "teleShell",
+            "x": 84,
+            "y": 76,
+            "w": 1836,
+            "h": 154,
+            "opts": {
+              "app": "Drive Recorder",
+              "icon": "camera",
+              "tabs": "Record, Clips, Settings",
+              "sel": 1,
+              "chips": "",
+              "title": "Yesterday 18:05",
+              "sub": "30 s · all cameras · 160 MB",
+              "back": true,
+              "credit": "",
+              "hu": "id7"
+            }
+          },
+          {
+            "name": "back",
+            "rtype": "gpu",
+            "gpu": "teleButton",
+            "x": 116,
+            "y": 168,
+            "w": 150,
+            "h": 56,
+            "opts": {
+              "text": "Back",
+              "icon": "back",
+              "kind": "outline",
+              "disabled": false
+            },
+            "onTap": "back"
+          },
+          {
+            "name": "video",
+            "rtype": "gpu",
+            "gpu": "video",
+            "x": 116,
+            "y": 230,
+            "w": 467,
+            "h": 350,
+            "opts": {
+              "stream": 1,
+              "show": true,
+              "text": "",
+              "radius": 0,
+              "parts": 4,
+              "aspect": 1.3333333333333333
+            }
+          },
+          {
+            "name": "gridBack",
+            "rtype": "gpu",
+            "gpu": "teleButton",
+            "x": 132,
+            "y": 246,
+            "w": 300,
+            "h": 96,
+            "opts": {
+              "text": "All cameras",
+              "icon": "back",
+              "kind": "quiet",
+              "disabled": false,
+              "hidden": true
+            },
+            "onTap": "event:gridBack"
+          },
+          {
+            "name": "camName",
+            "rtype": "gpu",
+            "gpu": "text",
+            "x": 267,
+            "y": 287,
+            "w": 300,
+            "h": 31,
+            "opts": {
+              "text": "REAR",
+              "size": 24,
+              "font": "bold",
+              "align": "right",
+              "color": "#f2f2f2",
+              "wrap": false,
+              "spacing": 2,
+              "hidden": true
+            }
+          },
+          {
+            "name": "pause",
+            "rtype": "gpu",
+            "gpu": "teleButton",
+            "x": 116,
+            "y": 604,
+            "w": 96,
+            "h": 96,
+            "opts": {
+              "text": "",
+              "icon": "pause",
+              "kind": "outline",
+              "disabled": false
+            },
+            "onTap": "event:pause"
+          },
+          {
+            "name": "timeline",
+            "rtype": "gpu",
+            "gpu": "teleSlider",
+            "x": 236,
+            "y": 604,
+            "w": 197,
+            "h": 96,
+            "opts": {
+              "min": 0,
+              "max": 30,
+              "value": 11,
+              "decimals": 0,
+              "unit": "",
+              "showValue": false,
+              "disabled": false,
+              "step": 1
+            }
+          },
+          {
+            "name": "time",
+            "rtype": "gpu",
+            "gpu": "text",
+            "x": 453,
+            "y": 640,
+            "w": 130,
+            "h": 35,
+            "opts": {
+              "text": "0:11 / 0:30",
+              "size": 27,
+              "font": "num",
+              "align": "right",
+              "color": "#f2f2f2",
+              "wrap": false
+            }
+          },
+          {
+            "name": "spdWord",
+            "rtype": "gpu",
+            "gpu": "text",
+            "x": 623,
+            "y": 239,
+            "w": 400,
+            "h": 31,
+            "opts": {
+              "text": "SPEED",
+              "size": 24,
+              "font": "bold",
+              "align": "left",
+              "color": "#8b9099",
+              "wrap": false,
+              "spacing": 2
+            }
+          },
+          {
+            "name": "spd",
+            "rtype": "gpu",
+            "gpu": "teleValue",
+            "x": 623,
+            "y": 274,
+            "w": 601,
+            "h": 100,
+            "opts": {
+              "value": "47",
+              "unit": "km/h",
+              "size": 96,
+              "color": "",
+              "align": "left"
+            }
+          },
+          {
+            "name": "timeWord",
+            "rtype": "gpu",
+            "gpu": "text",
+            "x": 1256,
+            "y": 239,
+            "w": 400,
+            "h": 31,
+            "opts": {
+              "text": "TIME",
+              "size": 24,
+              "font": "bold",
+              "align": "left",
+              "color": "#8b9099",
+              "wrap": false,
+              "spacing": 2
+            }
+          },
+          {
+            "name": "clock",
+            "rtype": "gpu",
+            "gpu": "teleValue",
+            "x": 1256,
+            "y": 282,
+            "w": 632,
+            "h": 70,
+            "opts": {
+              "value": "18:05:11",
+              "unit": "",
+              "size": 64,
+              "color": "",
+              "align": "left"
+            }
+          },
+          {
+            "name": "clockSub",
+            "rtype": "gpu",
+            "gpu": "text",
+            "x": 1256,
+            "y": 351,
+            "w": 632,
+            "h": 31,
+            "opts": {
+              "text": "30 Oct 2026",
+              "size": 24,
+              "font": "label",
+              "align": "left",
+              "color": "#8b9099",
+              "wrap": false
+            }
+          },
+          {
+            "name": "hint",
+            "rtype": "gpu",
+            "gpu": "text",
+            "x": 623,
+            "y": 400,
+            "w": 1265,
+            "h": 64,
+            "opts": {
+              "text": "Tap a camera to enlarge it · plays only while the car stands still",
+              "size": 24,
+              "font": "label",
+              "align": "left",
+              "color": "#8b9099",
+              "wrap": true
+            }
+          },
+          {
+            "name": "lock",
+            "rtype": "gpu",
+            "gpu": "teleButton",
+            "x": 623,
+            "y": 488,
+            "w": 622.5,
+            "h": 96,
+            "opts": {
+              "text": "Lock",
+              "icon": "lock",
+              "kind": "outline",
+              "disabled": false
+            },
+            "onTap": "event:lock"
+          },
+          {
+            "name": "export",
+            "rtype": "gpu",
+            "gpu": "teleButton",
+            "x": 1265.5,
+            "y": 488,
+            "w": 622.5,
+            "h": 96,
+            "opts": {
+              "text": "Copy to USB",
+              "icon": "usb",
+              "kind": "outline",
+              "disabled": false
+            },
+            "onTap": "event:export"
+          },
+          {
+            "name": "delete",
+            "rtype": "gpu",
+            "gpu": "teleButton",
+            "x": 623,
+            "y": 604,
+            "w": 1265,
+            "h": 96,
+            "opts": {
+              "text": "Delete",
+              "icon": "trash",
+              "kind": "dangerOutline",
+              "disabled": false
+            },
+            "onTap": "event:delete"
+          },
+          {
+            "name": "dialog",
+            "rtype": "gpu",
+            "gpu": "teleDialog",
+            "x": 84,
+            "y": 76,
+            "w": 1836,
+            "h": 644,
+            "opts": {
+              "title": "Delete this clip?",
+              "body": "Yesterday 18:05 · 30 s · 160 MB",
+              "body2": "It is removed from the head unit.",
+              "danger": true
+            }
+          },
+          {
+            "name": "no",
+            "rtype": "gpu",
+            "gpu": "teleButton",
+            "x": 400,
+            "y": 444,
+            "w": 590,
+            "h": 96,
+            "opts": {
+              "text": "Cancel",
+              "icon": "",
+              "kind": "outline",
+              "disabled": false
+            },
+            "onTap": "event:no"
+          },
+          {
+            "name": "yes",
+            "rtype": "gpu",
+            "gpu": "teleButton",
+            "x": 1014,
+            "y": 444,
+            "w": 590,
+            "h": 96,
+            "opts": {
+              "text": "Delete",
+              "icon": "trash",
+              "kind": "danger",
+              "disabled": false
+            },
+            "onTap": "event:yes"
+          }
+        ]
+      }
+    },
+    {
+      "name": "diag",
+      "kind": "gpu",
+      "title": "Drive Recorder",
+      "bg": "#000000",
+      "bgArea": "app",
+      "components": [
+        {
+          "name": "nav",
+          "rtype": "gpu",
+          "gpu": "teleShell",
+          "x": 0,
+          "y": 76,
+          "w": 2880,
+          "h": 172,
+          "opts": {
+            "app": "Drive Recorder",
+            "icon": "camera",
+            "tabs": "Record, Clips, Settings",
+            "sel": 2,
+            "chips": "",
+            "title": "Diagnostics",
+            "sub": "For support",
+            "back": true,
+            "credit": "",
+            "hu": "id8"
+          }
+        },
+        {
+          "name": "back",
+          "rtype": "gpu",
+          "gpu": "teleButton",
+          "x": 40,
+          "y": 184,
+          "w": 150,
+          "h": 56,
+          "opts": {
+            "text": "Back",
+            "icon": "back",
+            "kind": "outline",
+            "disabled": false
+          },
+          "onTap": "back"
+        },
+        {
+          "name": "diagText",
+          "rtype": "gpu",
+          "gpu": "teleKv",
+          "x": 40,
+          "y": 248,
+          "w": 2400,
+          "h": 560,
+          "opts": {
+            "rowH": 40,
+            "rows": [
+              [
+                "Provisioning data state",
+                "DATA_AVAILABLE · getValue: true"
+              ],
+              [
+                "Gates open",
+                "the video buffer service is there."
+              ],
+              [
+                "Buffer",
+                "RECORDING, config 30000/40960"
+              ],
+              [
+                "Camera ECU",
+                "DR_ACTIVE (icam2proxy) · DR_ACTIVE (XView3D) · DR degradation NO_DEGRADATION"
+              ],
+              [
+                "Player",
+                "running 1.1.0 · 6 clips · 610 MB",
+                "ok"
+              ]
+            ]
+          }
+        },
+        {
+          "name": "check",
+          "rtype": "gpu",
+          "gpu": "teleButton",
+          "x": 2480,
+          "y": 248,
+          "w": 360,
+          "h": 96,
+          "opts": {
+            "text": "Check cameras",
+            "icon": "camera",
+            "kind": "outline",
+            "disabled": false
+          },
+          "onTap": "event:check"
+        }
+      ],
+      "id7": {
+        "components": [
+          {
+            "name": "nav",
+            "rtype": "gpu",
+            "gpu": "teleShell",
+            "x": 84,
+            "y": 76,
+            "w": 1836,
+            "h": 154,
+            "opts": {
+              "app": "Drive Recorder",
+              "icon": "camera",
+              "tabs": "Record, Clips, Settings",
+              "sel": 2,
+              "chips": "",
+              "title": "Diagnostics",
+              "sub": "For support",
+              "back": true,
+              "credit": "",
+              "hu": "id7"
+            }
+          },
+          {
+            "name": "back",
+            "rtype": "gpu",
+            "gpu": "teleButton",
+            "x": 116,
+            "y": 168,
+            "w": 150,
+            "h": 56,
+            "opts": {
+              "text": "Back",
+              "icon": "back",
+              "kind": "outline",
+              "disabled": false
+            },
+            "onTap": "back"
+          },
+          {
+            "name": "diagText",
+            "rtype": "gpu",
+            "gpu": "teleKv",
+            "x": 116,
+            "y": 230,
+            "w": 1372,
+            "h": 468,
+            "opts": {
+              "rowH": 36,
+              "rows": [
+                [
+                  "Provisioning data state",
+                  "DATA_AVAILABLE · getValue: true"
+                ],
+                [
+                  "Gates open",
+                  "the video buffer service is there."
+                ],
+                [
+                  "Buffer",
+                  "RECORDING, config 30000/40960"
+                ],
+                [
+                  "Camera ECU",
+                  "DR_ACTIVE (icam2proxy) · DR_ACTIVE (XView3D) · DR degradation NO_DEGRADATION"
+                ],
+                [
+                  "Player",
+                  "running 1.1.0 · 6 clips · 610 MB",
+                  "ok"
+                ]
+              ]
+            }
+          },
+          {
+            "name": "check",
+            "rtype": "gpu",
+            "gpu": "teleButton",
+            "x": 1528,
+            "y": 230,
+            "w": 360,
+            "h": 96,
+            "opts": {
+              "text": "Check cameras",
+              "icon": "camera",
+              "kind": "outline",
+              "disabled": false
+            },
+            "onTap": "event:check"
+          }
+        ]
+      }
+    }
+  ]
+}

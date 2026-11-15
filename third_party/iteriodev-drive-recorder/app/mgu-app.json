@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "id": "oap-driverecorder-next",
+  "version": "2.5.0",
+  "tree": "oap-driverecorder-next@2.5.0",
+  "modules": [
+    "src/main.js",
+    "src/online-host.js",
+    "src/frontccu.js",
+    "src/recorder.js",
+    "src/player.js",
+    "src/meta.js",
+    "src/ui.js"
+  ],
+  "sdk": [
+    "oap-sdk/src/core/OnlineApp.js",
+    "oap-sdk/src/logging/logging",
+    "oap-sdk/src/someip/someipBuilders"
+  ],
+  "title": "Drive Recorder",
+  "description": "Keeps the car's cameras recording and saves a clip when you ask; watch, lock, delete and copy clips to a USB stick while the car stands still. Works by touch or with the iDrive controller. Over 4 GB the oldest unlocked clips are replaced. The Store installs the Drive Recorder player with it. The car must be coded for the Drive Recorder.",
+  "mguHmi": [
+    "ID7",
+    "ID8"
+  ],
+  "needs": [
+    "renderer"
+  ],
+  "requires": {
+    "mgu-deploy": "0.7.5",
+    "iteriodev-drplay": "1.2.0"
+  },
+  "texts": {
+    "ru": {
+      "title": "Видеорегистратор",
+      "description": "Записывает камеры автомобиля и сохраняет клип по нажатию. Просмотр на стоянке, защита и удаление клипов, копирование на USB. Сенсорное управление и контроллер iDrive. При заполнении 4 ГБ заменяются старые незащищённые записи. Проигрыватель устанавливается вместе с приложением. Автомобиль должен быть закодирован для Drive Recorder."
+    }
+  },
+  "uninstallable": true
+}

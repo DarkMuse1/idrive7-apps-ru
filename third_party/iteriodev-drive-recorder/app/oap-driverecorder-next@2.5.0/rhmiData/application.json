@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "1.0.0",
+  "application": {
+    "uuid": "8d2f6a14-3c5e-4b7a-9e01-6f4c2b8d0a37",
+    "type": "OnlineApp",
+    "name": "oap-driverecorder-next",
+    "vendor": "custom",
+    "version": "1.0.0",
+    "defaultLanguage": "en_GB",
+    "uiDescriptions": [
+      {
+        "applicationFilePath": "./uiDescriptions/ID7/application.xml",
+        "uiDescriptionFilePath": "./uiDescriptions/ID7/uiDescription.json",
+        "hmi": [
+          "ID7"
+        ]
+      },
+      {
+        "applicationFilePath": "./uiDescriptions/ID8/application.xml",
+        "uiDescriptionFilePath": "./uiDescriptions/ID8/uiDescription.json",
+        "hmi": [
+          "ID8"
+        ]
+      }
+    ],
+    "stringBundleUuid": "88c59e89-d7c0-4f3b-a1eb-fccb661e8c9a",
+    "resourceBundleUuid": "30beb584-ac3d-4d0c-aa3c-959a315c3224",
+    "variantGroups": [
+      {
+        "stringsPath": "./variantGroups/Common/texts",
+        "hmi": [
+          "ID7",
+          "ID8"
+        ],
+        "brands": [
+          "BMW"
+        ],
+        "resourcesPath": "./resources"
+      }
+    ],
+    "entryPoints": [
+      {
+        "uuid": "c5a9e3f1-7b2d-4e68-a4c0-1d9f3b6e5a82",
+        "textId": "SID_10",
+        "insertionStateId": 20974,
+        "insertionFocusId": 2,
+        "appearance": "DEFAULT",
+        "insertionMode": "INSERT_BELOW",
+        "insertionOrder": 0,
+        "insertionPriority": 0,
+        "insertionGroup": 0,
+        "isGroupHeader": false,
+        "availability": "ENABLED",
+        "icon": "oap-driverecorder-next_icon.png"
+      }
+    ],
+    "appletId": 20105
+  }
+}

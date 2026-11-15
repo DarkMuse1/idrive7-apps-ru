@@ -66,6 +66,10 @@
     {
       "id": "mgu-ambient-rgb",
       "path": "tools/mgu-ambient-rgb"
+    },
+    {
+      "id": "iteriodev-drplay",
+      "path": "third_party/iteriodev-drive-recorder/player"
     }
   ],
   "components": [
@@ -351,6 +355,11 @@
           "oap-sdk"
         ]
       }
+    },
+    {
+      "id": "oap-driverecorder-next",
+      "kind": "app",
+      "path": "third_party/iteriodev-drive-recorder/app"
     }
   ]
 }
