@@ -31,8 +31,6 @@
       ]
     },
     "exclude": [
-      "ambient_light",
-      "light_show",
       "mgu_unified",
       "aa_cluster_companion"
     ]
@@ -64,10 +62,6 @@
       ]
     },
     {
-      "id": "mgu-ambient-rgb",
-      "path": "tools/mgu-ambient-rgb"
-    },
-    {
       "id": "iteriodev-drplay",
       "path": "third_party/iteriodev-drive-recorder/player"
     },
@@ -77,38 +71,6 @@
     }
   ],
   "components": [
-    {
-      "manifest": "app.json",
-      "icon": "icon.png",
-      "mguHmi": [
-        "ID7"
-      ],
-      "requires": {
-        "idrive7-renderd": "2.1.10",
-        "mgu-inputgate": "1.0.0",
-        "mgu-ambient-rgb": "0.1.3"
-      },
-      "build": {
-        "python": "tools/build_protected_auto.py",
-        "args": [
-          "{id}",
-          "--language",
-          "auto"
-        ],
-        "sdk": "oap-sdk",
-        "output": "dist/{id}@{version}.tgz",
-        "shared": [
-          "tools/build_protected_auto.py",
-          "tools/auto-language",
-          "tools/protected-apps/kit",
-          "tools/build_light_show.py",
-          "oap-sdk"
-        ]
-      },
-      "id": "ambient_light",
-      "kind": "app",
-      "path": "apps/ambient_light"
-    },
     {
       "manifest": "app.json",
       "icon": "icon.png",
@@ -135,7 +97,6 @@
           "tools/build_protected_auto.py",
           "tools/auto-language",
           "tools/protected-apps/kit",
-          "tools/build_light_show.py",
           "oap-sdk"
         ]
       }
@@ -166,7 +127,6 @@
           "tools/build_protected_auto.py",
           "tools/auto-language",
           "tools/protected-apps/kit",
-          "tools/build_light_show.py",
           "oap-sdk"
         ]
       }
@@ -326,38 +286,6 @@
         "idrive7-renderd": "2.1.7",
         "mgu-inputgate": "1.0.0",
         "cluster-render": "0.5.1"
-      }
-    },
-    {
-      "id": "light_show",
-      "kind": "app",
-      "path": "apps/light_show",
-      "manifest": "app.json",
-      "icon": "icon.png",
-      "mguHmi": [
-        "ID7",
-        "ID8"
-      ],
-      "uninstallable": true,
-      "requires": {
-        "mgu-deploy": "0.7.5"
-      },
-      "build": {
-        "python": "tools/build_protected_auto.py",
-        "args": [
-          "{id}",
-          "--language",
-          "auto"
-        ],
-        "sdk": "oap-sdk",
-        "output": "dist/{id}@{version}.tgz",
-        "shared": [
-          "tools/build_protected_auto.py",
-          "tools/auto-language",
-          "tools/protected-apps/kit",
-          "tools/build_light_show.py",
-          "oap-sdk"
-        ]
       }
     },
     {

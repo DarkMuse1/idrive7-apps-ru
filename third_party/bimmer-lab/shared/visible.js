@@ -16,8 +16,8 @@ const HOOD = [
     [1000, 1], [1100, 2], [1200, 5], [1300, 10], [1400, 19], [1500, 37], [1600, 67], [1700, 84], [1800, 128], [1900, 196],
     [1920, 240],
 ];
-/** BMW draws a solid black box over our panel here (its gear slot): [x0, y0, x1, y1]. */
-const BLACK_BOX = [1406, 342, 1597, 419];
+/* BMW's black box over x 1406..1597, y 342..419 (Nov 5 2026 photos) is not checked any more (Nov 15 2026): BMW draws it only
+ * while a theme covers its gear letter in the bottom strip, and every theme leaves that letter uncovered (genlib GEAR_WIN). */
 /** BMW's seat-belt warning light is drawn over us here: [x0, y0, x1, y1]. */
 const BELT = [587, 663, 626, 700];
 /** The part of the 800x480 HUD target seen through the windshield: BMW's own height-adjust frame (car photo Nov 7,
@@ -81,9 +81,6 @@ function check(widgets, target) {
                 const worst = under.reduce((a, b) => (b.d > a.d ? b : a));
                 out.push(id + ': ' + worst.what + ' ' + worst.d + ' px under the hood');
             }
-            if (overlaps(w, BLACK_BOX)) {
-                out.push(id + ': overlaps BMW\'s gear box x' + BLACK_BOX[0] + '-' + BLACK_BOX[2] + ' y' + BLACK_BOX[1] + '-' + BLACK_BOX[3]);
-            }
             if (overlaps(w, BELT)) {
                 out.push(id + ': overlaps BMW\'s seat-belt light x' + BELT[0] + '-' + BELT[2] + ' y' + BELT[1] + '-' + BELT[3]);
             }
@@ -103,4 +100,4 @@ function check(widgets, target) {
     return out;
 }
 
-module.exports = { HOOD, BLACK_BOX, BELT, HUD_WINDOW, HUD_BMW, CAMERA, hoodY, check };
+module.exports = { HOOD, BELT, HUD_WINDOW, HUD_BMW, CAMERA, hoodY, check };

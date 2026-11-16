@@ -175,6 +175,14 @@ def apply(stage, spec=None, strings_by_language=None, rhmi_strings=None,
     display_cache_files = patch_display_caches(js, kit)
     entry_path = js / entry
     body = entry_path.read_text(encoding='utf-8')
+    if spec and spec.get('id') == 'ambient_config':
+        marker = '        settings.onChange(() => { dirty = true; });'
+        repaint = '        if (ctx.onLayout) ctx.onLayout(() => { dirty = true; });'
+        if repaint not in body:
+            if body.count(marker) != 1:
+                raise ValueError('Review Ambient Config display invalidation before applying automatic language')
+            body = body.replace(marker, marker + '\n' + repaint, 1)
+            display_cache_files.append(entry)
     directive = "require('./auto-language').install();\n"
     if directive not in body:
         # Preload before any kit module destructures i18n.t or caches a title.

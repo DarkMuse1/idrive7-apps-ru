@@ -76,6 +76,20 @@
  *   mtach     effect layer; the M rev bar: "side" left|right, "max" rpm, and in target px for the LEFT bar
  *             "y0" (0 rpm), "y8" (max), "ym" (the bend), "xm" (outer edge x at the bend; the right bar gives
  *             its own, mirrored), "kTop" / "kBot" (x per y px above / below the bend), "round", "wBot" / "wTop" / "wBend"
+ *   mview     effect layer; the whole M view theme (shaders.js mview, layout made by design/gen_mview.py): "path" (the
+ *             left scale's line, target px, at most 32 points, its corners already rounded; the right scale is its
+ *             mirror), "scale" [arc length at 0, at the top mark], "dial" [x, y, r] and "dialAng" [full, empty] (the fuel
+ *             dial; the oil one is its mirror), "line" [x0, x1, y, bottom line end x]; speed 0..MVIEW_SPEED, revs
+ *             0..MVIEW_RPM; the map window as fill ("hole", "holeWhen"), an oval feathered over "holeOval" px if set;
+ *             "panel" [[top x, y], [middle x, y], [bottom x, y], inset]: the dark panel inside the left scale (from
+ *             inset px inside the line to that chevron edge; mirrored right) and BMW's red glow by the needle. A layout with "mapLive": true and no widget
+ *             toggled on mapUp opens and closes the window by u_hole alone, without a rebuild
+ *   vdash     effect layer; the whole Vector theme (shaders.js vdash, layout made by design/gen_vector.py): "tach" [cx, cy,
+ *             inner r, outer r, start deg, sweep deg, segments] (revs 0..VDASH_RPM), "segs" (the bracket lines, at most
+ *             20: [x0, y0, x1, y1, width, brightness 0..1]), "rings" (at most 4: {cx, cy, r, signal, min, max, color
+ *             [r, g, b] 0..1}), "bars" (at most 3, gone while the map shows: {x, y, w, signal, min, max}), "panel" [x, y,
+ *             w, h] (the music panel's plate), "vinyl" [cx, cy, r] (red label while something plays), "prog" [x, y, w]
+ *             (the track's progress); the map window as fill ("hole", "holeWhen") with its corners cut "holeCut" px
  *   sdash     effect layer; the whole Sport theme (shaders.js sdash), optional "road" [horizonY, scale] (a road in the
  *             middle while no map shows, its dashes running with the speed): "geo" [yTop, yBend, yBottom, xBend] and
  *             "k" [above, below, round] for the left bracket's outer line (the right one is mirrored), "band"
@@ -99,11 +113,6 @@
  *             widest advance and h = its cell height, logged at creation), and a new value is one uniform
  *             message of glyph codes. "text" tokens as text, "font", "color" role, "align" left | right | center.
  *             Up to 32 cells; only the characters the font has.
- *   dial      effect layer (shaders.js dial): a classic round gauge, the Roadster's: "measure" speed | rpm | signal ("signal",
- *             "max", "ticks"); speed reads 0..160 mph / 0..240 km/h (DIAL_SPEED, labels {{dial:speed:<i>}}), rpm 0.."max"
- *             (8000) with the red band from the redline (_redMarks) and the ring in the shift red at the shift point;
- *             "start" / "sweep" degrees (225 / 270), "minor" ticks per step (4), "ringW" px (14), roles "ring" (line)
- *             fading to "ring2" (dim), "tick" (fg), "needle" (hot), "face" (bg). The numbers are text widgets.
  *   meter     effect layer (shaders.js meter): a segmented bar, "signal" between "min" and "max" (raw units: km/h, C,
  *             bar, rpm), "segments" (20), "gap" px (4), "vertical": true fills upward; "colors" [3 roles] lit below
  *             "at"[0] / up to "at"[1] / past it (fractions of the bar), "trackColor" (track); "peak": ms (true = 3 s)
@@ -188,6 +197,9 @@
  * Text "showWhen": "abnormal" (or "abnormal:oil" / "abnormal:coolant" on a plain label): empty while that temperature is
  *   normal and the setting "smartTemps" is on; temperature values take their band's colour, outside blue at 3 C and
  *   under (smart_temps.js).
+ * Text "showWhen": "media" / "!media" (something with a title is playing, HmiMediaState, or not) and "mapUp" / "!mapUp"
+ *   (the Waze map shows inside the theme): empty otherwise, without a rebuild. Text "ellipsis": true: a text wider than
+ *   the box is cut to fit, ending in "...".
  * Switch-off guard (vehicle_state.js): no new layer while BMW's vehicle state is off / switching on / off, the layers
  *   dropped at 12 or 5 and under, built again when the car is on.
  * HUD holiday colours (shared/hud_holiday.js, the "holiday" setting on the HUD target): the theme's accents in the holiday's
@@ -212,7 +224,7 @@
  *
  * Text tokens: {{speed}} {{u:speed}} {{oil}} {{coolant}} {{boost}} {{u:boost}} {{rpm}}
  * {{gear}} (P / R / N, D3 / S3 / M3 by the shifter programme, or just 3 when the selector position is unknown), {{gearnum}} (3, or P / R / N)
- * {{spd:<i>}} (speed scale label i of SPEED_SCALE: 0..200 mph, 0..320 km/h) {{range}} {{u:distLc}} (mi, km) {{u:dist}} (MI, KM) {{ambient}} (outside, signed: +75) {{u:speedLc}} (mph, km/h) {{ampmLc}} (am, pm) {{torque}} {{u:torque}} (lb-ft, Nm) {{torquePct}} {{powerPct}} (% of config.engine's peak) {{boostHi}} {{boostMid}}
+ * {{spd:<i>}} (speed scale label i of SPEED_SCALE: 0..200 mph, 0..320 km/h) {{range}} {{u:distLc}} (mi, km) {{u:dist}} (MI, KM) {{ambient}} (outside, signed: +75) {{u:speedLc}} (mph, km/h) {{speed2}} {{u:speed2Lc}} {{u:speed2}} (the speed in the other unit) {{mediaTitle}} {{mediaArtist}} {{mediaElapsed}} {{mediaLeft}} (now playing, HmiMediaState; empty without) {{ampmLc}} (am, pm) {{torque}} {{u:torque}} (lb-ft, Nm) {{torquePct}} {{powerPct}} (% of config.engine's peak) {{boostHi}} {{boostMid}}
  * (gauge labels for 1.4 / 0.7 bar in the display unit) {{stage}} (P R N, D / S / M by the shifter programme) {{gearInD}} (gear number while in D) {{mode}} (COMFORT, SPORT, SPORT PLUS, SPORT INDIVIDUAL, ECO PRO, ...)
  * {{temp:<deg C>}} (that temperature in the display unit, °F rounded to 10, for gauge labels) {{setup:engine|chassis|steering|gearbox}} (what that part is set to in the drive mode now)
  * {{time}} {{ampm}} {{u:temp}} (°F / °C) {{gLat}} {{gLong}} (g, 2 decimals) {{gSide}} ("0.42 L", "0.42 R")
@@ -293,14 +305,10 @@ const TEXT_MS = 200;             // text re-draws at most 5 times a second (what
 const TARGET_SIZES = { hud: [800, 480], panel: [1920, 720] };
 const MODE_KEY = { comfort: 'inComfort', sport: 'inSport', eco: 'inEco' };
 const TYRE_CORNERS = ['FL', 'FR', 'RL', 'RR'];
-// the Roadster's speed dial: 0..160 mph or 0..240 km/h in 8 steps (labels {{dial:speed:<i>}})
-const DIAL_SPEED = { us: { max: 160, ticks: 8 }, metric: { max: 240, ticks: 8 } };
 // the HUD's place (the page's Position tab): settings that move / scale the layers already there, no rebuild
-const PLACE_KEYS = ['hudX', 'hudY', 'hudScale', 'stripClear'];
-// "Leave BMW's bottom strip clear" (cluster, issues #5 / #1): BMW's own strip (range, clock, belt light, P) starts at
-// y 662. A theme drawn only above it is reported (#5, an M car) to stop BMW painting its black boxes over the theme.
-// cluster-render has no clip, so the switch squeezes every layer to 662 / 720 of its height about the panel's top.
-const STRIP_TOP = 662;
+const PLACE_KEYS = ['hudX', 'hudY', 'hudScale'];
+// (0.17.4: "Leave BMW's bottom strip clear" is gone. Since 0.17.0 every cluster theme ends above BMW's strip anyway;
+// its squeeze to 662 / 720 only lifted the theme off the bottoms of BMW's own gauges, car photo Nov 14 2026.)
 // settings that only change what a text shows (the next tick paints it), no rebuild
 const LIVE_KEYS = ['warnOil', 'warnCoolant', 'warnBoost', 'badge', 'badgeBMW', 'gFlipLat', 'gFlipLong', 'gRange', 'gTrail'];
 // g (after cauliflowermossgrape's G-Force, MIT, idea only): a sample over G_BAD is a bad reading, not a corner;
@@ -328,8 +336,22 @@ const TILE_BAR = {
 };
 const TILE_MAX = 14;       // half a flash: red, then the normal colour
 // widgets that show the shift cue (the reaction time is learned only while one of them is drawn)
+const MVIEW_RPM = 8000;            // the M view theme's rev scale: 0..8
+const MVIEW_SPEED = { us: 200, metric: 330 };
+const VDASH_RPM = 8000;            // the Vector theme's rev counter: 0..8
+const MEDIA_IF = 'de.bmw.infotainment.hmi.hmimediastate.HmiMediaState';   // the head unit's now playing (front)
+const MEDIA_TYPES = { 1: 'ARTIST', 2: 'ALBUM', 3: 'TITLE' };
+/** A song's text for the baked fonts: accents dropped, curly quotes and dashes made plain, the rest left out. */
+function mediaText(v) {
+    let t = String(v === undefined || v === null ? '' : v);
+    try { t = t.normalize('NFD'); } catch (e) { /* no ICU: keep it */ }
+    return t.replace(/[\u0300-\u036f]/g, '').replace(/[\u2018\u2019]/g, "'").replace(/[\u201c\u201d]/g, '"')
+        .replace(/[\u2013\u2014]/g, '-').replace(/\u2026/g, '...').replace(/[^\x20-\x7e]/g, '').replace(/\s+/g, ' ').trim();
+}
+/** Seconds as m:ss. */
+function clockOf(sec) { const t = Math.max(0, Math.floor(sec)); return Math.floor(t / 60) + ':' + ('0' + (t % 60)).slice(-2); }   // its speed scale: 0..200 mph by 20, 0..330 km/h by 30 (linear)
 const ROAD_DASH_M = 12;            // the Sport road: metres per dash and gap (shaders.js sdash u_road)
-const CUE_TYPES = { lights: true, shiftbar: true, revbar: true, revarc: true, ribbon: true, mtach: true, dial: true };
+const CUE_TYPES = { lights: true, shiftbar: true, revbar: true, revarc: true, ribbon: true, mtach: true };
 // the shift-light test (page.js Alerts): rpm climbs from TEST_FROM to just past the shift point, then holds
 const TEST_FROM = 1500, TEST_CLIMB_MS = 2500, TEST_HOLD_MS = 1200;
 // night colours (Cluster Themes "nightDim"): after sunset the theme's whites and greys go to this brightness
@@ -371,6 +393,18 @@ function scaleFrac(v, marks) {
  */
 /** The mode's variant: 'plus' (Sport+ / Comfort+ / Eco Pro+: wire 2, 5, 8, or PLUS / EXPERT in the name), 'individual'
  *  (wire 3, 6, 9, or INDIVID in the name), else null. */
+/**
+ * M cars (issue #8): MDrive.controlDisplayMSystems.controlDisplayEngineMode, the engine mode M Setup shows; FES's
+ * driving experience stays on Comfort on these cars. KOMFORT 1 is what M calls Efficient, SPORT 2, SPORT_PLUS 3;
+ * 0, 4 and 7 carry no mode. The enum comes as its name or its number. Signal and values: ALMSTRA/idv7lol (tested on
+ * an F98 X4 M Competition, Nov 14 2026; facts only, no code taken). Returns { mode, variant } or null.
+ */
+function mEngineModeOf(v) {
+    let n = v && typeof v === 'object' ? v.controlDisplayEngineMode : v;
+    if (typeof n === 'string') n = /^\d+$/.test(n.trim()) ? Number(n.trim()) : { KOMFORT: 1, SPORT: 2, SPORT_PLUS: 3 }[n.trim().toUpperCase()];
+    return n === 1 ? { mode: 'comfort', variant: null } : n === 2 ? { mode: 'sport', variant: null } : n === 3 ? { mode: 'sport', variant: 'plus' } : null;
+}
+
 function driveVariantOf(raw) {
     const v = typeof raw === 'string' && /^\d+$/.test(raw.trim()) ? Number(raw.trim()) : raw;
     if (typeof v === 'number') return v === 2 || v === 5 || v === 8 ? 'plus' : v === 3 || v === 6 || v === 9 ? 'individual' : null;
@@ -503,6 +537,9 @@ class HudApp {
         this.modeDiagLogged = {};        // how many distinct values of each went to the log (20 at most)
         this.lastDiag = '';
         this.diagTimer = null;
+        this.mDrive = false;             // issue #8: the drive mode comes from M Drive (an M car)
+        this.fesWorks = false;           // FES has shown a mode other than Comfort: its mode is right on this car
+        this.diagAt = {};                // when each busy candidate (Engine, Sport2: boost rides on it) was last looked at
 
         this.slotsFile = path.join(ctx.dataDir || '.', 'slots.json');
         this.slotPicks = {};             // { layout: { slot id: sensor id } }: the readout slots' picks (page.js Readouts)
@@ -512,9 +549,10 @@ class HudApp {
         this.mapLayout = false;          // the active layout has a map window (a widget with holeWhen "mapUp")
         // the Waze map inside the theme (Cluster Themes, config.waze; waze.js): "mapUp" is on while it shows
         this.waze = this.config.waze ? new Waze(Object.assign({ dataDir: ctx.dataDir }, this.config.waze), this.log, () => this._guard('waze', () => {
-            if (this.mapLayout && this.setting('mapUp') !== this.mapShown) this._rebuild(); else this._status();
+            if (this.mapLayout && this.setting('mapUp') !== this.mapShown) { if (this.mapLive) this._mapLive(); else this._rebuild(); } else this._status();
         })) : null;
-        this.mapShown = false;           // "mapUp" when the layout was built
+        this.mapShown = false;           // "mapUp" when the layout was built (or last opened / closed, mapLive)
+        this.mapLive = false;            // the active layout opens and closes its map window without a rebuild
         // the screen shared with the other app (screen.js): stepping aside while the driver gave it to the other one
         this.screen = new Screen(this.target === 'panel' ? 'cluster' : 'hud', ctx.dataDir, this.log,
             () => !!(this.started && this.activeName && this.activeName !== 'off'), () => this._guard('screen', () => this._rebuild()),
@@ -596,13 +634,12 @@ class HudApp {
      * so the layout's box stays inside it. The scale is cluster-render's layer sx / sy about the layout's centre.
      */
     _place() {
-        const off = this._offset(), sc = this._scale(), st = this._stripSy();
+        const off = this._offset(), sc = this._scale();
         if (!this.placed.length) return;
         const b = this._placedBox(), cx = b.x + b.w / 2, cy = b.y + b.h / 2;
         this.placed.forEach((l) => {
             const o = { x: l.x + off.x, y: l.y + off.y };
-            if (st !== 1) { o.sx = 1; o.sy = st; o.px = 0; o.py = -l.y; l.scaled = true; }      // about the panel's top, y 0
-            else if (sc !== 1 || l.scaled) { o.sx = sc; o.sy = sc; o.px = cx - l.x; o.py = cy - l.y; l.scaled = sc !== 1; }
+            if (sc !== 1 || l.scaled) { o.sx = sc; o.sy = sc; o.px = cx - l.x; o.py = cy - l.y; l.scaled = sc !== 1; }
             l.c.set(l.ref, o);
         });
     }
@@ -632,11 +669,6 @@ class HudApp {
     }
     _cameraOn() { return this.target === 'panel' && !!this.ctx.settings.item('cameraNotch') && this.setting('cameraNotch') === true; }
 
-    /** The cluster's squeeze for "Leave BMW's bottom strip clear": 662 / 720 while it's on, else 1. */
-    _stripSy() {
-        if (this.target !== 'panel' || !this.ctx.settings.item('stripClear')) return 1;
-        return this.setting('stripClear') === true ? STRIP_TOP / TARGET_SIZES.panel[1] : 1;
-    }
     _scale() {
         if (!this.ctx.settings.item('hudScale')) return 1;
         const v = this.setting('hudScale');
@@ -704,8 +736,16 @@ class HudApp {
             },
             // S / M next to the gear: the gearbox status carries no programme on some cars, the M drive display does
             'de.bmw.infotainment.misc.MDrive': {
-                // issue #8: what an M car keeps here (car_vitals reads xDrive from it), for the drive mode check
-                statusMSystem: (v) => this._diag('MSystem', v),
+                // issue #8: an M car's drive mode (M Setup's engine mode). Used unless FES has ever shown a mode other
+                // than Comfort (then this car's FES works and stays in charge)
+                controlDisplayMSystems: (v) => {
+                    this._diag('MDrive', v);
+                    const m = mEngineModeOf(v);
+                    if (!m || this.fesWorks) return;
+                    if (!this.mDrive) this.log.info('drive mode: from M Drive (M Setup\'s engine mode)');
+                    this.mDrive = true;
+                    this._driveMode(m.mode, m.variant, 'M Drive ' + JSON.stringify(v && typeof v === 'object' ? v.controlDisplayEngineMode : v));
+                },
                 dataDisplayGearbox: (v) => {
                     const raw = v && v.displayProgramGearbox;
                     this.program = PROGRAMS[raw] || null;
@@ -748,13 +788,18 @@ class HudApp {
                         return;
                     }
                     this.driveRaw = null;
-                    if (this.demoKeep) { this.demoKeep.mode = m; this.demoKeep.variant = variant; return; }   // the demo show has the mode; kept for after
-                    if (m === this.driveMode && variant === this.driveVariant) return;
-                    this.log.info('drive mode ' + MODE_NAME[m] + (variant ? ' ' + variant : '') + ' (' + raw + ')');
-                    this.driveMode = m; this.driveVariant = variant;
-                    if (this._layoutName() !== this.activeName) this._rebuild(); else this._status();
+                    if (m !== 'comfort') this.fesWorks = true;      // not an M car whose FES is stuck on Comfort
+                    if (this.mDrive && !this.fesWorks) return;     // an M car: M Drive has the mode
+                    this._driveMode(m, variant, raw);
                 },
             },
+        };
+        // now playing (the Vector layouts' music panel): the head unit's own media state, front screen only. Optional
+        // (app.json): not every unit may have it, and whether CarPlay fills it is not known yet. Added last, so the
+        // one-at-a-time SOME/IP setup (signals.js) reaches every vehicle signal before it, whatever this one does
+        extra[MEDIA_IF] = {
+            playerMetadata: (v) => this._mediaFeed('meta', v),
+            trackProgress: (v) => this._mediaFeed('progress', v),
         };
         this.car = new Car(this.ctx, ['rpm', 'speed', 'temps', 'accel', 'gear', 'torque'], extra);
         // "Play demo": this.car becomes the show's stand-in (the car's own data unless the show plays)
@@ -830,6 +875,7 @@ class HudApp {
         c.on('budget', (capKb, maxKb, reason) => this.log.info('budget' + tag + ' ' + capKb + '/' + maxKb + ' kb/s (' + reason + ')'));
         c.on('status', (text) => {
             this.log.info('cluster-render status: ' + text);
+            this._stallsFromStatus(text);
             const ids = sceneIdsOf(text);
             if (!ids) return;
             const apart = ids.panel !== ids.hud;
@@ -838,6 +884,27 @@ class HudApp {
             this.log.info(apart ? 'cluster and HUD on their own scenes (panel ' + ids.panel + ', hud ' + ids.hud + '): both apps can show at once'
                 : 'cluster and HUD share scene ' + ids.panel + ': one app at a time');
             this.screen.beat();
+        });
+    }
+
+    /**
+     * cluster-render's status lists every layer of every client with its state. After a reconnect it may show our layers
+     * without a per-layer event for each (car log Nov 14 2026: "still stalled after 5 s" 3 s after the status had them all
+     * shown): when the status shows as many of a connection's layers as we made, none of them is stalled any more.
+     */
+    _stallsFromStatus(text) {
+        const lines = String(text).split('\n');
+        this.clients.forEach((c, ci) => {
+            const re = new RegExp('^layer \\d+ \\w+ of ' + c.app.replace(/[^\w-]/g, '') + ' on ' + this.target + ',.*: shown$');
+            const shown = lines.filter((l) => re.test(l.trim())).length;
+            const mine = this._layerRefs().filter((r) => r.ci === ci).length;
+            if (!mine || shown < mine) return;
+            this.layerStates.forEach((st, key) => {
+                if (key.indexOf(ci + ':') !== 0 || st.state !== 'stalled') return;
+                clearTimeout(this.stallTimers.get(key)); this.stallTimers.delete(key);
+                if (st.long) this.log.info('layer ' + key.slice(key.indexOf(':') + 1) + (ci ? ' [connection ' + (ci + 1) + ']' : '') + ' shown (cluster-render status)');
+                this.layerStates.set(key, { state: 'shown', reason: null, since: Date.now(), long: false });
+            });
         });
     }
 
@@ -934,6 +1001,7 @@ class HudApp {
         clearInterval(this.dmeTimer);
         clearInterval(this.claimTimer);
         clearTimeout(this.statusAskT);
+        clearTimeout(this.diagTimer); this.diagTimer = null;
         this.vstate.stop();
         this.stallTimers.forEach((t) => clearTimeout(t)); this.stallTimers.clear();
         if (this.waze) this._guard('waze stop', () => this.waze.stop());
@@ -1185,11 +1253,28 @@ class HudApp {
     /**
      * Issue #8: M cars keep FES's drive mode on Comfort whatever their M Setup says, so the real mode is somewhere
      * else. While "Change with the drive mode" is on, the Settings tab shows the raw contents of the candidates
-     * (FES HMI switch, FES engine display, FES sport display 2, MDrive M system) for a driver to photograph in each
+     * (FES HMI switch, MDrive's engine mode, FES engine display, FES sport display 2) for a driver to photograph in each
      * mode. Fields that change all the time while driving (boost, power, torque) are left out. Never throws.
      */
+    /** A drive mode from the car (FES, or M Drive on M cars): the layout for it, or the status line. */
+    _driveMode(m, variant, raw) {
+        if (this.demoKeep) { this.demoKeep.mode = m; this.demoKeep.variant = variant; return; }   // the demo show has the mode; kept for after
+        if (m === this.driveMode && variant === this.driveVariant) return;
+        this.log.info('drive mode ' + MODE_NAME[m] + (variant ? ' ' + variant : '') + ' (' + raw + ')');
+        this.driveMode = m; this.driveVariant = variant;
+        if (this._layoutName() !== this.activeName) this._rebuild(); else this._status();
+    }
+
     _diag(name, v, drop) {
         try {
+            // nothing to show while byMode is off; the busy candidates (drop: they notify with every boost or power
+            // change) are looked at once a second at most, never on every notification
+            if (this.setting('byMode') !== true) return;
+            if (drop) {
+                const now = Date.now();
+                if (now - (this.diagAt[name] || 0) < 1000) return;
+                this.diagAt[name] = now;
+            }
             let o = v;
             if (v && typeof v === 'object' && drop) { o = {}; Object.keys(v).forEach((k) => { if (drop.indexOf(k) < 0) o[k] = v[k]; }); }
             const t = String(JSON.stringify(o)).replace(/"/g, '').slice(0, 84);
@@ -1201,10 +1286,13 @@ class HudApp {
             if (!this.diagTimer) this.diagTimer = setTimeout(() => { this.diagTimer = null; try { this._status(); } catch (e) { /* next status */ } }, 500);
         } catch (e) { /* a diagnostic never stops the app */ }
     }
-    /** The drive mode check's lines for the Settings tab (one per signal), [] while byMode is off. */
-    modeDiagLines() {
+    /**
+     * The drive mode check's lines for the Settings tab (one per signal), [] while byMode is off. names: the
+     * candidates the app listens to (its app.json; main.js gives them to the page), so none shows "--" for ever.
+     */
+    modeDiagLines(names) {
         if (this.setting('byMode') !== true) return [];
-        return ['HMI', 'MSystem', 'Engine', 'Sport2'].map((n, i) => (i ? '' : 'Drive mode check: ') + n + '  ' + (this.modeDiag[n] || '--'));
+        return (names || ['HMI', 'MDrive', 'Engine', 'Sport2']).map((n, i) => (i ? '' : 'Drive mode check: ') + n + '  ' + (this.modeDiag[n] || '--'));
     }
 
 /* ---------------- theme, units, values ---------------- */
@@ -1319,7 +1407,8 @@ class HudApp {
                 if (m && !this.demoKeep) this.demoKeep = { mode: this.driveMode, variant: this.driveVariant };
                 if (m) { this.driveMode = m; this.driveVariant = null; }
                 else if (this.demoKeep) { this.driveMode = this.demoKeep.mode; this.driveVariant = this.demoKeep.variant; this.demoKeep = null; }
-                if (force || this._layoutName() !== this.activeName) this._rebuild(); else this._status();
+                // a calibration layout carries the DEMO tag only while the show plays (CAL_LAYOUTS): Play and Stop rebuild it
+                if (force || this._layoutName() !== this.activeName || CAL_LAYOUTS[this.activeName]) this._rebuild(); else this._status();
             },
         };
     }
@@ -1420,13 +1509,6 @@ class HudApp {
         if (!this.car.data().demo) return null;
         const rear = corner === 'RL' || corner === 'RR';
         return kind === 'p' ? (rear ? 2.5 : 2.3) : (rear ? 27 : 24);
-    }
-
-    /** A dial's scale: { max, ticks } in display units (speed: DIAL_SPEED by the units setting; rpm: "max", 8000). */
-    _dialScale(w) {
-        if (w.measure === 'speed') return DIAL_SPEED[this.setting('units') === 'us' ? 'us' : 'metric'];
-        if (w.measure === 'rpm') { const max = w.max || 8000; return { max, ticks: max / 1000 }; }
-        return { max: w.max || 1, ticks: w.ticks || 8 };
     }
 
     /** Peak hold for a gauge: the highest value of the last `hold` ms (true: 3 s), as 0..1. */
@@ -1549,6 +1631,7 @@ class HudApp {
             if (name === 'torquePct') return Math.max(0, d.torque) / (e.torqueNm || 500) * 100;
             return isNum(d.rpm) ? Math.max(0, d.torque) * d.rpm / 9549 / (e.powerKw || 285) * 100 : null;
         }
+        if (name === 'mediaPct') { const e = this._mediaElapsed(); return e === null ? null : e / this.media.total * 100; }   // the song's progress
         if (name.indexOf('setupLevel:') === 0) { const s = this._setup(); return s ? SETUP_LEVEL[s[name.slice(11)]] || 0 : 0; }
         const d = this.car.data();
         return Object.prototype.hasOwnProperty.call(d, name) ? d[name] : null;
@@ -1586,6 +1669,7 @@ class HudApp {
             const kind = tok.slice(0, tok.indexOf(':')), sn = this.slotSensor(this.activeName, tok.slice(kind.length + 1), this.layoutSlots);
             if (kind === 'slot') return this.sensorValue(sn);
             if (kind === 'slotHead') return sn ? sn.head : '';
+            if (kind === 'slotHeadS') return sn ? sn.short || sn.head : '';     // M's slot rows: LAST SHIFT -> SHIFTED
             // the heading with the unit, for a slot with no unit of its own: "FUEL %" (a temperature's ° is on its value)
             if (kind === 'slotHeadU') { const u = sn && !sn.suffix ? this.sensorUnit(sn) : ''; return sn ? sn.head + (u ? ' ' + u : '') : ''; }
             if (kind === 'slotUnit') return this.sensorUnit(sn);
@@ -1593,10 +1677,6 @@ class HudApp {
         }
         if (tok.indexOf('tyreP:') === 0) { const v = this._tyre('p', tok.slice(6)); return isNum(v) ? (us ? fix(v * 14.5038, 0) : fix(v, 1)) : '--'; }
         if (tok.indexOf('tyreT:') === 0) { const v = this._tyre('t', tok.slice(6)); return isNum(v) ? String(Math.round(us ? v * 9 / 5 + 32 : v)) : '--'; }
-        if (tok.indexOf('dial:speed:') === 0) {     // a speed dial's label i ({{dial:speed:<i>}}): DIAL_SPEED's steps
-            const D = DIAL_SPEED[us ? 'us' : 'metric'];
-            return String(Math.round(D.max / D.ticks * Number(tok.slice(11))));
-        }
         switch (tok) {
             case 'u:pressure': return us ? 'psi' : 'bar';
             case 'intake': { const v = this._raw('intake'); return fix(isNum(v) ? (us ? v * 9 / 5 + 32 : v) : v, 0); }
@@ -1609,6 +1689,13 @@ class HudApp {
             case 'badge': return badges.text(this.setting('badge'), this.setting('badgeBMW') === true);
             case 'speed': { const v = this._raw('speed'); return fix(isNum(v) ? (us ? v * 0.621371 : v) : v, 0); }
             case 'u:speed': return us ? 'MPH' : 'KM/H';
+            case 'mediaTitle': return this._mediaOn() ? this.media.title : '';
+            case 'mediaArtist': return this._mediaOn() ? this.media.artist : '';
+            case 'mediaElapsed': { const e = this._mediaElapsed(); return e === null ? '' : clockOf(e); }
+            case 'mediaLeft': { const e = this._mediaElapsed(); return e === null ? '' : '-' + clockOf(this.media.total - e); }
+            case 'speed2': { const v = this._raw('speed'); return fix(isNum(v) ? (us ? v : v * 0.621371) : v, 0); }   // the other unit
+            case 'u:speed2Lc': return us ? 'km/h' : 'mph';
+            case 'u:speed2': return us ? 'KM/H' : 'MPH';
             case 'oil': case 'coolant': { const v = this._raw(tok); return fix(isNum(v) ? (us ? v * 9 / 5 + 32 : v) : v, 0); }
             case 'boost': { const v = this._raw('boost'); return us ? fix(isNum(v) ? v * 14.5038 : v, 1) : fix(v, 2); }
             case 'u:boost': return us ? 'PSI' : 'BAR';
@@ -1793,6 +1880,8 @@ class HudApp {
         }
         this.problem = null;
         this.mapLayout = layout.widgets.some((w) => w.holeWhen === 'mapUp');
+        // "mapLive" holds only while nothing else changes with the map (a widget toggled on mapUp needs the rebuild)
+        this.mapLive = layout.mapLive === true && !layout.widgets.some((w) => typeof w.toggle === 'string' && w.toggle.indexOf('mapUp') >= 0);
         this._wazeWant();
         this.layoutSlots = layout.slots || [];
         this.layoutTheme = layout.theme && THEMES[layout.theme] ? layout.theme : null;
@@ -1803,7 +1892,13 @@ class HudApp {
         this.nightOn = this._nightDim();
         if (this.nightOn) this.theme = dimTheme(this.theme, NIGHT_DIM);
         this.log.info('layout "' + layout.name + '", theme ' + this.theme.name + (this.layoutTheme ? '' : ' (' + this.setting('hudTheme') + ')'));
-        const shown = layout.widgets.filter((w) => !(w.toggle && !this._toggleOn(w.toggle)) && !(w.themes && w.themes.indexOf(this.themeName) < 0));
+        // full screen (Nov 14 2026): the layout's strip widgets (design/genlib.py full_screen) cover BMW's strip except a
+        // window over its gear letter, and the theme's own strip row ("stripRow" l / r) shows the clock, range and outside
+        // temperature. "Leave BMW's bottom strip clear" is gone again (0.17.7): with the gear letter uncovered BMW draws no
+        // black box (car test of 0.17.6), so the switch had nothing left to fix.
+        // Copies, since the strip row's connection is set below.
+        const shown = layout.widgets.filter((w) => !(w.toggle && !this._toggleOn(w.toggle)) && !(w.themes && w.themes.indexOf(this.themeName) < 0))
+            .map((w) => (w.stripRow ? Object.assign({}, w) : w));
         this.shown = shown;              // for a scale to find its rev bar (driver camera wings)
         this._setNeeds(shown);
         // plan the layers first (a sheet's size is only known once every member is placed), then make them
@@ -1815,6 +1910,26 @@ class HudApp {
         // that many times its members' own area, so far-apart readouts don't share one mostly empty sheet (pixel
         // memory); relaxed along with the size limit when the layer budget needs it. Without it: the size limit only.
         let waste = isNum(layout.packWaste) ? layout.packWaste : Infinity;
+        // the strip row goes on the connection where it costs the fewest pixels without going over the layer budget
+        const row = shown.filter((w) => w.stripRow);
+        if (row.length) {
+            let best = null;
+            for (let ci = 0; ci < MAX_CONN; ci++) {
+                row.forEach((w) => { w.conn = ci; });
+                const p = this._plan(shown, Math.floor(area / SHEET_AREA_FRAC), waste);
+                if (over(p)) continue;
+                const px = p.reduce((a, e) => a + (e.kind === 'sheet' ? e.w * e.h : 0), 0), conns = this._connCounts(p).length;
+                if (!best || px < best.px || (px === best.px && conns < best.conns)) best = { ci, px, conns };
+            }
+            if (!best) {
+                // the layout alone is already over at the first size limit: the least used connection (a new one if one is left)
+                const base = this._connCounts(this._plan(shown.filter((w) => !w.stripRow), Math.floor(area / SHEET_AREA_FRAC), waste));
+                let ci = base.length < MAX_CONN ? base.length : 0;
+                base.forEach((k, i) => { if (k < (ci < base.length ? base[ci] : 0)) ci = i; });
+                best = { ci };
+            }
+            row.forEach((w) => { w.conn = best.ci; });
+        }
         // the demo show's DEMO tag (demo_script.js), at a free spot that costs the fewest layers and pixels. It is in every
         // layout (drawn empty until the show plays), so pressing Play changes one small image and rebuilds nothing;
         // the calibration layouts only get it while the show plays (there it would cost a layer)
@@ -1846,7 +1961,7 @@ class HudApp {
                 this._guard('widget ' + e.w.id, () => this._create(e.w, null));
             }
         });
-        if (this._offset().x || this._offset().y || this._scale() !== 1 || this._stripSy() !== 1) this._place();
+        if (this._offset().x || this._offset().y || this._scale() !== 1) this._place();
         const atlasBytes = this._atlasBytes();
         px += atlasBytes;
         this.pixelBytes = px;
@@ -1893,7 +2008,10 @@ class HudApp {
                 if (s.kind !== 'sheet' || s.klass !== klass || s.z !== z || s.conn !== conn) continue;
                 const u = union(s, w);
                 const own = s.members.reduce((a, m) => a + m.w * m.h, 0) + w.w * w.h;
-                if (u.w * u.h <= maxPx && u.w * u.h <= waste * own) { sheet = s; box = u; }
+                // the strip row: one sheet a side of BMW's gear window, never shared with the rest (a sheet's box must not
+                // reach over the window: car test Nov 14 2026, BMW blacks out its gear slot while its strip is covered)
+                if (!s.members.every((m) => (m.stripRow || '') === (w.stripRow || ''))) continue;
+                if (u.w * u.h <= maxPx && (u.w * u.h <= waste * own || w.stripRow)) { sheet = s; box = u; }
             }
             if (!sheet) { sheet = { kind: 'sheet', klass, z, conn, x: w.x, y: w.y, w: w.w, h: w.h, members: [], ref: 0, c: null, ci: conn, buf: null }; plan.push(sheet); }
             else { sheet.x = box.x; sheet.y = box.y; sheet.w = box.w; sheet.h = box.h; }
@@ -2008,6 +2126,61 @@ class HudApp {
             c.uniform(ref, 'u_strip', w.strip);
             c.uniform(ref, 'u_topEnd', [w.topEnd]);
             c.uniform(ref, 'u_road', w.road ? [w.road[0], w.road[1], 0, 1] : [0, 1, 0, 0]);
+        } else if (w.type === 'mview') {
+            // the left scale's line: points (layer px) and the arc length at each (the shader mirrors it for the right)
+            const pts = [], cum = [];
+            let acc = 0;
+            w.path.slice(0, 32).forEach((pt, i) => {
+                if (i) acc += Math.hypot(pt[0] - w.path[i - 1][0], pt[1] - w.path[i - 1][1]);
+                pts.push(pt[0] - w.x, pt[1] - w.y); cum.push(acc);
+            });
+            while (pts.length < 64) pts.push(0);
+            while (cum.length < 32) cum.push(0);
+            c.uniform(ref, 'u_size', [w.w, w.h]);
+            c.uniform(ref, 'u_path', pts, { type: 'vec2' });
+            c.uniform(ref, 'u_cum', cum, { type: 'float' });
+            c.uniform(ref, 'u_n', [Math.min(32, w.path.length)]);
+            c.uniform(ref, 'u_scale', [w.scale[0], w.scale[1], 0, acc]);
+            const us = this.setting('units') === 'us';
+            c.uniform(ref, 'u_ticks', us ? [10, 2, 8, 2] : [11, 3, 8, 2]);   // a mark every 10 mph / 10 km/h; every 500 rpm
+            const [redFrom, orange] = this._redMarks(MVIEW_RPM);
+            c.uniform(ref, 'u_redFrom', [redFrom]);
+            c.uniform(ref, 'u_orange', [orange]);
+            c.uniform(ref, 'u_dial', [w.dial[0] - w.x, w.dial[1] - w.y, w.dial[2], 0]);
+            c.uniform(ref, 'u_dialAng', w.dialAng);
+            c.uniform(ref, 'u_line', [w.line[0] - w.x, w.line[1] - w.x, w.line[2] - w.y, w.line[3] - w.x]);
+            c.uniform(ref, 'u_hole', this._hole(w));
+            c.uniform(ref, 'u_holeR', [this._holeRadius(w)]);
+            const pn = w.panel;     // [[top x, y], [middle x, y], [bottom x, y], inset]
+            c.uniform(ref, 'u_panel', pn ? [pn[0][0] - w.x, pn[0][1] - w.y, pn[1][0] - w.x, pn[1][1] - w.y] : [0, 0, 0, 1]);
+            c.uniform(ref, 'u_panelB', pn ? [pn[2][0] - w.x, pn[2][1] - w.y, pn[3], 0] : [0, 2, 0, 0]);
+            c.uniform(ref, 'u_oval', [isNum(w.holeOval) ? w.holeOval : 0]);
+        } else if (w.type === 'vdash') {
+            // the bracket lines (target px): [x0, y0, x1, y1, width, brightness 0..1]
+            const seg = [], segW = [];
+            (w.segs || []).slice(0, 20).forEach((g) => {
+                seg.push(g[0] - w.x, g[1] - w.y, g[2] - w.x, g[3] - w.y);
+                segW.push(Math.max(1, Math.floor(g[4] || 2)) + Math.min(0.99, Math.max(0, isNum(g[5]) ? g[5] : 0.99)));
+            });
+            const nseg = segW.length;
+            while (seg.length < 80) seg.push(0);
+            while (segW.length < 20) segW.push(0);
+            c.uniform(ref, 'u_size', [w.w, w.h]);
+            c.uniform(ref, 'u_seg', seg, { type: 'vec4' });
+            c.uniform(ref, 'u_segW', segW, { type: 'float' });
+            c.uniform(ref, 'u_nseg', [nseg]);
+            const T = w.tach;      // [cx, cy, inner r, outer r, start deg, sweep deg, segments]
+            c.uniform(ref, 'u_tach', [T[0] - w.x, T[1] - w.y, T[2], T[3]]);
+            c.uniform(ref, 'u_redFrom', [this._redMarks(VDASH_RPM)[0]]);
+            const rc = [];
+            [0, 1, 2, 3].forEach((i) => { const g = (w.rings || [])[i]; rc.push.apply(rc, g && g.color ? g.color : [1, 1, 1]); });
+            c.uniform(ref, 'u_ringC', rc, { type: 'vec3' });
+            const pn = w.panel, vn = w.vinyl, pr = w.prog;
+            c.uniform(ref, 'u_panel', pn ? [pn[0] - w.x, pn[1] - w.y, pn[2], pn[3]] : [0, 0, 0, 0]);
+            x.vinyl = vn ? [vn[0] - w.x, vn[1] - w.y, vn[2]] : [0, 0, 0];
+            x.prog = pr ? [pr[0] - w.x, pr[1] - w.y, pr[2]] : [0, 0, 0];
+            c.uniform(ref, 'u_hole', this._hole(w));
+            c.uniform(ref, 'u_holeC', [isNum(w.holeCut) ? w.holeCut : 40]);
         } else if (w.type === 'mdash') {
             const ty = w.tyres || [0, 0, 0], L = w.gaugeL || {}, R = w.gaugeR || {}, b = w.blade || {};
             const bars = Array.isArray(w.segbars) ? w.segbars.slice(0, 4) : [];
@@ -2067,22 +2240,6 @@ class HudApp {
             c.uniform(ref, 'u_highAt', [(red - 500) / max]);
             c.uniform(ref, 'u_track', rgba(t.track));
             c.uniform(ref, 'u_flash', [0]);
-        } else if (w.type === 'dial') {
-            const D = this._dialScale(w);
-            c.uniform(ref, 'u_size', [w.w, w.h]);
-            c.uniform(ref, 'u_start', [(w.start === undefined ? 225 : w.start) * Math.PI / 180]);
-            c.uniform(ref, 'u_sweep', [(w.sweep === undefined ? 270 : w.sweep) * Math.PI / 180]);
-            c.uniform(ref, 'u_ticks', [D.ticks]);
-            c.uniform(ref, 'u_minor', [w.minor || 4]);
-            c.uniform(ref, 'u_redFrom', [w.measure === 'rpm' ? this._redMarks(D.max)[0] : (isNum(w.redFrom) ? w.redFrom : 2)]);
-            c.uniform(ref, 'u_ringW', [w.ringW || 14]);
-            c.uniform(ref, 'u_ring', rgb(color(t, w.ring || 'line')));
-            c.uniform(ref, 'u_ring2', rgb(color(t, w.ring2 || 'dim')));
-            c.uniform(ref, 'u_tick', rgb(color(t, w.tick || 'fg')));
-            c.uniform(ref, 'u_needle', rgb(color(t, w.needle || 'hot')));
-            c.uniform(ref, 'u_red', rgb(t.hot));
-            c.uniform(ref, 'u_face', rgb(color(t, w.face || 'bg')));
-            c.uniform(ref, 'u_hot', [0]);
         } else if (w.type === 'gmeter') {
             // 14 uniform vectors (shaders.js gmeter): u_geo [w, h, range, step] and u_dot [x, y, trail points, envelope
             // on] go from the update below; the dot's amber [255, 176, 40] and its 0.5 / 0.8 g marks are constants in the shader;
@@ -2282,6 +2439,71 @@ class HudApp {
 
     _holeRadius(w) { return isNum(w.holeRadius) ? w.holeRadius : 28; }
 
+    /**
+     * Now playing from HmiMediaState: playerMetadata (two lines, each tagged TITLE / ARTIST / ALBUM, or three rows)
+     * and trackProgress (elapsed, total). Only the front screen's (sink FRONT). The first few values are logged, so a
+     * car's log shows what it really sends (the time unit, which source fills it).
+     */
+    _mediaFeed(kind, v) {
+        if (!v || typeof v !== 'object') return;
+        if (v.sink !== undefined && v.sink !== 0 && v.sink !== 'FRONT') return;
+        const m = this.media || (this.media = { title: '', artist: '', elapsed: 0, total: 0, at: 0, moved: 0 });
+        this.mediaLogged = (this.mediaLogged || 0) + 1;
+        if (this.mediaLogged <= 6) this.log.info('media ' + kind + ': ' + JSON.stringify(v).slice(0, 300));
+        if (kind === 'meta') {
+            const type = (t) => MEDIA_TYPES[t] || String(t || '').toUpperCase();
+            const lines = [[mediaText(v.firstLineText), type(v.firstLineType)], [mediaText(v.secondLineText), type(v.secondLineType)]];
+            let title = '', artist = '';
+            lines.forEach(([t, k]) => { if (!t) return; if (k === 'TITLE' && !title) title = t; else if (k === 'ARTIST' && !artist) artist = t; });
+            if (!title) title = (lines.find(([t, k]) => t && k !== 'ARTIST' && t !== artist) || [''])[0];
+            if (!artist) artist = (lines.find(([t]) => t && t !== title) || [''])[0];
+            if (!title && v.threeRowText) {
+                const rows = String(v.threeRowText).split(/[\r\n]+/).map(mediaText).filter(Boolean);
+                title = rows[0] || ''; artist = rows[1] || '';
+            }
+            if (title !== m.title || artist !== m.artist) { m.elapsed = 0; m.total = 0; m.moved = 0; }
+            m.title = title; m.artist = artist;
+        } else {
+            const e = Number(v.elapsed), t = Number(v.total);
+            if (!isFinite(e) || !isFinite(t) || v.hasProgress === false) { m.total = 0; return; }
+            // milliseconds or seconds: a track over ~3 hours in seconds is unlikely, so a big total is ms
+            const k = t > 10800 ? 1000 : 1;
+            if (e / k !== m.elapsed) m.moved = Date.now();
+            m.elapsed = e / k; m.total = t / k; m.at = Date.now();
+        }
+    }
+
+    /** Something is playing that has a title (the music panel shows it; "showWhen": "media"). */
+    _mediaOn() { return !!(this.media && this.media.title); }
+
+    /** The track's elapsed seconds now: carried on from the last value while it was still moving (playing). */
+    _mediaElapsed() {
+        const m = this.media;
+        if (!m || !m.total) return null;
+        const run = Date.now() - m.moved < 2500 ? (Date.now() - m.at) / 1000 : 0;
+        return Math.min(m.total, m.elapsed + run);
+    }
+
+    /** "showWhen": "media" / "!media" (the music panel or what shows instead), "mapUp" / "!mapUp": empty otherwise. */
+    _shownNow(w) {
+        const sw = w.showWhen;
+        if (sw === 'media') return this._mediaOn();
+        if (sw === '!media') return !this._mediaOn();
+        if (sw === 'mapUp') return this.setting('mapUp') === true;
+        if (sw === '!mapUp') return this.setting('mapUp') !== true;
+        return true;
+    }
+
+    /**
+     * A "mapLive" layout's map window, opened or closed as the Waze map comes or goes: only its own layers' u_hole changes
+     * (no widget of it toggles on mapUp), so the theme stays up instead of being built again (seconds on the car).
+     */
+    _mapLive() {
+        this.mapShown = this.setting('mapUp');
+        this.widgets.forEach((x) => { if (!x.sheet && x.c && x.w.holeWhen === 'mapUp') x.c.uniform(x.ref, 'u_hole', this._hole(x.w)); });
+        this._status();
+    }
+
     _tick() {
         const now = Date.now();
         this._smoothRpm(now);
@@ -2341,7 +2563,7 @@ class HudApp {
         else if (w.type === 'garland') this._garlandTick(x, now);
         else if (w.type === 'text') {
             if (!force && now - x.lastPaint < (w.rate || TEXT_MS)) return;
-            const s = (w.navHide && this.navShown) || smartTemps.hidden(this, w) ? '' : this._resolve(w.text);   // nav turn showing / "showWhen": "abnormal"
+            let s = (w.navHide && this.navShown) || smartTemps.hidden(this, w) || !this._shownNow(w) ? '' : this._resolve(w.text);   // nav turn showing / "showWhen"
             let role = w.color || 'fg';
             if (w.colorBy === 'verdict' && this.score.last) role = VERDICT[this.score.last.verdict] || role;
             if (w.near && this._nearMark(w.near[0]) === w.near[1]) role = w.nearColor || 'fg';
@@ -2363,6 +2585,12 @@ class HudApp {
             // longer value than its default) or has a character the font lacks (Retro's seven-segment digits have no
             // letters, + or °), on the same baseline
             let font = w.font, offsetY = 0;
+            // "ellipsis": a longer text (a song title) is cut to fit, ending in ...
+            if (w.ellipsis && textRaster.measure(s, font, w.spacing) > w.w) {
+                let t = s;
+                while (t.length > 1 && textRaster.measure(t.replace(/\s+$/, '') + '...', font, w.spacing) > w.w) t = t.slice(0, -1);
+                s = t.replace(/\s+$/, '') + '...';
+            }
             const has = (n) => { const g = textRaster.loadFont(n).metrics.glyphs; return s.split('').every((ch) => ch === ' ' || g[ch]); };
             if (w.fit && (textRaster.measure(s, font, w.spacing) > w.w || !has(font))) {
                 const f = w.fit.find((n) => has(n) && textRaster.measure(s, n, w.spacing) <= w.w) || w.fit[w.fit.length - 1];
@@ -2483,18 +2711,6 @@ class HudApp {
             x.last = key;
             x.c.uniform(x.ref, 'u_value', [q]);
             if (w.peak) x.c.uniform(x.ref, 'u_peak', [pk > q ? pk : -1]);
-        } else if (w.type === 'dial') {
-            const D = this._dialScale(w), us = this.setting('units') === 'us';
-            let raw = this._raw(w.measure === 'rpm' ? 'rpm' : w.measure === 'speed' ? 'speed' : w.signal);
-            if (w.measure === 'speed' && isNum(raw) && us) raw *= 0.621371;
-            const v = isNum(raw) ? Math.min(1, Math.max(0, raw / D.max)) : 0;
-            const q = Math.round(v * 1000) / 1000;
-            const hot = w.measure === 'rpm' && this._shift().now ? 1 : 0;
-            const key = q + '|' + hot;
-            if (!force && key === x.last) return;
-            x.last = key;
-            x.c.uniform(x.ref, 'u_value', [q]);
-            x.c.uniform(x.ref, 'u_hot', [hot]);
         } else if (w.type === 'sdash') {
             const us = this.setting('units') === 'us';
             const sp = this._raw('speed'), rpm = this._raw('rpm'), fuel = this._raw('fuel'), oil = this._raw('oil');
@@ -2516,6 +2732,40 @@ class HudApp {
             if (!force && key === x.last) return;
             x.last = key;
             if (w.road) x.c.uniform(x.ref, 'u_road', [w.road[0], w.road[1], vals[4], 1]);
+            x.c.uniform(x.ref, 'u_speed', [vals[0]]);
+            x.c.uniform(x.ref, 'u_rpm', [vals[1]]);
+            x.c.uniform(x.ref, 'u_fuel', [vals[2]]);
+            x.c.uniform(x.ref, 'u_oil', [vals[3]]);
+        } else if (w.type === 'vdash') {
+            const T = w.tach, q = (v) => Math.round(Math.min(1, Math.max(0, v)) * 400) / 400;
+            const frac = (g) => { const v = g && g.signal ? this._raw(g.signal) : null; return isNum(v) ? q((v - g.min) / (g.max - g.min)) : 0; };
+            const rpm = this._raw('rpm');
+            const rings = [0, 1, 2, 3].map((i) => (w.rings || [])[i]), bars = [0, 1, 2].map((i) => (w.bars || [])[i]);
+            const rv = rings.map(frac), bv = bars.map(frac);
+            const on = this._mediaOn() ? 1 : 0, e = this._mediaElapsed();
+            const pv = on && e !== null && this.media.total > 0 ? q(e / this.media.total) : 0;
+            const key = [isNum(rpm) ? q(rpm / VDASH_RPM) : 0].concat(rv, bv, [on, pv, this.setting('mapUp') ? 1 : 0]).join('|');
+            if (!force && key === x.last) return;
+            x.last = key;
+            x.c.uniform(x.ref, 'u_tachA', [T[4], T[5], T[6], isNum(rpm) ? q(rpm / VDASH_RPM) : 0]);
+            const ru = [], bu = [];
+            rings.forEach((g, i) => ru.push(g ? g.cx - w.x : 0, g ? g.cy - w.y : 0, g ? g.r : 0, rv[i]));
+            // the bars sit under the map window: gone while the map shows
+            const mapUp = this.setting('mapUp') === true;
+            bars.forEach((b, i) => bu.push(b ? b.x - w.x : 0, b ? b.y - w.y : 0, b && !mapUp ? b.w : 0, bv[i]));
+            x.c.uniform(x.ref, 'u_ring', ru, { type: 'vec4' });
+            x.c.uniform(x.ref, 'u_bar', bu, { type: 'vec4' });
+            x.c.uniform(x.ref, 'u_vinyl', x.vinyl.concat([on]));
+            x.c.uniform(x.ref, 'u_prog', x.prog.concat([pv]));
+        } else if (w.type === 'mview') {
+            const us = this.setting('units') === 'us';
+            const sp = this._raw('speed'), rpm = this._raw('rpm'), fuel = this._raw('fuel'), oil = this._raw('oil');
+            const q = (v) => Math.round(Math.min(1, Math.max(0, v)) * 1000) / 1000;
+            const vals = [q(isNum(sp) ? (us ? sp * 0.621371 : sp) / MVIEW_SPEED[us ? 'us' : 'metric'] : 0),
+                q(isNum(rpm) ? rpm / MVIEW_RPM : 0), q(isNum(fuel) ? fuel : 0), q(isNum(oil) ? (oil - 50) / 100 : 0)];
+            const key = vals.join('|');
+            if (!force && key === x.last) return;
+            x.last = key;
             x.c.uniform(x.ref, 'u_speed', [vals[0]]);
             x.c.uniform(x.ref, 'u_rpm', [vals[1]]);
             x.c.uniform(x.ref, 'u_fuel', [vals[2]]);

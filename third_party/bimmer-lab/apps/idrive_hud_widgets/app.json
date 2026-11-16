@@ -1,8 +1,8 @@
 {
   "id": "idrive_hud_widgets",
   "title": "HUD Widgets",
-  "description": "Gear, shift lights, boost, oil, coolant and intake temperatures, a G-meter and trip figures on the windshield HUD, in Classic, M or Night themes",
-  "version": "0.14.1",
+  "description": "Gear, shift lights, boost, oil, coolant and intake temperatures, a G-meter, trip figures and the song playing on the windshield HUD, in Classic, M or Night themes",
+  "version": "0.15.1",
   "vendor": "custom",
   "loggingId": "OAH1",
   "iconGlyph": "HUD",
@@ -54,6 +54,10 @@
       "statusActualValueTorque2": "rs",
       "statusFESVehicleDynamicSwitchHMI": "rs"
     },
+    "de.bmw.infotainment.misc.MDrive": {
+      "controlDisplayMSystems": "rs",
+      "_optional": "an M car's drive mode (issue #8)"
+    },
     "de.bmw.infrastructure.VehicleInformation": {
       "statusGearboxDrive": "s",
       "DataPowerTrain2": "s"
@@ -102,6 +106,11 @@
       "_optional": "directions on the HUD: whether Android Auto is guiding",
       "_instances": "AndroidAutoProjectedManagerInst1",
       "projectedGuidanceActive": "rs"
+    },
+    "de.bmw.infotainment.hmi.hmimediastate.HmiMediaState": {
+      "playerMetadata": "rs",
+      "trackProgress": "rs",
+      "_optional": "now playing (title, artist, progress) in the Vector layout"
     },
     "de.bmw.infrastructure.VehicleCondition": {
       "VehicleCondition": "s",
@@ -173,6 +182,14 @@
           "Retro"
         ],
         [
+          "mview",
+          "M view"
+        ],
+        [
+          "vector",
+          "Vector"
+        ],
+        [
           "grid",
           "Calibration grid"
         ],
@@ -237,6 +254,14 @@
         [
           "retro",
           "Retro"
+        ],
+        [
+          "mview",
+          "M view"
+        ],
+        [
+          "vector",
+          "Vector"
         ]
       ]
     },
@@ -289,6 +314,14 @@
         [
           "retro",
           "Retro"
+        ],
+        [
+          "mview",
+          "M view"
+        ],
+        [
+          "vector",
+          "Vector"
         ]
       ]
     },
@@ -341,6 +374,14 @@
         [
           "retro",
           "Retro"
+        ],
+        [
+          "mview",
+          "M view"
+        ],
+        [
+          "vector",
+          "Vector"
         ]
       ]
     },
@@ -1141,7 +1182,7 @@
   "texts": {
     "ru": {
       "title": "Виджеты проекционного дисплея",
-      "description": "Передача, индикаторы переключения, наддув, температуры масла, охлаждающей жидкости и впуска, измеритель перегрузок и данные поездки на проекционном дисплее HUD на лобовом стекле, в темах Classic, M или Night"
+      "description": "Передача, индикаторы переключения, наддув, температуры масла, охлаждающей жидкости и впуска, перегрузки, данные поездки и текущая композиция на проекционном дисплее HUD. Темы Classic, M и Night."
     }
   }
 }

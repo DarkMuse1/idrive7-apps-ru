@@ -1,8 +1,8 @@
 {
   "id": "cluster_themes",
   "title": "Cluster Themes",
-  "description": "Redraws the instrument cluster: GT3 race dash, M-style, Sport, Minimal, Roadster, Track, Drag, Rally, Retro 80s, Cruise, Dyno (BMW-coloured readout tiles) or Ribbon (with holiday editions), with shift lights, boost, temps, tyres, a G-meter and a 0-60 timer",
-  "version": "0.17.3",
+  "description": "Redraws the instrument cluster: GT3 race dash, M-style, M view, Vector (with a music panel), Sport, Minimal, Track, Drag, Rally, Retro 80s, Cruise, Dyno (BMW-coloured readout tiles) or Ribbon (with holiday editions), with shift lights, boost, temps, tyres, a G-meter and a 0-60 timer",
+  "version": "0.19.1",
   "vendor": "custom",
   "loggingId": "OAC1",
   "iconGlyph": "CLU",
@@ -75,8 +75,13 @@
     },
     "de.bmw.infotainment.misc.MDrive": {
       "dataDisplayGearbox": "s",
-      "statusMSystem": "rs",
-      "_optional": "S or M next to the gear; statusMSystem for the drive mode check (issue #8)"
+      "controlDisplayMSystems": "rs",
+      "_optional": "S or M next to the gear; controlDisplayMSystems: an M car's drive mode (issue #8)"
+    },
+    "de.bmw.infotainment.hmi.hmimediastate.HmiMediaState": {
+      "playerMetadata": "rs",
+      "trackProgress": "rs",
+      "_optional": "now playing (title, artist, progress) in the Vector theme's music panel"
     },
     "de.bmw.infotainment.vehicle.TPMS": {
       "statusTyrePressure": "rs",
@@ -124,16 +129,20 @@
           "M"
         ],
         [
+          "mview",
+          "M view"
+        ],
+        [
+          "vector",
+          "Vector"
+        ],
+        [
           "sport",
           "Sport"
         ],
         [
           "minimal",
           "Minimal"
-        ],
-        [
-          "roadster",
-          "Roadster"
         ],
         [
           "track",
@@ -198,16 +207,20 @@
           "M"
         ],
         [
+          "mview",
+          "M view"
+        ],
+        [
+          "vector",
+          "Vector"
+        ],
+        [
           "sport",
           "Sport"
         ],
         [
           "minimal",
           "Minimal"
-        ],
-        [
-          "roadster",
-          "Roadster"
         ],
         [
           "track",
@@ -258,16 +271,20 @@
           "M"
         ],
         [
+          "mview",
+          "M view"
+        ],
+        [
+          "vector",
+          "Vector"
+        ],
+        [
           "sport",
           "Sport"
         ],
         [
           "minimal",
           "Minimal"
-        ],
-        [
-          "roadster",
-          "Roadster"
         ],
         [
           "track",
@@ -318,16 +335,20 @@
           "M"
         ],
         [
+          "mview",
+          "M view"
+        ],
+        [
+          "vector",
+          "Vector"
+        ],
+        [
           "sport",
           "Sport"
         ],
         [
           "minimal",
           "Minimal"
-        ],
-        [
-          "roadster",
-          "Roadster"
         ],
         [
           "track",
@@ -692,12 +713,6 @@
       "label": "Show boost",
       "type": "bool",
       "default": true
-    },
-    {
-      "key": "stripClear",
-      "label": "Leave BMW's bottom strip clear",
-      "type": "bool",
-      "default": false
     },
     {
       "key": "cameraNotch",
@@ -1260,7 +1275,7 @@
   "texts": {
     "ru": {
       "title": "Темы приборной панели",
-      "description": "Перерисовка приборной панели: гоночная панель GT3, M-style, Sport, Minimal, Roadster, Track, Drag, Rally, Retro 80s, Cruise, Dyno (плитки показаний в цветах BMW) или Ribbon (с праздничными вариантами), с индикаторами переключения, наддувом, температурами, показаниями шин, измерителем перегрузок и таймером 0-60"
+      "description": "Оформление приборной панели в стилях GT3, M-style, M view, Vector с музыкальной панелью, Sport, Minimal, Track, Drag, Rally, Retro 80s, Cruise, Dyno или Ribbon. Индикаторы переключения, наддув, температуры, шины, перегрузки и таймер разгона 0–60."
     }
   }
 }

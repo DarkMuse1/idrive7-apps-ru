@@ -5,6 +5,7 @@
  *   {{slot:<id>}}      the value            {{slotHead:<id>}}   the name, upper case (the box's heading)
  *   {{slotUnit:<id>}}  the unit, upper case {{slotSuffix:<id>}} '°' for temperatures, else nothing
  *   {{slotHeadU:<id>}} the name and, unless the value carries a °, its unit ("FUEL %": a slot with no unit box)
+ *   {{slotHeadS:<id>}} the short name where a theme has less room ("short", else the name: M's slot rows)
  * The pick per layout and slot is kept in <data>/slots.json (hud.js slotSensor / setSlot).
  *
  * Each sensor: id, name (the page), cat (the page's chips), head (upper case, the cluster's heading fonts), tok (a
@@ -42,7 +43,7 @@ const LIST = [
     { id: 'tyreTRL', name: 'Tyre temperature, rear left', cat: 'Tyres', head: 'RL', tok: 'tyreT:RL', unit: T, suffix: '°' },
     { id: 'tyreTRR', name: 'Tyre temperature, rear right', cat: 'Tyres', head: 'RR', tok: 'tyreT:RR', unit: T, suffix: '°' },
     { id: 'shiftAt', name: 'Shift point', cat: 'Drive', head: 'SHIFT AT', tok: 'shiftAt', unit: () => '' },
-    { id: 'lastShift', name: 'Last shift', cat: 'Drive', head: 'LAST SHIFT', tok: 'lastShift', unit: () => '' },
+    { id: 'lastShift', name: 'Last shift', cat: 'Drive', head: 'LAST SHIFT', short: 'SHIFTED', tok: 'lastShift', unit: () => '' },
     { id: 'time', name: 'Clock', cat: 'Drive', head: 'TIME', tok: 'time', unit: null },
 ];
 const BY_ID = {};

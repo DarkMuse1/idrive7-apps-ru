@@ -44,7 +44,7 @@ function tempOf(hud, w) {
     const sw = typeof w.showWhen === 'string' ? w.showWhen : '';
     if (sw.indexOf('abnormal:') === 0) return sw.slice(9);
     const t = String(w.text || '');
-    const m = t.match(/\{\{slot(?:Head|HeadU|Unit|Suffix)?:([A-Za-z0-9]+)\}\}/);
+    const m = t.match(/\{\{slot(?:Head|HeadU|HeadS|Unit|Suffix)?:([A-Za-z0-9]+)\}\}/);
     if (m) { const sn = hud.slotSensor(hud.activeName, m[1], hud.layoutSlots); return sn ? sn.id : null; }
     if (t.indexOf('{{oil}}') >= 0) return 'oil';
     if (t.indexOf('{{coolant}}') >= 0) return 'coolant';

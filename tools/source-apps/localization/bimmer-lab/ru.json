@@ -3260,5 +3260,19 @@
   "Drive mode check: ": "Проверка режима движения: ",
   "Stop pressed": "Нажата остановка",
   "then": "затем",
-  "not seen": "нет данных"
+  "not seen": "нет данных",
+  "M view": "Вид M",
+  "Vector": "Вектор",
+  "RPM X1000": "ОБ/МИН ×1000",
+  "COOL {{u:temp}}": "ОЖ {{u:temp}}",
+  "NOW PLAYING": "СЕЙЧАС ИГРАЕТ",
+  "NOTHING PLAYING": "ВОСПРОИЗВЕДЕНИЯ НЕТ",
+  "AVG {{u:speed}}": "СРЕД. {{u:speed}}",
+  "PEAK BOOST {{u:boost}}": "ПИК НАДДУВА {{u:boost}}",
+  "LATERAL G": "БОКОВАЯ G",
+  "RANGE {{u:dist}}": "ЗАПАС ХОДА {{u:dist}}",
+  "M3 / M5 look": "Оформление M3 / M5",
+  "music panel": "Музыкальная панель",
+  "rev band · km/h": "Шкала оборотов · км/ч",
+  "lights · now playing": "Индикаторы · музыка"
 }

@@ -114,13 +114,13 @@
       "type": "text",
       "x": 462,
       "y": 206,
-      "w": 100,
+      "w": 96,
       "h": 17,
       "text": "{{slotHeadU:1}}",
       "font": "small",
       "color": "dim",
       "align": "left",
-      "spacing": 1.5,
+      "spacing": 0.5,
       "toggle": "showOil",
       "showWhen": "abnormal"
     },
@@ -147,13 +147,13 @@
       "type": "text",
       "x": 462,
       "y": 260,
-      "w": 100,
+      "w": 96,
       "h": 17,
       "text": "{{slotHeadU:2}}",
       "font": "small",
       "color": "dim",
       "align": "left",
-      "spacing": 1.5,
+      "spacing": 0.5,
       "toggle": "showCoolant",
       "showWhen": "abnormal"
     },
@@ -178,15 +178,15 @@
     {
       "id": "shift_at_label",
       "type": "text",
-      "x": 570,
+      "x": 574,
       "y": 206,
-      "w": 100,
+      "w": 96,
       "h": 17,
       "text": "{{slotHeadU:3}}",
       "font": "small",
       "color": "dim",
       "align": "right",
-      "spacing": 1.5
+      "spacing": 0.5
     },
     {
       "id": "shift_at",
@@ -208,15 +208,15 @@
     {
       "id": "last_label",
       "type": "text",
-      "x": 570,
+      "x": 574,
       "y": 260,
-      "w": 100,
+      "w": 96,
       "h": 17,
       "text": "LAST SHIFT",
       "font": "small",
       "color": "dim",
       "align": "right",
-      "spacing": 1.5
+      "spacing": 0.5
     },
     {
       "id": "last_gears",

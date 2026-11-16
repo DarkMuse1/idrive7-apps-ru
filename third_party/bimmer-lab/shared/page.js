@@ -605,20 +605,31 @@ class Page {
         label(cv, CX, 70, 'Settings');
         const keys = this.cfg.settings.filter((k) => this.item(k));
         const colW = (CW - 24) / 2, per = Math.ceil(keys.length / 2);
+        // issue #8: the drive mode check (raw signal values, only the signals this app listens to: cfg.modeCheck)
+        // under the right column while "Change with the drive mode" is on
+        const diag = this.hud.modeDiagLines ? this.hud.modeDiagLines(this.cfg.modeCheck || []) : [];
+        // the page's room depends on the screen (bottom 512 without extra room below it): compact rows (46 high,
+        // 52 apart) when the full ones, the drive mode check and the status line don't all fit
+        const fits = (h, pitch) => 84 + (per - 1) * pitch + h <= bottom - 24 &&
+            84 + (keys.length - per) * pitch + 10 + 20 * diag.length <= bottom - 24;
+        const h = fits(56, 64) ? 56 : 46, pitch = h === 56 ? 64 : 52;
         keys.forEach((k, i) => {
-            const x = CX + (i < per ? 0 : colW + 24), y = 84 + (i % per) * 64;
-            if (y + 56 > bottom) return;
+            const x = CX + (i < per ? 0 : colW + 24), y = 84 + (i % per) * pitch;
+            if (y + h > bottom) return;
             const s = this.item(k);
-            if (s.type === 'bool') this.toggleRow(cv, x, y, colW, s.label, k);
-            else if (s.type === 'number') this.stepRow(cv, x, y, colW, s.label, k);
-            else this.pickRow(cv, x, y, colW, s.label, k);
+            if (s.type === 'bool') this.toggleRow(cv, x, y, colW, s.label, k, h);
+            else if (s.type === 'number') this.stepRow(cv, x, y, colW, s.label, k, null, h);
+            else this.pickRow(cv, x, y, colW, s.label, k, null, h);
         });
         // what the engine says it is doing (layers, pixel memory, why nothing shows): for checking on the car
         cv.text(this.hud.lastStatus || '', CX, bottom - 6, 15, C.label, { literal: true });
-        // issue #8: the drive mode check (raw signal values) under the right column while "Change with the drive mode" is on
-        const diag = this.hud.modeDiagLines ? this.hud.modeDiagLines() : [];
-        const dy = 84 + (keys.length - per) * 64 + 10;
-        diag.forEach((t, i) => { if (dy + 20 * i < bottom - 16) cv.text(t, CX + colW + 24, dy + 20 * i, 15, C.label, { literal: true }); });
+        const dy = 84 + (keys.length - per) * pitch + 10;
+        diag.forEach((t, i) => {
+            if (dy + 20 * i > bottom - 24) return;
+            // cut to the column (a long value would run off the screen)
+            while (t.length > 8 && cv.textWidth(t, 15, { literal: true }) > colW) t = t.slice(0, -1);
+            cv.text(t, CX + colW + 24, dy + 20 * i, 15, C.label, { literal: true });
+        });
     }
 
     /* ---------- rows ---------- */
@@ -647,14 +658,15 @@ class Page {
         cv.target(x, y, w, h, () => { this.picker = { key, title: name, fmt }; this.kick(); }, 'set:' + key, 14);
         return y + h + (h < 56 ? 6 : 8);
     }
-    stepRow(cv, x, y, w, name, key, fmt) {
-        this.rowBox(cv, x, y, w, name, 56);
+    stepRow(cv, x, y, w, name, key, fmt, h) {
+        h = h || 56;
+        const base = this.rowBox(cv, x, y, w, name, h);
         const s = this.item(key), steps = s.steps || [], i = steps.indexOf(this.get(key));
-        const bx = x + w - 66, ax = bx - 236;
-        stepBtn(cv, ax, y + 9, '-', i > 0, () => this.set(key, steps[i - 1]), 'dn:' + key);
-        cv.text(fmt ? fmt(this.get(key)) : this.valueText(key), ax + 140, y + 35, 19, C.blueHi, { align: 'center', font: 'bold', literal: true });
-        stepBtn(cv, bx, y + 9, '+', i < steps.length - 1, () => this.set(key, steps[i + 1]), 'up:' + key);
-        return y + 64;
+        const bx = x + w - 66, ax = bx - 236, by = y + (h - 38) / 2;
+        stepBtn(cv, ax, by, '-', i > 0, () => this.set(key, steps[i - 1]), 'dn:' + key);
+        cv.text(fmt ? fmt(this.get(key)) : this.valueText(key), ax + 140, base, 19, C.blueHi, { align: 'center', font: 'bold', literal: true });
+        stepBtn(cv, bx, by, '+', i < steps.length - 1, () => this.set(key, steps[i + 1]), 'up:' + key);
+        return y + h + (h < 56 ? 6 : 8);
     }
     chipRow(cv, x, y, w, name, key) {
         glass(cv, x, y, w, 64, false);

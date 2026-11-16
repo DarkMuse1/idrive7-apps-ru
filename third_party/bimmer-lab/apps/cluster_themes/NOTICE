@@ -42,6 +42,10 @@ Besides its own code, the app ships with:
    asset) is after js/showcase.js (TEXT_FS) of https://github.com/robertnisipeanu/idrive-apps (native/cluster-render):
    Mozilla Public License 2.0, Copyright (C) 2026 Robert Nisipeanu.
 
+7. The M view theme (shaders.js mview, its map window opened without a rebuild in hud.js, and the scale geometry in
+   the layout mview.json) is ported from Asksket's f90 branch of a fork of this repository
+   (https://github.com/Asksket/apps), offered in issue #15: MIT, the same licence as this repository.
+
 ----------------------------------------------------------------------------------------------
 Copyright 2017 The Barlow Project Authors (https://github.com/jpt/barlow)
 Copyright 2011 The Michroma Project Authors (https://github.com/googlefonts/Michroma-font)

@@ -3,7 +3,6 @@ from pathlib import Path
 import argparse
 import copy
 import json
-import runpy
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -12,7 +11,7 @@ from auto_language import apply
 sys.path.insert(0, str(ROOT / 'tools/protected-apps/kit/tools'))
 import build as author
 
-APPS = {'ambient_light', 'light_show', 'mgu_unified', 'aa_cluster_companion'}
+APPS = {'mgu_unified', 'aa_cluster_companion'}
 
 
 def read(path):
@@ -80,26 +79,6 @@ def main():
     args = parser.parse_args()
     dist = Path(args.dist or (author.PREVIEW_DIST if args.preview_only else author.DIST)).resolve()
     dist.mkdir(parents=True, exist_ok=True)
-    delegated = {'light_show': 'build_light_show.py'}
-    if args.app in delegated:
-        # Keep each app's existing native/input/ID8/archive preparation. Apply
-        # language resources to its generated stage before that wrapper packs it.
-        original = author.build
-        def build_with_language(app, language='en', **kwargs):
-            original(app, 'en', **kwargs)
-            finish(app, Path(kwargs.get('dist', author.DIST)) / app)
-        author.build = build_with_language
-        argv = [str(ROOT / 'tools' / delegated[args.app]), args.app, '--sdk', args.sdk, '--dist', str(dist)]
-        if args.preview_only:
-            argv.append('--preview-only')
-        previous = sys.argv
-        try:
-            sys.argv = argv
-            runpy.run_path(argv[0], run_name='__main__')
-        finally:
-            sys.argv = previous
-            author.build = original
-        return
     mode = 'preview'
     if not args.preview_only:
         sdk = author.check_sdk(args.sdk)
