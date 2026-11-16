@@ -794,14 +794,18 @@ class HudApp {
                 },
             },
         };
-        // now playing (the Vector layouts' music panel): the head unit's own media state, front screen only. Optional
-        // (app.json): not every unit may have it, and whether CarPlay fills it is not known yet. Added last, so the
-        // one-at-a-time SOME/IP setup (signals.js) reaches every vehicle signal before it, whatever this one does
-        extra[MEDIA_IF] = {
+        this.car = new Car(this.ctx, ['rpm', 'speed', 'temps', 'accel', 'gear', 'torque'], extra);
+        // Media uses the named front-screen instance. Car's common vehicle watches use instance '1'.
+        // Queue it after those watches and retain the same provider-availability tracking.
+        const car = this.car;
+        this.mediaSubscription = this.ctx.signals.watch(MEDIA_IF, 'HMI_CID', {
             playerMetadata: (v) => this._mediaFeed('meta', v),
             trackProgress: (v) => this._mediaFeed('progress', v),
-        };
-        this.car = new Car(this.ctx, ['rpm', 'speed', 'temps', 'accel', 'gear', 'torque'], extra);
+        }, this.log).then((sub) => {
+            car.subs.push(sub);
+            this.log.info('signal HmiMediaState' + (sub.error ? ' error: ' + sub.error : ' subscribed'));
+            return sub;
+        });
         // "Play demo": this.car becomes the show's stand-in (the car's own data unless the show plays)
         this.demo = new DemoShow(this.car, this._demoHooks(), this.log);
         this.car = this.demo.car;
@@ -995,6 +999,8 @@ class HudApp {
     }
 
     stop() {
+        if (this.mediaSubscription) this.mediaSubscription.then((sub) => sub.shutdown())
+            .catch((error) => this.log.warn('media subscription shutdown: ' + error));
         clearInterval(this.tickTimer);
         clearInterval(this.themeTimer);
         clearInterval(this.statusTimer);

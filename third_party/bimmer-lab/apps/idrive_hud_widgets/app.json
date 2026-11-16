@@ -2,7 +2,7 @@
   "id": "idrive_hud_widgets",
   "title": "HUD Widgets",
   "description": "Gear, shift lights, boost, oil, coolant and intake temperatures, a G-meter, trip figures and the song playing on the windshield HUD, in Classic, M or Night themes",
-  "version": "0.15.1",
+  "version": "0.15.2",
   "vendor": "custom",
   "loggingId": "OAH1",
   "iconGlyph": "HUD",
@@ -108,6 +108,7 @@
       "projectedGuidanceActive": "rs"
     },
     "de.bmw.infotainment.hmi.hmimediastate.HmiMediaState": {
+      "_instances": "HMI_CID",
       "playerMetadata": "rs",
       "trackProgress": "rs",
       "_optional": "now playing (title, artist, progress) in the Vector layout"
