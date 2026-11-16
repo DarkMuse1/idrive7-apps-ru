@@ -31,8 +31,7 @@
       ]
     },
     "exclude": [
-      "mgu_unified",
-      "aa_cluster_companion"
+      "mgu_unified"
     ]
   },
   "tools": [
@@ -84,36 +83,6 @@
       "id": "mgu_unified",
       "kind": "app",
       "path": "apps/mgu_unified",
-      "build": {
-        "python": "tools/build_protected_auto.py",
-        "args": [
-          "{id}",
-          "--language",
-          "auto"
-        ],
-        "sdk": "oap-sdk",
-        "output": "dist/{id}@{version}.tgz",
-        "shared": [
-          "tools/build_protected_auto.py",
-          "tools/auto-language",
-          "tools/protected-apps/kit",
-          "oap-sdk"
-        ]
-      }
-    },
-    {
-      "manifest": "app.json",
-      "icon": "icon.png",
-      "mguHmi": [
-        "ID7"
-      ],
-      "requires": {
-        "idrive7-renderd": "2.1.10",
-        "mgu-inputgate": "1.0.0"
-      },
-      "id": "aa_cluster_companion",
-      "kind": "app",
-      "path": "apps/aa_cluster_companion",
       "build": {
         "python": "tools/build_protected_auto.py",
         "args": [

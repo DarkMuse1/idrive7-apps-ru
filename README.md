@@ -30,8 +30,7 @@ Transmission Config (`zf8hp`), Drag Timer (`draggy`), eDrive (`edrive`),
 Brake Test (`brake_test`), G-Force (`gforce`), Fault Scanner (`dtc_scanner`),
 Virtual Dyno (`dyno`), Warm-Up (`warmup`), Live Data (`live_data`),
 Engine Config (`live_adjustments`), Подсветка (`ambient_light`),
-Service (`service`), Doom (`doom`), AA Cluster Companion
-(`aa_cluster_companion`).
+Service (`service`), Doom (`doom`).
 
 Единое приложение: **MGU Tools · всё в одном** (`mgu_unified`) — все модули под
 одним значком, кроме отдельного экрана xDrive (отключение xDrive осталось в
@@ -74,7 +73,7 @@ LightShow0.4.1 для ID7/ID8: наружный свет, выбор секци�
 В новом виде проекции Ramp учтена яркость подписей: при наших шрифтах режим
 «Чётче» теперь отличается и тогда, когда ширина не позволяет увеличить текст.
 
-Защищённые `ambient_light`, `mgu_unified` и наш `aa_cluster_companion`
+Защищённые `ambient_light`, `mgu_unified`
 сохранены побайтно; встроенные модули единого приложения этим выпуском
 не заменяются. Новый сторонний `ambient_config` вместо нашей «Подсветки»
 не добавляется. Диагностический транспорт, root/SSH и рендерер не заменялись.
@@ -104,8 +103,8 @@ eDrive **2.8.1** (экран аккумулятора 12 В и данные дл
 Redline **1.13.0** (экспериментальная проекция HUD через `cluster-render`),
 Engine Config **0.8.1** (режимы заслонки и обновления xDrive).
 Для новых экранов и настроек сохранена русская сборка и дополнен словарь.
-Изменения runtime и наши приложения `ambient_light`, `mgu_unified`,
-`aa_cluster_companion` сохранены; встроенные модули единого приложения
+Изменения runtime и наши приложения `ambient_light`, `mgu_unified`
+сохранены; встроенные модули единого приложения
 этой синхронизацией не заменяются.
 
 - Версия каждого приложения — строго `x.y.z` (из его `app.json`). Пре-релизных

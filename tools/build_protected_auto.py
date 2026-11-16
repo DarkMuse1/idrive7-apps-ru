@@ -11,7 +11,7 @@ from auto_language import apply
 sys.path.insert(0, str(ROOT / 'tools/protected-apps/kit/tools'))
 import build as author
 
-APPS = {'mgu_unified', 'aa_cluster_companion'}
+APPS = {'mgu_unified'}
 
 
 def read(path):
@@ -54,14 +54,6 @@ def finish(app, stage):
         tables['ru']['SID_' + app.upper() + '_TITLE'] = spec['texts']['ru']['title']
     if set(tables['en']) != set(tables['ru']):
         raise ValueError('Native StringIds must be identical across languages')
-    if app == 'aa_cluster_companion':
-        entry = Path(stage) / 'source/javascript/app.js'
-        body = entry.read_text(encoding='utf-8')
-        before = 'const changed = () => { version++; };'
-        if body.count(before) != 1:
-            raise ValueError('Review AA Companion display version before applying automatic language')
-        body = body.replace(before, before + '\n        if(ctx.onLayout)ctx.onLayout(changed);', 1)
-        entry.write_text(body, encoding='utf-8', newline='\n')
     meta_path = Path(stage) / 'meta.json'
     meta = read(meta_path)
     meta['texts'] = spec.get('texts', {})
