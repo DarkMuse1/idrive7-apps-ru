@@ -15,8 +15,7 @@
  * Everything goes to the car as it is picked. The lights are driven through the body controller (lights.js); a car
  * whose body controller does not answer keeps BMW's own colours (ambient.js), offered on the Colour tab.
  * It runs from the platform's start (app.json "autostart"): the look and the driving modes work with the app closed.
- * With IterioDev's Comfort tool running (others.js), which writes the same lights, it stands aside (no light writes
- * until Comfort is gone) and the Colour and Animations tabs say so in red and recommend uninstalling it.
+ * While Comfort's ambient lighting is enabled (others.js), light writes wait and the UI explains the conflict.
  */
 const mgu = require('./kit/mgu');
 const G = require('./kit/gauges');
@@ -29,7 +28,7 @@ const { Control } = require('./control');
 const { Others } = require('./others');
 const { Strobe, gateChecks, gateWhy } = require('./strobe');
 const Parked = require('./kit/parked');
-const { t: translate } = require('./kit/i18n');
+const { t: translate, getLanguage } = require('./kit/i18n');
 const { drawCabin } = require('./cabin');
 const { sample } = require('./lin');
 const S = require('./scenes');
@@ -69,6 +68,11 @@ async function background(bg) {
     diag.quiet = true; diag.busyLog = false;
     // the lights found at an earlier start: the colour goes out at once, and the buses are read again after it
     const lights = new Lights({ diag, log, known: settings.get('lightsKnown') });
+    const others = new Others({ log }).start();
+    // Apply the conflict guard before a saved colour can start writing at startup.
+    const besideComfort = () => lights.hold('comfort', others.comfort);
+    others.on('change', besideComfort);
+    besideComfort();
     const control = new Control({ settings, lights, ambient, log });
     control.start();
     // with the lights answering, the driving modes' looks replace BMW's colours by mode (ambient.js)
@@ -133,15 +137,6 @@ async function background(bg) {
         if (key === 'follow') control.apply();
         if (key === 'turnGlow' || key === 'doorRed' || key === 'hazardRed' || key === 'drive') control.signals();
     });
-    const others = new Others({ log }).start();
-    // IterioDev's Comfort tool writes the same lights: while it runs, ours stand aside (no writes, so the two don't fight
-    // and the lights don't jump), and carry on once it is gone
-    const besideComfort = () => {
-        lights.hold('comfort', others.comfort);
-        if (others.comfort) log.warn('lights: IterioDev\'s Comfort tool is running, Ambient config stands aside until it is gone');
-    };
-    others.on('change', besideComfort);
-    besideComfort();
     // the high beam strobe and the light show (strobe.js): only for use on private property, behind its setting,
     // with someone in the car; the light show also with the car standing still (kit/parked.js, checked again on every
     // step: it stops when the car moves off); why not, or null
@@ -215,16 +210,23 @@ mgu.run({
         const stepHue = (d) => { const c = partColour(look()); return setRgb(S.hsv(S.stepHue(S.hueOf(c.rgb), d), 1, 1)); };
 
         // another ambient app's service writing the same lights: says so in place of the status, wrapped to width w
-        const COMFORT_WARNING = 'IterioDev\'s Comfort tool is running and changes the same lights, so Ambient config has stopped ' +
-            'changing them. Uninstall Comfort in the Store (Installed, Head-unit tools, Comfort) to use Ambient config.';
-        // in red, so it is seen: nothing on these tabs reaches the lights while Comfort runs
+        const COMFORT_WARNING = {
+            en: {
+                active: 'Comfort lighting is enabled. Turn off its lighting and driving-mode colours to use Ambient config.',
+                unknown: 'Comfort settings could not be read. Ambient light control is paused.'
+            },
+            ru: {
+                active: 'В Comfort включена подсветка. Отключите её и цвета по режимам движения.',
+                unknown: 'Не удалось прочитать настройки Comfort. Управление подсветкой приостановлено.'
+            }
+        };
         function warnOthers(cv, t, x, y, w) {
-            const head = cv.textWidth(translate('Another ambient app is running'), 22, { font: 'bold', literal: true }) <= w
+            const head = others.unknown ? 'Comfort' : cv.textWidth(translate('Another ambient app is running'), 22, { font: 'bold', literal: true }) <= w
                 ? 'Another ambient app is running' : 'Another ambient app';
             cv.text(head, x, y, 22, t.crit, { font: 'bold' });
             const lines = [];
-            // translated whole before wrapping, so a localized build wraps its own sentence
-            translate(COMFORT_WARNING).split(' ').forEach((word) => {
+            const words = COMFORT_WARNING[getLanguage()] || COMFORT_WARNING.en;
+            words[others.unknown ? 'unknown' : 'active'].split(' ').forEach((word) => {
                 const last = lines.length - 1, joined = last >= 0 ? lines[last] + ' ' + word : word;
                 if (last >= 0 && cv.textWidth(joined, 18, { literal: true }) <= w) lines[last] = joined; else lines.push(word);
             });
