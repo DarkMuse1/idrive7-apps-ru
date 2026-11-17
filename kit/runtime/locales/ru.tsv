@@ -2146,3 +2146,34 @@ Changing Hybrid's look	Оформление режима Hybrid
 It shows whenever Hybrid is on.	Включается в режиме Hybrid.
 Changing Electric's look	Оформление режима Electric
 It shows whenever Electric is on.	Включается в режиме Electric.
+The car standing still (light show)	Автомобиль стоит (световое шоу)
+Hybrid Eco	Гибрид Эко
+Hybrid Comfort	Гибрид Комфорт
+Electric Individual	Электро индивидуальный
+Sport Boost	Спорт Буст
+Fully electric (BEV)	Электромобиль (BEV)
+Fully electric: usable battery when new	Электромобиль: полезная ёмкость новой батареи
+Fully electric: range counts down to	Электромобиль: запас хода считается до
+0 % (empty)	0 % (полный разряд)
+Real range	Реальный запас хода
+down to	запас до
+cell charge	заряд ячейки
+lowest to highest cell	мин. – макс. ячейка
+Cell voltage spread	Разброс напряжения ячеек
+Cell charge spread	Разброс заряда ячеек
+Cell voltages	Напряжения ячеек
+no reading	нет показаний
+Hybrid or electric car? Settings > Drive system	Гибрид или электромобиль? Настройки > Привод
+Cold starts	Холодные пуски
+ENGINE STARTS	ПУСКИ ДВИГАТЕЛЯ
+WITH COLD OIL	С ХОЛОДНЫМ МАСЛОМ
+COLD AND REVVED	ОБОРОТЫ НА ХОЛОДНУЮ
+under	ниже
+past the safe rev limit	выше безопасных оборотов
+Latest starts	Последние пуски
+Counted from the next engine start	Учёт начнётся со следующего пуска
+revved cold	обороты на холодную
+cold start	холодный пуск
+WHEELSPIN ~	ПРОБУКСОВКА ~
+Another ambient app is running	Другая подсветка
+IterioDev's Comfort tool is running and changes the same lights, so Ambient config has stopped changing them. Uninstall Comfort in the Store (Installed, Head-unit tools, Comfort) to use Ambient config.	Служба Comfort от IterioDev управляет подсветкой. Для работы здесь удалите Comfort через Магазин / Установленные / Утилиты ГУ.

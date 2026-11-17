@@ -15,8 +15,8 @@
  * Everything goes to the car as it is picked. The lights are driven through the body controller (lights.js); a car
  * whose body controller does not answer keeps BMW's own colours (ambient.js), offered on the Colour tab.
  * It runs from the platform's start (app.json "autostart"): the look and the driving modes work with the app closed.
- * With IterioDev's Comfort tool running (others.js), the Colour and Animations tabs warn that it writes the same
- * lights and recommend uninstalling it: one ambient app at a time.
+ * With IterioDev's Comfort tool running (others.js), which writes the same lights, it stands aside (no light writes
+ * until Comfort is gone) and the Colour and Animations tabs say so in red and recommend uninstalling it.
  */
 const mgu = require('./kit/mgu');
 const G = require('./kit/gauges');
@@ -42,6 +42,8 @@ const QUICK = [['Red', [255, 0, 0]], ['Orange', [255, 100, 0]], ['Amber', [255, 
 const RING = { cx: 290, cy: 288, R: 186, r: 136 }, DIAL = { cx: 655, cy: 400, R: 54, r: 43 };
 
 const ON_BY_DEFAULT = ['follow', 'flashAlerts'];
+const MOVE_DRAW_MS = 250;            // a moving scene's picture: at most 4 a second
+const FIND_LATER_MS = 5000;          // lights known from an earlier start: read again once the first colour is out
 const IDLE_MS = 15 * 60000;          // without the car's own state: not driven nor the app used this long = parked and left
 /* The car's turn signals (Light.StatusFunctionsIndicators activeFunctionIndicateDirection, by name or number): the
  * driver's (held or tapped), the driving assistant's, and the hazards; the lock and alarm flashes are none. */
@@ -65,15 +67,17 @@ async function background(bg) {
     await ambient.start();
     const diag = await new Diag(signals, log).init();
     diag.quiet = true; diag.busyLog = false;
-    const lights = new Lights({ diag, log });
+    // the lights found at an earlier start: the colour goes out at once, and the buses are read again after it
+    const lights = new Lights({ diag, log, known: settings.get('lightsKnown') });
     const control = new Control({ settings, lights, ambient, log });
     control.start();
     // with the lights answering, the driving modes' looks replace BMW's colours by mode (ambient.js)
     lights.on('change', () => { ambient.slotsOff = lights.lights.length > 0; });
+    lights.on('found', (l) => settings.set('lightsKnown', l));
     // lights that did not answer: asked again every 2 min while the car is in use (parked and left: the car sleeps)
     const again = () => setTimeout(() => { if (control._away) again(); else find(); }, 120000);
     const find = () => lights.find().then((l) => { if (!l.length) again(); }, (e) => { log.warn('lights: ' + e); again(); });
-    find();
+    setTimeout(find, lights.lights.length ? FIND_LATER_MS : 0);
     signals.watch('de.bmw.infotainment.vehicle.Vehicle', '1', {
         statusDayNightChangeOver: (v) => {
             const x = v && typeof v === 'object' ? v.dayNightChangeOver : v, c = typeof x === 'string' ? DAY_NIGHT[x] : x;
@@ -85,13 +89,26 @@ async function background(bg) {
     // used for IDLE_MS counts as left
     let stateSeen = false, activeT = Date.now();
     const active = () => { activeT = Date.now(); if (!stateSeen && control._away) control.away(false); };
+    // the state from either of the car's two copies (some cars send only the one without a CRC); without one, the
+    // partial networks it keeps awake, numbered the same (KOM_PARKEN... = 1-3, no communication = parked)
+    const conditionFrom = (v) => {
+        const n = Car.conditionOf(v && v.statusConditionVehicle);
+        if (n !== undefined) return n;
+        const p = v && v.controlBasePartialNetworks;
+        if (p === 0 || p === 'KEINE_KOMMUNIKATION') return 1;
+        return Car.conditionOf(typeof p === 'string' ? p.replace(/^KOM_/, '') : p);
+    };
+    const sources = new Set();
+    const onCondition = (field) => (v) => {
+        const n = conditionFrom(v);
+        if (n === undefined) return;
+        if (!sources.has(field)) { sources.add(field); log.info('vehicle state: from ' + field + ' (' + n + ')'); }
+        stateSeen = true;
+        control.away(n <= 3);
+    };
     signals.watch('de.bmw.infrastructure.VehicleCondition', '1', {
-        VehicleCondition: (v) => {
-            const n = Car.conditionOf(v && v.statusConditionVehicle);
-            if (n === undefined) return;
-            stateSeen = true;
-            control.away(n <= 3);
-        },
+        VehicleCondition: onCondition('VehicleCondition'),
+        vehicleConditionNoCrc: onCondition('vehicleConditionNoCrc'),
     }, log).catch((e) => log.warn('vehicle state: ' + (e && e.message || e)));
     // the speed
     signals.watch('de.bmw.infotainment.vehicle.Vehicle2', '1', {
@@ -100,7 +117,11 @@ async function background(bg) {
             if (typeof k === 'number' && k !== 65535 && k * 0.015625 > 1 && k * 0.015625 < 400) active();
         },
     }, log).catch((e) => log.warn('speed: ' + (e && e.message || e)));
-    setInterval(() => { if (!stateSeen && !control._away && Date.now() - activeT > IDLE_MS) control.away(true); }, 30000);
+    setInterval(() => {
+        if (stateSeen || control._away || Date.now() - activeT <= IDLE_MS) return;
+        log.info('vehicle state: none from the car, not driven or used for ' + IDLE_MS / 60000 + ' min: parked');
+        control.away(true);
+    }, 30000);
     // the turn signals: that side's door lines blink green; an open door: its line red (settings turnGlow, doorRed, both off
     // until switched on)
     signals.watch('de.bmw.body.Light', '1', { StatusFunctionsIndicators: (v) => control.turn(turnOf(v)) }, log)
@@ -113,6 +134,14 @@ async function background(bg) {
         if (key === 'turnGlow' || key === 'doorRed' || key === 'hazardRed' || key === 'drive') control.signals();
     });
     const others = new Others({ log }).start();
+    // IterioDev's Comfort tool writes the same lights: while it runs, ours stand aside (no writes, so the two don't fight
+    // and the lights don't jump), and carry on once it is gone
+    const besideComfort = () => {
+        lights.hold('comfort', others.comfort);
+        if (others.comfort) log.warn('lights: IterioDev\'s Comfort tool is running, Ambient config stands aside until it is gone');
+    };
+    others.on('change', besideComfort);
+    besideComfort();
     // the high beam strobe and the light show (strobe.js): only for use on private property, behind its setting,
     // with someone in the car; the light show also with the car standing still (kit/parked.js, checked again on every
     // step: it stops when the car moves off); why not, or null
@@ -186,17 +215,20 @@ mgu.run({
         const stepHue = (d) => { const c = partColour(look()); return setRgb(S.hsv(S.stepHue(S.hueOf(c.rgb), d), 1, 1)); };
 
         // another ambient app's service writing the same lights: says so in place of the status, wrapped to width w
-        const COMFORT_WARNING = 'IterioDev\'s Comfort tool is running. It changes the ambient lights too, so the colours jump ' +
-            'between the two apps. Uninstall it in the Store (Installed, Head-unit tools, Comfort) and use one ambient app at a time.';
+        const COMFORT_WARNING = 'IterioDev\'s Comfort tool is running and changes the same lights, so Ambient config has stopped ' +
+            'changing them. Uninstall Comfort in the Store (Installed, Head-unit tools, Comfort) to use Ambient config.';
+        // in red, so it is seen: nothing on these tabs reaches the lights while Comfort runs
         function warnOthers(cv, t, x, y, w) {
-            cv.text('Another ambient app', x, y, 22, t.warn, { font: 'bold' });
+            const head = cv.textWidth(translate('Another ambient app is running'), 22, { font: 'bold', literal: true }) <= w
+                ? 'Another ambient app is running' : 'Another ambient app';
+            cv.text(head, x, y, 22, t.crit, { font: 'bold' });
             const lines = [];
             // translated whole before wrapping, so a localized build wraps its own sentence
             translate(COMFORT_WARNING).split(' ').forEach((word) => {
                 const last = lines.length - 1, joined = last >= 0 ? lines[last] + ' ' + word : word;
                 if (last >= 0 && cv.textWidth(joined, 18, { literal: true }) <= w) lines[last] = joined; else lines.push(word);
             });
-            lines.forEach((line, i) => cv.text(line, x, y + 30 + i * 24, 18, t.text, { literal: true }));
+            lines.forEach((line, i) => cv.text(line, x, y + 30 + i * 24, 18, t.crit, { literal: true }));
         }
         function status(cv, t, x, y) {
             if (others.comfort) return warnOthers(cv, t, x, y, 1560 - x);
@@ -500,12 +532,16 @@ mgu.run({
             }
         };
         setInterval(pauseCheck, 250);
-        // moving lights redraw a few times a second, the rest when something changes
+        // moving lights redraw MOVE_DRAW_MS apart (the lights' writes share the app's one thread), the rest when something
+        // changes
+        let movedAt = 0;
         const tick = () => {
             if (page === 4) { strobeSeen = Date.now(); pauseCheck(); }
             const moving = (lights.scene && S.moves(lights.scene)) || (page === 1 && control.on() && S.moves(look()));
+            const due = moving && page <= 1 && Date.now() - movedAt >= MOVE_DRAW_MS;
+            if (due) movedAt = Date.now();
             // (the Strobe tab: its checks follow the car, so it draws on each tick)
-            return dirty || (moving && page <= 1) || page === 4 ? render() : null;
+            return dirty || due || page === 4 ? render() : null;
         };
 
         if (ctx.onTap) {

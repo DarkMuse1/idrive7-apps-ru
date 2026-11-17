@@ -367,7 +367,17 @@ mgu.run({
                 const h = {};
                 fields[i].forEach((f) => { h[f] = (v) => sigFeed(i, f, v, false); });
                 return ctx.signals.watch(i, '1', h, log, SIG.POLL[i] ? { pollMs: SIG.POLL[i] } : undefined).then((s) => { sigSubs.push(s); return s; });
-            })).then((all) => log.info('car signals: ' + all.map((s) => SIG.short(s.iface) + (s.error ? ' (error: ' + s.error + ')' : '')).join(' ')));
+            }).concat(
+                // the car's pressure unit: boost and tyre pressures come in it
+                ctx.signals.watch('de.bmw.infotainment.vehicle.Vehicle', '1', {
+                    statusNewCurrentUnitsStatusExt: (v) => {
+                        const p = SIG.pressUnitOf(v && v.unitOfMeasurementAirPressure);
+                        if (p === SIG.units.press) return;
+                        SIG.units.press = p;
+                        log.info('car units: pressure ' + (p || '?'));
+                    },
+                }, log).then((s) => { sigSubs.push(s); return s; })
+            )).then((all) => log.info('car signals: ' + all.map((s) => SIG.short(s.iface) + (s.error ? ' (error: ' + s.error + ')' : '')).join(' ')));
             setTimeout(() => {
                 const names = (on) => sigSubs.filter((s) => !!s.available === on).map((s) => SIG.short(s.iface)).join(' ') || 'none';
                 log.info('car signals after 15 s: offered ' + names(true) + '; not offered ' + names(false));
@@ -1421,7 +1431,8 @@ mgu.run({
                 TimeElapsed: [on ? line(list[2]) : '', 'Text'],
                 TimeRemaining: [on ? line(list[3]) : '', 'Text'],
                 ProgressbarVisible: [on && frac !== null, 'Bool'],
-                Progress: [on && frac !== null ? Math.round(frac * 100) : 0, 'Float'],
+                // the layout's progress bar takes a share 0..1 (a percentage showed it full at any value)
+                Progress: [on && frac !== null ? Math.round(frac * 100) / 100 : 0, 'Float'],
             };
             const prev = wtext[inst.spawnId] || (wtext[inst.spawnId] = {});
             Object.keys(cells).forEach((k) => {

@@ -306,7 +306,9 @@ mgu.run({
                 statusSwitchDriveDynamicSport2: (v) => {
                     logRaw('FES boost', v.displayBoostPressure);
                     logRaw('FES g [lat, long]', [v.displayLateralAcceleration, v.displayLongitudinalAcceleration]);
-                    put('boostFes', sc('boost', v.displayBoostPressure));
+                    // in the car's pressure unit: 0.01 bar (or 1 kPa) a step, 0.1 psi a step on a car set to psi (issue #186)
+                    const b = sc('boost', v.displayBoostPressure);
+                    put('boostFes', G.isNum(b) && carUnits.press === 'PSI' ? b * 10 / 14.5038 : b);
                 },
                 // the HMI's sport display: power / torque in % of the car's maximum
                 statusVehicleDynamicEngine: (v) => { put('powerPct', sc('sportPct', v.displaySportEnginePower)); put('torquePct', sc('sportPct', v.displaySportEngineTorque)); },
@@ -444,6 +446,9 @@ mgu.run({
          * answers (false = service 06, true = UDS F6xx, null = not found yet); misCyl: cylinders found.
          */
         let misMode = null, misCyl = 0;
+        // when the misfire counts are coloured: the total from MIS_WARN (yellow) and MIS_CRIT (red), a cylinder from
+        // MIS_CYL_WARN
+        const MIS_WARN = 100, MIS_CRIT = 500, MIS_CYL_WARN = 50;
         async function readMisfire() {
             const m = dme.misfire || {}, ecu = m.ecu == null ? dme.ecu : m.ecu, tid = parseInt(m.tid || '0C', 16);
             if (misMode === null) {
@@ -770,7 +775,9 @@ mgu.run({
             const { counts, since } = misShown(raw);
             const ok = Array.isArray(counts) && counts.length, big = h > 200 ? 100 : 64;
             const total = ok ? counts.reduce((a, c) => a + (c || 0), 0) : null;
-            const col = !ok ? t.dim : total === 0 ? GO : total < 20 ? t.warn : t.crit;
+            // a healthy engine counts a few each drive; the engine unit only flags misfires at ~1-2 % of revolutions,
+            // so small counts are shown as normal (issue #191)
+            const col = !ok ? t.dim : total === 0 ? GO : total < MIS_WARN ? t.text : total < MIS_CRIT ? t.warn : t.crit;
             const tw = cv.text(ok ? String(total) : '--', x + 18, y + 52 + big * 0.78, big, col, { font: 'num' });
             const at = since ? new Date(since) : null, pad = (n) => (n < 10 ? '0' : '') + n;
             cv.text(!ok ? '' : at ? translate('since reset') + ' ' + pad(at.getHours()) + ':' + pad(at.getMinutes()) : 'this drive',
@@ -788,7 +795,7 @@ mgu.run({
             // panel stretched) up to 16 higher, nearer the other tiles' graphs and lines
             const n = counts.length, gap = 8, cw = (w - 36 - gap * (n - 1)) / n, ch = 74, cy = yb - 12 - ch - G.clamp(yb - Math.round(y + h), 0, 16);
             counts.forEach((c, i) => {
-                const cx = x + 18 + i * (cw + gap), hit = G.isNum(c) && c > 0;
+                const cx = x + 18 + i * (cw + gap), hit = G.isNum(c) && c >= MIS_CYL_WARN;
                 cv.roundRect(cx, cy, cw, ch, 8, withAlpha(hit ? t.warn : t.track, hit ? 0.18 : 0.9));
                 cv.text((cw > 84 ? 'Cyl ' : '') + (i + 1), cx + cw / 2, cy + 26, 22, t.dim, { align: 'center', font: 'bold' });
                 cv.text(G.isNum(c) ? String(c) : '-', cx + cw / 2, cy + ch - 10, 34, !G.isNum(c) ? t.dim : hit ? t.warn : t.text, { align: 'center', font: 'num' });
