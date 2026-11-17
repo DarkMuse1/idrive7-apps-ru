@@ -1,6 +1,6 @@
 {
   "name": "oap-driverecorder-next",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "description": "Own Drive Recorder: records via its own AVB receiver (no icam2proxy video buffer), drives camera DR mode, saves clips on demand; renderer screens with a clip viewer (iDrive 7 and iDrive 8 layouts, touch or the iDrive controller), front end of the iteriodev-drplay player tool",
   "private": false,
   "main": "javascript/runner.js",

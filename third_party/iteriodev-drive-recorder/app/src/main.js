@@ -189,7 +189,7 @@ function exec(a) {
     else if (a.do === 'view') rec.setView(a.view);
     else if (a.do === 'detect') rec.detect();
     else if (a.do === 'setting' && a.key === 'len') rec.setLength((settings.length + 1) % recorder.LENGTHS.length);
-    else if (a.do === 'setting' && a.key === 'auto') { settings.autoCam = !!a.value; saveSettings(); if (a.value) rec.setView(settings.view); }
+    else if (a.do === 'setting' && a.key === 'auto') rec.setAutoCam(a.value);
     else if (a.do === 'open') openMeta(a.id);
     else if (a.do === 'play') player.play(a.id, a.at);
     else if (a.do === 'seek') { clearTimeout(seekTimer); seekTimer = setTimeout(() => player.seek(a.s), 250); }   // a drag: the last one
@@ -420,7 +420,7 @@ const host = createHost({
         if (stopLanguage) stopLanguage();
         log('usage at shutdown:', usageText());
         if (player.up) player.stop();
-        return Promise.race([rec.release(), new Promise((r) => setTimeout(r, 2000))]);
+        return Promise.race([rec.stop(), new Promise((r) => setTimeout(r, 2000))]);
     },
 });
 host.once('initialized', startServices);

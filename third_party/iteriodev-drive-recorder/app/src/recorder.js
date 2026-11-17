@@ -63,6 +63,7 @@ const LENGTHS = [[10, 5], [20, 10], [30, 15], [60, 30]];   // seconds before / a
 const MIN_BEFORE = 5;      // 2.3.9: a save needs at least this many seconds before the tap (else: shorter clips, not none)
 const CAP = 4 * 1073741824, CLIP_RATE = 5.5 * 1048576;
 const POLL_MS = 2000, RETRY_MS = 30e3;
+const START_RETRY_MS = [5000, 10000, 20000];
 // [interface, instance names to try] - names from the OAP catalogue's instanceIDs (VideoBuffer is not "1": 1.0.0 failed
 // with "Instance not available in 'instances' section"; DataExport has 5, which one icam2proxy offers: tried in turn)
 const IF = {
@@ -110,6 +111,7 @@ const camStream = (s) => (s && typeof s === 'object' ? `${s.imageWidth}x${s.imag
 function create(o) {
     const log = o.log, settings = o.settings, saveSettings = o.saveSettings, someipBuilders = o.someipBuilders;
     const api = new EventEmitter();
+    let stopped = false, pollTimer = null;
     api.active = false;                     // a screen is open: services read every 2 s
     api.tool = { up: false, full: false };  // the player tool (main.js)
     const changed = () => api.emit('change');
@@ -127,7 +129,7 @@ function create(o) {
     const rx = { up: false, state: null, version: null };     // state: { state RECORDING|WAITING, held s, bytes, fps, persp }
     let rxSock = null, rxBuf = '', rxStatusWait = null, rxSaveWait = null, rxConnTimer = null;
     function rxConnect() {
-        if (rxSock) return;
+        if (stopped || rxSock) return;
         const s = net.connect(RX_SOCK);
         rxSock = s;
         s.setEncoding('utf8');
@@ -142,7 +144,8 @@ function create(o) {
             if (rxStatusWait) { const f = rxStatusWait; rxStatusWait = null; f(null); }
             if (rxSaveWait) { const f = rxSaveWait; rxSaveWait = null; f({ ok: false, text: `receiver not running (${why})` }); }
             changed();
-            clearTimeout(rxConnTimer); rxConnTimer = setTimeout(rxConnect, 3000);
+            clearTimeout(rxConnTimer);
+            if (!stopped) rxConnTimer = setTimeout(rxConnect, 3000);
         };
         s.on('error', (e) => { log('receiver:', errText(e)); drop(errText(e)); });
         s.on('close', () => drop('closed'));
@@ -177,6 +180,7 @@ function create(o) {
     }
 
     function connect(name) {
+        if (stopped) return Promise.resolve();
         link[name] = link[name] || 'connecting';
         const ifName = IF[name][0], instances = IF[name][1];
         let lastErr = null;
@@ -186,6 +190,7 @@ function create(o) {
                 .then((p) => ({ p, inst: instances[i] }), (e) => { lastErr = e; return attempt(i + 1); }));
         return attempt(0)
             .then((r) => {
+                if (stopped) return;
                 px[name] = r.p; link[name] = `ok (${r.inst})`; log(`${name} connected, instance ${r.inst}`);
                 if (name === 'icam') { log('icam methods:', Object.keys(r.p).join(' ')); autoCam(); }
             })
@@ -243,6 +248,7 @@ function create(o) {
     }
 
     function poll() {
+        if (stopped) return Promise.resolve();
         return pollAll().then(() => camSeen());
     }
     function pollAll() {
@@ -321,10 +327,17 @@ function create(o) {
     // ---- camera DR mode -------------------------------------------------------------------------------------------
     let camView = null, camCookie = null;       // camView: the view asked for (a VIEWS req), null = released
     let attaching = null;   // the attach under way: a second request (start + a tab tap) waits for it - one cookie
-    let camMsg = 'not requested', autoDone = false;
+    let camMsg = 'not requested', autoDone = false, autoBusy = false;
+    let autoTimer = null, autoRetries = 0, cameraRequest = null;
+    let cameraGeneration = 0, probeWaitTimer = null, finishProbeWait = null;
     // enum arguments by name (getters return names); if the proxy refuses, once more as wire numbers
-    const named = (fn, byName, byNumber) => Promise.resolve().then(() => fn(byName))
-        .catch((e) => { log('enum names refused, trying numbers:', errText(e)); return fn(byNumber); });
+    const named = (fn, byName, byNumber) => Promise.resolve().then(() => {
+        if (stopped) throw new Error('recorder stopped');
+        return fn(byName);
+    }).catch((e) => {
+        if (stopped) throw e;
+        log('enum names refused, trying numbers:', errText(e)); return fn(byNumber);
+    });
 
     // CameraProxy 0xF789 is never offered on its own on the car (1.0.12): ICAM2Proxy extends it, so clientAttach /
     // clientDetach live on ICAM2Proxy. The catalogue lists only ICAM2Proxy's own changeState, so without a typed method
@@ -350,9 +363,12 @@ function create(o) {
     // DR_ACTIVE with a view (attached first); the view is kept for the next start. A view this car doesn't have (2.0.0's
     // saved 9, never applied by the ECU; one the check didn't find) -> the first one it has. Not while views are checked.
     function setView(want) {
+        if (stopped) return Promise.resolve(false);
         const view = pick(want);
-        if (probing) { log(`camera: view ${want} not asked, the views are being checked`); return Promise.resolve(); }
-        if (view === null) { camMsg = 'no drive-recorder cameras found (Diagnostics: Check cameras)'; changed(); return Promise.resolve(); }
+        if (probing) { log(`camera: view ${want} not asked, the views are being checked`); return Promise.resolve(false); }
+        if (cameraRequest) return cameraRequest;
+        if (view === null) { camMsg = 'no drive-recorder cameras found (Diagnostics: Check cameras)'; changed(); return Promise.resolve(false); }
+        clearTimeout(autoTimer); autoTimer = null;
         settings.view = view;
         saveSettings();
         return ask(clusterView !== null ? clusterView : view);
@@ -362,21 +378,40 @@ function create(o) {
     // asked for; settings.view stays the user's and is asked again when the widget goes. Only while DR mode runs.
     let clusterView = null;
     function setCluster(req) {
+        if (stopped) return Promise.resolve();
         const view = req !== null && pick(req) === req ? req : null;    // a view this car has, else none
         if (view === clusterView) return Promise.resolve();
         clusterView = view;
         log(`camera: cluster widget ${view === null ? `gone, back to ${viewLabel(settings.view)}` : `shows ${viewLabel(view)}`}`);
+        if (cameraRequest) return cameraRequest.then(() => setView(settings.view));
         if (camView === null || probing) return Promise.resolve();
         return ask(view !== null ? view : settings.view);
     }
 
     function ask(view) {
-        if (!px.icam) { camMsg = `not possible: ICAM2Proxy ${link.icam || '-'}`; changed(); return Promise.resolve(); }
-        return attach()
-            .then(() => camRequest('DR_ACTIVE', view))
-            .then(() => { camView = view; camMsg = `cookie ${camCookie}, requested DR_ACTIVE / MODE_MOSAIK / ${viewLabel(view)}`; log(`camera: ${camMsg}`); camCheck(view, 0); },
-                (e) => { camMsg = `DR_ACTIVE ${viewLabel(view)} failed: ${errText(e)}`; log('camera request failed:', e); })
-            .then(() => { changed(); poll(); });
+        if (stopped) return Promise.resolve(false);
+        if (cameraRequest) return cameraRequest;
+        if (!px.icam) { camMsg = `not possible: ICAM2Proxy ${link.icam || '-'}`; changed(); return Promise.resolve(false); }
+        const generation = ++cameraGeneration;
+        const current = () => !stopped && generation === cameraGeneration;
+        clearTimeout(camTimer);
+        camSince = null;
+        cameraRequest = attach()
+            .then(() => current() ? camRequest('DR_ACTIVE', view) : null)
+            .then(() => {
+                if (!current()) return false;
+                camView = view; autoDone = true;
+                clearTimeout(autoTimer); autoTimer = null;
+                camMsg = `cookie ${camCookie}, requested DR_ACTIVE / MODE_MOSAIK / ${viewLabel(view)}`;
+                log(`camera: ${camMsg}`); camCheck(view, 0, generation);
+                return true;
+            }, (e) => {
+                if (current()) { camMsg = `DR_ACTIVE ${viewLabel(view)} failed: ${errText(e)}`; log('camera request failed:', e); }
+                return false;
+            })
+            .then((ok) => { cameraRequest = null; changed(); poll(); return ok; });
+        changed();
+        return cameraRequest;
     }
 
     // 2.0.3: which view numbers this car's camera ECU takes: each view asked for ms (attached first), then CurrentState
@@ -384,24 +419,32 @@ function create(o) {
     // seen per view, or null (not attached / a probe under way). The re-request check is off meanwhile.
     let probing = false;
     function probe(views, ms) {
-        if (probing || !px.icam) return Promise.resolve(null);
+        if (stopped || probing || cameraRequest || !px.icam) return Promise.resolve(null);
+        const generation = ++cameraGeneration;
+        const current = () => !stopped && generation === cameraGeneration;
         probing = true;
         camSince = null;
         clearTimeout(camTimer);
         changed();
         log(`probe: views ${views.join(' ')}, ${ms / 1000} s each`);
-        const seen = [], wait = () => new Promise((r) => setTimeout(r, ms));
+        const seen = [], wait = () => new Promise((resolve) => {
+            if (!current()) { resolve(); return; }
+            finishProbeWait = () => { finishProbeWait = null; probeWaitTimer = null; resolve(); };
+            probeWaitTimer = setTimeout(finishProbeWait, ms);
+        });
         // 2.3.7: on iDrive 7 the ECU is still starting for about 10 s after the attach (SIGNAL_UNFILLED): the first
         // view, all cameras, was asked then and found missing. A view counts as there when it was applied, and as
         // missing only when an ECU that was ready when asked did not apply it; else it is asked again (at most
         // NOT_READY_TRIES times in all)
         let wasReady = false, retries = 0;
         const step = (i) => {
+            if (!current() || i === null) { probing = false; return null; }
             if (i >= views.length) { probing = false; log('probe: done'); return seen; }
             const askedReady = wasReady;
             return camRequest('DR_ACTIVE', views[i]).then(wait)
                 .then(() => get('xv', 'CurrentState', 'xvState')).then(() => get('icam', 'currentState', 'camState'))
                 .then(() => {
+                    if (!current()) return null;
                     const s = [st.xvState, st.camState].find((x) => x && typeof x === 'object') || null;
                     log(`probe: asked ${views[i]} -> ${camState(st.camState)} (icam2proxy) · ${camState(st.xvState)} (XView3D)`);
                     wasReady = !notReady(s);
@@ -412,17 +455,25 @@ function create(o) {
                     }
                     seen[i] = s;
                     return i + 1;
-                }, (e) => { log(`probe: asked ${views[i]} failed: ${errText(e)}`); return i + 1; })
+                }, (e) => {
+                    if (!current()) return null;
+                    log(`probe: asked ${views[i]} failed: ${errText(e)}`); return i + 1;
+                })
                 .then(step);
         };
         // the ECU's state before the first request: ready (iDrive 8, a running car) or still starting
         const first = () => get('icam', 'currentState', 'camState').then(() => { wasReady = !notReady(st.camState); });
-        return attach().then(first).then(() => step(0)).catch((e) => { probing = false; log('probe stopped:', errText(e)); changed(); return null; });
+        return attach().then(first).then(() => step(0)).catch((e) => {
+            probing = false;
+            if (current()) { camMsg = `camera check failed: ${errText(e)}`; log('probe stopped:', errText(e)); changed(); }
+            return null;
+        });
     }
 
     // 2.1.0: the views this car records (see the header): saved, then the chosen view again (restore) or the camera given
     // back; none found -> given back
     function detect(restore) {
+        if (stopped || probing || cameraRequest) return Promise.resolve(false);
         // no camera service to ask (ICAM2Proxy not there: the VM, a car without it): none found, said so - not a tap
         // that does nothing (the first connect checks again: autoCam)
         if (!px.icam && !probing) {
@@ -431,48 +482,66 @@ function create(o) {
             return Promise.resolve(null);
         }
         return probe(VIEWS.map((v) => v.req), 6000).then((seen) => {
-            if (!seen) return null;
+            if (stopped || !seen) return false;
             settings.views = VIEWS.filter((v, i) => applied(v.req, seen[i])).map((v) => v.req);
             settings.viewsChecked = CANDIDATES; settings.view = pick(settings.view); saveSettings();    // (one it lacks: the first)
             log(`cameras: ${settings.views.length ? avail().map((v) => viewLabel(v.req)).join(', ') : 'no drive-recorder view applied'}`);
-            return settings.views.length && restore ? setView(settings.view) : camRelease();
+            return settings.views.length && restore ? setView(settings.view) : camRelease().then(() => false);
         });
     }
 
     // 2.0.0: at start (once, when ICAM2Proxy is there), unless "Start with the car" is off; 2.1.0: the views checked first
     // when none are saved
     function autoCam() {
-        if (autoDone || settings.autoCam === false || camCookie !== null) return;
-        autoDone = true;
-        if (!checked()) { log('camera: DR mode at start, the views this car records checked first'); detect(true); return; }
-        log(`camera: DR mode at start, ${viewLabel(pick(settings.view))}`);
-        setView(settings.view);
+        if (stopped || autoDone || autoBusy || settings.autoCam === false) return;
+        autoBusy = true;
+        log(`camera: startup attempt ${autoRetries + 1}${checked() ? '' : ', checking views first'}`);
+        const start = checked() ? setView(settings.view) : detect(true);
+        return start.then(() => {
+            autoBusy = false;
+            if (stopped || settings.autoCam === false || autoDone) return;
+            if (autoRetries >= START_RETRY_MS.length) {
+                log('camera: startup retries exhausted; select a view or check cameras to try again');
+                changed(); return;
+            }
+            const delay = START_RETRY_MS[autoRetries++];
+            log(`camera: startup failed, retry in ${delay / 1000} s`);
+            autoTimer = setTimeout(() => { autoTimer = null; autoCam(); }, delay);
+            changed();
+        });
     }
 
     // 5 s after a request the ECU view is read back; when it isn't the one asked for, the view is asked again, the second
     // time after another view the car has (a safety net: 2.0.1 found the real cause, view 9, see the header)
     let camTimer = null;
-    function camCheck(want, tries) {
+    function camCheck(want, tries, generation) {
         clearTimeout(camTimer);
         camTimer = setTimeout(() => {
             camTimer = null;
-            if (camCookie === null || camView !== want || probing) return;
+            if (stopped || generation !== cameraGeneration || camCookie === null || camView !== want || probing) return;
             get('xv', 'CurrentState', 'xvState').then(() => get('icam', 'currentState', 'camState')).then(() => {
+                if (stopped || generation !== cameraGeneration || camView !== want || probing) return null;
                 const s = [st.xvState, st.camState].find((x) => x && typeof x === 'object');
                 const shown = s ? Number(s.perspective) : want, other = (avail().find((v) => v.req !== want) || {}).req;
                 if (byReq(want).shown.indexOf(shown) >= 0) { if (camSince === null) camSince = Date.now(); return null; }
                 if (tries >= 2) { camMsg = `${viewLabel(want)} asked 3 times, the ECU stays at view ${shown}`; log(`camera: ${camMsg}`); return null; }
                 log(`camera: the ECU shows view ${shown}, asking ${tries && other ? `${other} then ` : ''}${want} again`);
                 return (tries && other ? camRequest('DR_ACTIVE', other) : Promise.resolve())
-                    .then(() => camRequest('DR_ACTIVE', want))
-                    .then(() => camCheck(want, tries + 1), (e) => log('camera request failed:', e));
+                    .then(() => !stopped && generation === cameraGeneration ? camRequest('DR_ACTIVE', want) : null)
+                    .then(() => { if (!stopped && generation === cameraGeneration) camCheck(want, tries + 1, generation); },
+                        (e) => log('camera request failed:', e));
             }).then(() => { changed(); poll(); });
         }, 5000);
     }
 
     function camRelease() {
+        cameraGeneration++;
         clearTimeout(camTimer);
+        clearTimeout(probeWaitTimer);
+        if (finishProbeWait) finishProbeWait();
+        probing = false;
         camView = null; camSince = null;
+        if (attaching) return attaching.then(camRelease, () => {});
         if (camCookie === null || !(px.cam || px.icam)) return Promise.resolve();
         const c = camCookie;
         return Promise.resolve().then(() => camCall('clientDetach', { cookie: c }))
@@ -518,6 +587,8 @@ function create(o) {
             view: pick(settings.view),                    // the view chosen (null: the car has none)
             views: avail().map((v) => ({ req: v.req, label: v.label, name: v.name, layout: v.layout })),
             checking: probing,
+            cameraBusy: !!cameraRequest || !!attaching,
+            retrying: !!autoTimer,
             autoCam: settings.autoCam !== false,
             length: settings.length, before: len()[0], after: len()[1],
             filled: filled(),       // seconds of usable frames held (Save from MIN_BEFORE on, shorter until "before")
@@ -532,16 +603,33 @@ function create(o) {
         rxConnect();
         // no screen open: the receiver's state is still read every 10 s (RECORDING / held seconds for the Record page)
         let ticks = 0;
-        setInterval(() => {
+        pollTimer = setInterval(() => {
             ticks++;
             if (api.active) poll(); else if (ticks % 5 === 0) rxStatus();
         }, POLL_MS);
     };
     api.save = saveClip; api.setView = setView; api.setCluster = setCluster; api.camEvent = camSeen;
-    api.detect = () => detect(camView !== null);        // Diagnostics: the camera as it was afterwards
+    api.detect = () => {
+        clearTimeout(autoTimer); autoTimer = null;
+        return detect(settings.autoCam !== false || camView !== null);
+    };
     api.probe = (views) => probe(views, 8000).then((seen) => (seen ? setView(settings.view) : null));
     api.setLength = (i) => { settings.length = LENGTHS[i] ? i : 1; return restartBuffer(); };   // restartBuffer saves it
     api.restart = restartBuffer; api.release = camRelease;
+    api.setAutoCam = (on) => {
+        settings.autoCam = !!on; saveSettings();
+        clearTimeout(autoTimer); autoTimer = null;
+        if (on) { autoRetries = 0; return setView(settings.view); }
+        changed(); return Promise.resolve(false);
+    };
+    api.stop = () => {
+        stopped = true;
+        clearTimeout(autoTimer); autoTimer = null;
+        clearTimeout(rxConnTimer);
+        clearInterval(pollTimer);
+        if (rxSock) rxSock.destroy();
+        return camRelease();
+    };
     return api;
 }
 

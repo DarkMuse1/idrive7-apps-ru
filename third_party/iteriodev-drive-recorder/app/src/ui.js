@@ -216,15 +216,17 @@ class Ui {
 
     recordValues() {
         const r = this.rec, vb = r.vb, last = this.clips[0], views = r.views || [], now = this.now();
-        let word, sub, dot, bad = false;                      // bad: not recording (the frame, the line, the segments say so)
+        let word, sub, dot, bad = vb !== 'RECORDING';         // bad: the receiver is not recording
         // 2.4.0: vb is the receiver's state - null (down), WAITING (no frames yet), RECORDING. A save no longer changes
         // it (the daemon keeps recording); the "Saving…" bar comes from lastState (savingAt) below.
         if (!vb) { word = 'Not available'; sub = r.verdict || 'The receiver is not running'; dot = FAINT; bad = true; }
-        else if (vb !== 'RECORDING') { word = 'Not recording'; sub = r.verdict || 'Waiting for camera frames'; dot = FAINT; bad = true; }
         else if (r.checking) { word = 'Checking the cameras…'; sub = 'Each camera view is asked for a few seconds'; dot = WARN; }
+        else if (r.cameraBusy) { word = 'Starting the cameras…'; sub = 'Waiting for the camera service'; dot = WARN; }
+        else if (r.retrying) { word = 'Cameras not ready'; sub = 'Camera start failed. Trying again shortly.'; dot = WARN; bad = true; }
         else if (!views.length) { word = 'No cameras'; sub = 'Settings > Diagnostics > Check cameras looks again'; dot = FAINT; bad = true; }
         else if (!r.camView) { word = 'Cameras off'; sub = 'Pick a camera view to start them'; dot = FAINT; }
         else if (!r.camOk) { word = 'Starting the cameras…'; sub = short(r.camMsg, 60); dot = WARN; }
+        else if (vb !== 'RECORDING') { word = 'Not recording'; sub = 'Cameras are on, waiting for video frames'; dot = WARN; bad = true; }
         else { word = 'Recording'; sub = RES[r.camLayout] || `${cap(LAYOUT[r.camLayout] || 'one camera')} · 1280 × 480 · 30 fps`; dot = CRIT; }   // (single: car 2.1.3)
         // saving: a bar in Save's place from the tap until the clip is found ("after" s on + 5 s); a refused save: why
         const saving = this.savingAt !== null, f = saving ? Math.max(0, Math.min(0.95, (now - this.savingAt) / ((r.after + 5) * 1000))) : 0;
@@ -239,8 +241,10 @@ class Ui {
             recWord: { text: up(word), color: bad ? DIM : TEXT },
             recSub: { text: sub, color: bad ? WARN : DIM },
             // the views this car records (2.1.0): segments; one: its name; none: said so
-            view: { items: views.map((x) => x.label).join(','), sel: Math.max(0, views.map((x) => x.req).indexOf(r.view)), hidden: views.length < 2, disabled: bad },
-            viewName: { hidden: views.length > 1, text: views.length ? views[0].name || views[0].label : 'No drive-recorder cameras found', color: views.length ? TEXT : WARN },
+            view: { items: views.map((x) => x.label).join(','), sel: Math.max(0, views.map((x) => x.req).indexOf(r.view)),
+                hidden: !views.length || (views.length === 1 && r.camView && r.camOk), disabled: !!r.checking || !!r.cameraBusy },
+            viewName: { hidden: views.length > 1 || (views.length === 1 && !(r.camView && r.camOk)),
+                text: views.length ? views[0].name || views[0].label : 'No drive-recorder cameras found', color: views.length ? TEXT : WARN },
             saveHint: failed ? { text: short(r.lastClip, 110), color: CRIT } : { text: saving ? `Recording the next ${r.after} s, then writing the clip.`
                 : r.filled < r.before && r.filled >= (r.minBefore || 5) ? `Save clip writes the last ${r.filled - 1} s (all the cameras have recorded so far) and the next ${r.after} s.`
                     : `Save clip writes the last ${r.before} s and the next ${r.after} s to the head unit.`, color: DIM },
@@ -248,7 +252,7 @@ class Ui {
             // 2.3.9: from minBefore s on a save is possible, with as many seconds before the tap as there are until "before"
             save: { hidden: saving, text: vb === 'RECORDING' && r.camOk && r.filled < r.before
                 ? (r.filled < (r.minBefore || 5) ? `Save clip in ${(r.minBefore || 5) - r.filled} s` : `Save clip · ${r.filled - 1} s before`) : 'Save clip',
-                disabled: vb !== 'RECORDING' || r.filled < (r.minBefore || 5) || (this.up && this.full) || !views.length },
+                disabled: vb !== 'RECORDING' || !r.camOk || r.checking || r.cameraBusy || r.filled < (r.minBefore || 5) || (this.up && this.full) || !views.length },
             saving: { hidden: !saving, value: f, right: `${Math.round(f * 100)} %` },
             lastThumb: { src: last ? `key:t:${last.id}` : '', hidden: !last },
             lastDurBg: { hidden: !last },
@@ -388,7 +392,7 @@ class Ui {
         if (el === 'nav' && typeof o.sel === 'number') { const p = TABS[o.sel]; if (p && p !== page) this.push({ do: 'tab', page: p }); }
         else if (el === 'view' && typeof o.sel === 'number') {
             const v = (this.rec.views || [])[o.sel];
-            if (v && (v.req !== this.rec.view || !this.rec.camView)) this.push({ do: 'view', view: v.req });
+            if (v && !this.rec.checking && !this.rec.cameraBusy && (v.req !== this.rec.view || !this.rec.camView || !this.rec.camOk)) this.push({ do: 'view', view: v.req });
         } else if (el === 'filter' && typeof o.sel === 'number') { this.filter = o.sel ? 1 : 0; this.gridTop = 0; }
         else if (el === 'grid') {                            // scrolled (top: the first row shown) or a card tapped
             if (typeof o.top === 'number') this.gridTop = Math.max(0, o.top);
