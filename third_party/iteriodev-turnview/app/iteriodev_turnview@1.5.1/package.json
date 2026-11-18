@@ -1,0 +1,46 @@
+{
+  "name": "iteriodev_turnview",
+  "version": "1.5.1",
+  "description": "Control panel of the Turn View tool (iDrive 7 and iDrive 8): the front camera in the cluster (iDrive 8: its widget, iDrive 7: the map view in the centre) with a blue turn sign near each turn; on / off, status, camera calibration; asks the camera ECU for the front view when no other app does; talks to the tool over its control socket; GPU renderer screens",
+  "private": false,
+  "main": "javascript/runner.js",
+  "mguHmi": [
+    "ID7",
+    "ID8"
+  ],
+  "mguRequires": {
+    "iteriodev-turnview": "0.8.0",
+    "mgu-deploy": "0.7.5"
+  },
+  "oapAppSettings": {
+    "maxDiskUsage": 20971520,
+    "cpuLimit": 60,
+    "memoryThresholdKB": 196608,
+    "priority": "PRIO_LOW",
+    "visibility": "FOREGROUND",
+    "latencyClass": "FOREGROUND",
+    "loggingId": "OAA5",
+    "userLoginRequired": false,
+    "backgroundPriority": 150,
+    "someipManifest": "manifest.json"
+  },
+  "files": [
+    "icon.png",
+    "javascript",
+    "manifest.json",
+    "package.json",
+    "permissions.json",
+    "renderer",
+    "rhmiData",
+    "npm-shrinkwrap.json"
+  ],
+  "dependencies": {
+    "oap-sdk": "24.10.2"
+  },
+  "mguLocalOnly": true,
+  "productName": "Turn View",
+  "author": "IterioDev",
+  "store": {
+    "description": "The front camera in the instrument cluster with a turn card and, near each turn, a blue turn sign (three chevrons pointing the way), from BMW Maps, Apple CarPlay or Android Auto; the camera shows with or without a route. iDrive 8: pick \"Turn View AR\" in the cluster's widget menu (from the car's next start after installing). iDrive 7: off at every start of the car; switch it on in this app and set Instrument cluster > Central display area to Map view. Do not use it together with Waze on cluster on the cluster: set Waze on cluster to HUD only (the cluster and the HUD show 2 videos at most). Calibrate the camera once on a straight road. Needs the Turn View tool from the same source and Cluster renderer from robertnisipeanu/idrive-apps (0.5.10 or newer). Does not need Drive Recorder."
+  }
+}

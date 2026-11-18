@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "id": "iteriodev_turnview",
+  "version": "1.5.1",
+  "tree": "iteriodev_turnview@1.5.1",
+  "modules": [
+    "src/main.js",
+    "src/online-host.js",
+    "src/camreq.js"
+  ],
+  "sdk": [
+    "oap-sdk/src/core/OnlineApp.js",
+    "oap-sdk/src/logging/logging",
+    "oap-sdk/src/someip/someipBuilders"
+  ],
+  "title": "Turn View",
+  "description": "The front camera in the instrument cluster with a turn card and, near each turn, a blue turn sign (three chevrons pointing the way), from BMW Maps, Apple CarPlay or Android Auto; the camera shows with or without a route. iDrive 8: pick \"Turn View AR\" in the cluster's widget menu (from the car's next start after installing). iDrive 7: off at every start of the car; switch it on in this app and set Instrument cluster > Central display area to Map view. Do not use it together with Waze on cluster on the cluster: set Waze on cluster to HUD only (the cluster and the HUD show 2 videos at most). Cali",
+  "mguHmi": [
+    "ID7",
+    "ID8"
+  ],
+  "needs": [
+    "renderer"
+  ],
+  "requires": {
+    "iteriodev-turnview": "0.8.0",
+    "mgu-deploy": "0.7.5"
+  },
+  "texts": {
+    "ru": {
+      "title": "Обзор поворота",
+      "description": "Камера переднего обзора в приборной панели с подсказкой поворота: у каждого поворота синий знак из трёх шевронов, указывающих направление (из навигации BMW, Apple CarPlay или Android Auto). Камера работает с маршрутом и без него. iDrive 8: выберите «Turn View AR» в меню виджетов панели (после перезапуска головного устройства). iDrive 7: при каждом запуске выключено — включите в приложении и задайте «Вид карты» для центральной зоны панели. Не использовать одновременно с «Waze на панели». Настройка и калибровка — в приложении. Рисуется службой Cluster renderer."
+    }
+  },
+  "uninstallable": true
+}

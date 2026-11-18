@@ -67,6 +67,10 @@
     {
       "id": "iteriodev-comfort",
       "path": "third_party/iteriodev-seats/comfort"
+    },
+    {
+      "id": "iteriodev-turnview",
+      "path": "third_party/iteriodev-turnview/tool"
     }
   ],
   "components": [
@@ -266,6 +270,11 @@
       "id": "iteriodev_seats",
       "kind": "app",
       "path": "third_party/iteriodev-seats/app"
+    },
+    {
+      "id": "iteriodev_turnview",
+      "kind": "app",
+      "path": "third_party/iteriodev-turnview/app"
     }
   ]
 }

@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "1.3.0",
+  "containers": {
+    "1000": {
+      "type": "logical",
+      "name": "logicalContainer",
+      "components": {
+        "1110": {
+          "type": "bookmark",
+          "name": "bookmark"
+        }
+      }
+    },
+    "3000": {
+      "type": "state",
+      "name": "home",
+      "components": {
+        "3220": {
+          "type": "title",
+          "name": "homeTitle",
+          "rows": [
+            {
+              "Text": {
+                "value": "SID_0",
+                "type": "StringId"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "4000": {
+      "type": "state",
+      "name": "calib",
+      "properties": {
+        "ParentState": {
+          "value": 3000,
+          "type": "UInt"
+        }
+      },
+      "components": {
+        "4220": {
+          "type": "title",
+          "name": "calibTitle",
+          "rows": [
+            {
+              "Text": {
+                "value": "SID_1",
+                "type": "StringId"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
