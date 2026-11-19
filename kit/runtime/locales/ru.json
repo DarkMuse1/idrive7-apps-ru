@@ -3135,5 +3135,13 @@
   "cold start": "холодный пуск",
   "WHEELSPIN ~": "ПРОБУКСОВКА ~",
   "Another ambient app is running": "Другая подсветка",
+  "Open door: the car's own warning (G20 / G26)": "Открытая дверь: штатное предупреждение (G20 / G26)",
+  "Start the strobe with the flasher lever": "Запуск строба рычагом аварийки",
+  "Lever start of the strobe also while driving (only for use on private property)": "Запуск строба рычагом и на ходу (только на частной территории)",
+  "50 ms": "50 мс",
+  "80 ms": "80 мс",
+  "100 ms": "100 мс",
+  "150 ms": "150 мс",
+  "IterioDev's Comfort tool has its ambient colour on and changes the same lights, so Ambient config has stopped changing them. Turn its colour and its drive-mode colours off in IterioDev's Ambient Light app (the seats keep working), or uninstall Comfort in the Store (Installed, Head-unit tools, Comfort).": "Служба Comfort от IterioDev включила свою подсветку и управляет теми же лентами, поэтому «Настройка подсветки» перестала их менять. Отключите её цвет и цвета режимов движения в приложении Ambient Light от IterioDev (сиденья продолжат работать) или удалите Comfort в Магазине (Установленные, Утилиты ГУ, Comfort).",
   "IterioDev's Comfort tool is running and changes the same lights, so Ambient config has stopped changing them. Uninstall Comfort in the Store (Installed, Head-unit tools, Comfort) to use Ambient config.": "Служба Comfort от IterioDev управляет подсветкой. Для работы здесь удалите Comfort через Магазин / Установленные / Утилиты ГУ."
 }

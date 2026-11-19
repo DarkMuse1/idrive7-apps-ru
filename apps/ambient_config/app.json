@@ -2,7 +2,7 @@
   "id": "ambient_config",
   "title": "Ambient config",
   "description": "Any colour on the ambient light, animations, and a look for each driving mode",
-  "version": "2.6.4",
+  "version": "2.7.11",
   "vendor": "custom",
   "loggingId": "OAA4",
   "iconGlyph": "ambient",
@@ -52,7 +52,8 @@
     },
     "de.bmw.infotainment.vehicle.Vehicle2": {
       "_optional": "the car's speed: driven (for a car that does not say it is locked and left), and the light show only standing still",
-      "statusCarSpeed2": "rs"
+      "statusCarSpeed2": "rs",
+      "statusLightStatus": "rs"
     }
   },
   "screens": [
@@ -141,6 +142,12 @@
       "hidden": true
     },
     {
+      "key": "doorCar",
+      "label": "Open door: the car's own warning (G20 / G26)",
+      "type": "bool",
+      "default": false
+    },
+    {
       "key": "hazardRed",
       "label": "Hazard red",
       "type": "bool",
@@ -150,6 +157,12 @@
     {
       "key": "strobe",
       "label": "High beam strobe and light show (only for use on private property)",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "strobeLeverDriving",
+      "label": "Lever start of the strobe also while driving (only for use on private property)",
       "type": "bool",
       "default": false
     },
@@ -290,6 +303,13 @@
           "In turn"
         ]
       ]
+    },
+    {
+      "key": "strobeLever",
+      "label": "Start the strobe with the flasher lever",
+      "type": "bool",
+      "default": false,
+      "hidden": true
     },
     {
       "key": "strobeRate",

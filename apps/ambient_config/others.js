@@ -1,13 +1,19 @@
 'use strict';
 /**
- * Comfort also serves Seats. Its socket alone does not mean its ambient lighting is enabled.
- * Read the persisted settings without joining the control socket's client set: connecting there can probe
- * seats, and keeping an extra client alive affects when Comfort stops a manual seat move.
- * Comfort defaults to ambient off, including a fresh installation without data.json. Driving-mode colours
- * can enable it independently of the main switch. Unreadable settings retain the conflict guard.
+ * others.js - another ambient light app's service running beside this app. IterioDev's Comfort tool (the service
+ * behind his Ambient Light and Seats apps, github.com/IterioDev/car-apps) writes the same light modules through the
+ * body controller, with its own colours every 2 minutes - but only while its own ambient colour or its drive-mode
+ * colours are on (its data.json "ambient": on / modes.on). Its control socket is there exactly while it runs (systemd
+ * RuntimeDirectory), and apps can see it (his apps connect to it).
+ *
+ * Comfort running for the seats alone (its ambient off) leaves the lights to this app: o.comfort is true only while
+ * Comfort runs AND its ambient is on, or its settings cannot be read (then, as before, this app stands aside). Its
+ * data.json is read, not its socket: a connection makes it ask the seat modules again, and its last client leaving
+ * stops a seat move.
  *
  *   const o = new Others({ log }); o.start();
- *   o.comfort -> light writes must wait        o.unknown -> settings could not be checked
+ *   o.comfort -> true while Comfort runs with its ambient on        o.running -> Comfort runs at all
+ *   o.on('change', fn)
  */
 const EventEmitter = require('events');
 const fs = require('fs');
@@ -15,48 +21,43 @@ const fs = require('fs');
 const COMFORT_SOCK = process.env.MGU_AMBIENT_COMFORT || '/run/iteriodev-comfort/ctl.sock';
 const COMFORT_DATA = process.env.MGU_AMBIENT_COMFORT_DATA || '/var/opt/iteriodev-comfort/data.json';
 const EVERY_MS = 10000;
-// Comfort supplies colours for modes 1-10 unless a saved entry explicitly disables one with null.
-const MODE_COLOURS = { 1: true, 2: true, 3: true, 4: true, 5: true, 6: true, 7: true, 8: true, 9: true, 10: true };
 
 class Others extends EventEmitter {
     constructor(o) {
         super();
-        this.log = o && o.log; this.comfort = false; this.unknown = false; this._timer = null;
-        this._hadData = false;
+        this.log = o && o.log; this.comfort = false; this._timer = null;
     }
 
     start() { this.check(); this._timer = setInterval(() => this.check(), EVERY_MS); return this; }
 
     stop() { clearInterval(this._timer); }
 
+    /** Comfort's ambient: true (on: its colour or its drive-mode colours), false (off), null (cannot be read) */
+    static lightsOn() {
+        try {
+            const a = JSON.parse(fs.readFileSync(COMFORT_DATA, 'utf8')).ambient;
+            if (!a || typeof a !== 'object') return false;          // never set: its default is off
+            return a.on === true || !!(a.modes && a.modes.on === true);
+        } catch (e) { return e.code === 'ENOENT' ? false : null; }  // no file yet: nothing set, off
+    }
+
     check() {
-        let running = false, on = false, unknown = false;
-        try { running = fs.statSync(COMFORT_SOCK).isSocket(); } catch (e) {
-            unknown = e.code !== 'ENOENT' && e.code !== 'ENOTDIR';
+        let running = false;
+        try { running = fs.statSync(COMFORT_SOCK).isSocket(); } catch (e) { /* not running */ }
+        const lights = running ? Others.lightsOn() : false;
+        const on = running && lights !== false;
+        if (running !== this.running && this.log) {
+            if (running) this.log.info('IterioDev\'s Comfort tool is running');
+            else if (this.running !== undefined) this.log.info('IterioDev\'s Comfort tool is no longer running');
         }
-        if (running) {
-            try {
-                const data = JSON.parse(fs.readFileSync(COMFORT_DATA, 'utf8'));
-                if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('invalid Comfort settings');
-                const ambient = data.ambient || {};
-                if (typeof ambient !== 'object' || Array.isArray(ambient)) throw new Error('invalid ambient settings');
-                this._hadData = true;
-                const modes = ambient.modes || {}, colours = Object.assign({}, MODE_COLOURS, modes.rgb);
-                on = !!ambient.on || (modes.on === true && Object.keys(colours).some((mode) => !!colours[mode]));
-            } catch (e) {
-                // Before the first save, Comfort uses its disabled defaults. A previously read file disappearing
-                // does not prove that the running service has discarded its in-memory settings.
-                unknown = e.code !== 'ENOENT' || this._hadData;
-                on = unknown;
-            }
-        } else if (!unknown) this._hadData = false;
-        on = on || unknown;
-        if (on === this.comfort && unknown === this.unknown) return;
-        this.comfort = on; this.unknown = unknown;
+        this.running = running;
+        if (on === this.comfort) return;
+        this.comfort = on;
         if (this.log) {
-            if (unknown) this.log.warn('Comfort ambient settings could not be read; ambient writes are paused');
-            else if (on) this.log.warn('Comfort ambient lighting is enabled; ambient writes are paused');
-            else this.log.info('Comfort ambient lighting is disabled or its service is stopped');
+            if (on) this.log.warn(lights === null
+                ? 'IterioDev\'s Comfort tool is running and its settings cannot be read: it may write the ambient lights too, so this app stands aside'
+                : 'IterioDev\'s Comfort tool writes the ambient lights (its own colour or its drive-mode colours are on), so the colours jump between the two apps');
+            else this.log.info('IterioDev\'s Comfort tool no longer writes the ambient lights');
         }
         this.emit('change');
     }

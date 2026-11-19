@@ -15,7 +15,8 @@
  * Everything goes to the car as it is picked. The lights are driven through the body controller (lights.js); a car
  * whose body controller does not answer keeps BMW's own colours (ambient.js), offered on the Colour tab.
  * It runs from the platform's start (app.json "autostart"): the look and the driving modes work with the app closed.
- * While Comfort's ambient lighting is enabled (others.js), light writes wait and the UI explains the conflict.
+ * With IterioDev's Comfort tool writing the same lights (others.js: its own ambient colour on), it stands aside (no
+ * light writes until that is off or Comfort is gone) and the Colour and Animations tabs say so in red and recommend uninstalling it.
  */
 const mgu = require('./kit/mgu');
 const G = require('./kit/gauges');
@@ -27,8 +28,9 @@ const { Lights } = require('./lights');
 const { Control } = require('./control');
 const { Others } = require('./others');
 const { Strobe, gateChecks, gateWhy } = require('./strobe');
+const { Lever, beamOf } = require('./lever');
 const Parked = require('./kit/parked');
-const { t: translate, getLanguage } = require('./kit/i18n');
+const { t: translate } = require('./kit/i18n');
 const { drawCabin } = require('./cabin');
 const { sample } = require('./lin');
 const S = require('./scenes');
@@ -60,6 +62,17 @@ const DOOR_FIELDS = { statusDoorSwitchDRD: 'driver front', statusDoorSwitchPSD: 
 const doorsOf = (v) => Object.keys(DOOR_FIELDS).filter((k) => v && (v[k] === 1 || /_OFFEN$/.test(String(v[k])))).map((k) => DOOR_FIELDS[k]);
 const DAY_NIGHT = { KEINE_AENDERUNG: 0, TAG: 1, NACHT: 2, SIGNAL_UNGUELTIG: 3 };
 
+/* The strobe's options as the Strobe page has them (its buttons' settings), for its Start and the flasher lever. */
+function strobeOptions(settings, strobe) {
+    const cyc = (key, vals, def) => { const v = String(settings.get(key) || def); return vals.indexOf(v) >= 0 ? v : def; };
+    const pattern = ['both', 'alternate', 'police'].indexOf(settings.get('strobePattern')) >= 0 ? settings.get('strobePattern') : 'police';
+    const o = { lights: strobe && strobe.patterns && settings.get('strobeLights') === 'high' ? 'high' : 'all', pattern,
+        rate: settings.get('strobeRate') || 'normal', burst: cyc('policeBurst', ['1', '2', '3', '4'], '4'),
+        flashMs: cyc('strobeFlashMs', ['50', '80', '100', '150'], '80'), order: cyc('policeOrder', ['lbr', 'lrb', 'lr'], 'lbr') };
+    if (strobe && strobe.kind === 'fn') o.every = +cyc('strobeEvery', ['0', '250', '333', '500', '1000'], '0');
+    return o;
+}
+
 async function background(bg) {
     const { settings, signals, log } = bg;
     const ambient = new Ambient({ settings, signals, log });
@@ -68,11 +81,6 @@ async function background(bg) {
     diag.quiet = true; diag.busyLog = false;
     // the lights found at an earlier start: the colour goes out at once, and the buses are read again after it
     const lights = new Lights({ diag, log, known: settings.get('lightsKnown') });
-    const others = new Others({ log }).start();
-    // Apply the conflict guard before a saved colour can start writing at startup.
-    const besideComfort = () => lights.hold('comfort', others.comfort);
-    others.on('change', besideComfort);
-    besideComfort();
     const control = new Control({ settings, lights, ambient, log });
     control.start();
     // with the lights answering, the driving modes' looks replace BMW's colours by mode (ambient.js)
@@ -136,7 +144,18 @@ async function background(bg) {
         if (key === 'nightDim') control.night(control._night);
         if (key === 'follow') control.apply();
         if (key === 'turnGlow' || key === 'doorRed' || key === 'hazardRed' || key === 'drive') control.signals();
+        if (key === 'doorCar') control.carDoorSetting();
     });
+    const others = new Others({ log }).start();
+    // IterioDev's Comfort tool writes the same lights while its own ambient colour is on: then ours stand aside (no
+    // writes, so the two don't fight and the lights don't jump), and carry on once it is off or gone. Comfort running
+    // for the Seats app alone (its ambient off) leaves the lights to us (others.js).
+    const besideComfort = () => {
+        lights.hold('comfort', others.comfort);
+        if (others.comfort) log.warn('lights: IterioDev\'s Comfort tool has its ambient on, Ambient config stands aside until it is off or gone');
+    };
+    others.on('change', besideComfort);
+    besideComfort();
     // the high beam strobe and the light show (strobe.js): only for use on private property, behind its setting,
     // with someone in the car; the light show also with the car standing still (kit/parked.js, checked again on every
     // step: it stops when the car moves off); why not, or null
@@ -154,7 +173,38 @@ async function background(bg) {
     strobe.on('learned', (c) => { try { if (chFile) fs.writeFileSync(chFile, JSON.stringify(c)); } catch (e) { log.warn('strobe: ' + e); } });
     const findStrobe = () => { if (settings.get('strobe') === true && !strobe.kind) strobe.find().catch((e) => log.warn('strobe: ' + e)); };
     findStrobe();
-    settings.onChange((key) => { if (key === 'strobe') { if (settings.get('strobe') === true) findStrobe(); else strobe.stop(); } });
+    // the flasher lever (lever.js): a short pull while parked (also while driving with strobeLeverDriving, for private
+    // property) starts the strobe as the Strobe page has it, while its Lever start is on (off until switched on), and another pull while it flashes stops it; the
+    // light status read only from then on
+    const lever = new Lever();
+    let leverWatch = null;
+    const watchLever = () => {
+        if (leverWatch || settings.get('strobeLever') !== true) return;
+        leverWatch = Promise.resolve(signals.watch('de.bmw.infotainment.vehicle.Vehicle2', '1', {
+            statusLightStatus: (v) => {
+                const t = Date.now();
+                if (!lever.beam(beamOf(v && v.statusMainBeam_headlightFlasher), t)) return;
+                // a pull while the strobe flashes stops it (however it was started; stopping needs no checks)
+                if (strobe.running === 'strobe') {
+                    lever.cool(t);
+                    log.info('strobe: stopped with the flasher lever');
+                    strobe.stop();
+                    return;
+                }
+                // (while driving only with its setting, for private property)
+                const parkedOk = parked.moving() === false || settings.get('strobeLeverDriving') === true;
+                if (settings.get('strobeLever') !== true || !strobe.kind || strobe.running || gate('strobe') !== null || !parkedOk) return;
+                lever.cool(t);
+                log.info('strobe: started with the flasher lever');
+                strobe.start(strobeOptions(settings, strobe)).catch((e) => log.warn('strobe: ' + e));
+            },
+        }, log, { pollMs: 500 })).catch((e) => { leverWatch = null; log.warn('flasher lever: ' + (e && e.message || e)); });
+    };
+    watchLever();
+    settings.onChange((key) => {
+        if (key === 'strobe') { if (settings.get('strobe') === true) findStrobe(); else strobe.stop(); }
+        if (key === 'strobeLever') watchLever();
+    });
     // (the car locked and left mid-flash: the gate says no at the next step and the strobe stops)
     return { ambient, lights, control, active, others, strobe, checks };
 }
@@ -210,23 +260,17 @@ mgu.run({
         const stepHue = (d) => { const c = partColour(look()); return setRgb(S.hsv(S.stepHue(S.hueOf(c.rgb), d), 1, 1)); };
 
         // another ambient app's service writing the same lights: says so in place of the status, wrapped to width w
-        const COMFORT_WARNING = {
-            en: {
-                active: 'Comfort lighting is enabled. Turn off its lighting and driving-mode colours to use Ambient config.',
-                unknown: 'Comfort settings could not be read. Ambient light control is paused.'
-            },
-            ru: {
-                active: 'В Comfort включена подсветка. Отключите её и цвета по режимам движения.',
-                unknown: 'Не удалось прочитать настройки Comfort. Управление подсветкой приостановлено.'
-            }
-        };
+        const COMFORT_WARNING = 'IterioDev\'s Comfort tool has its ambient colour on and changes the same lights, so Ambient config ' +
+            'has stopped changing them. Turn its colour and its drive-mode colours off in IterioDev\'s Ambient Light app (the seats ' +
+            'keep working), or uninstall Comfort in the Store (Installed, Head-unit tools, Comfort).';
+        // in red, so it is seen: nothing on these tabs reaches the lights while Comfort runs
         function warnOthers(cv, t, x, y, w) {
-            const head = others.unknown ? 'Comfort' : cv.textWidth(translate('Another ambient app is running'), 22, { font: 'bold', literal: true }) <= w
+            const head = cv.textWidth(translate('Another ambient app is running'), 22, { font: 'bold', literal: true }) <= w
                 ? 'Another ambient app is running' : 'Another ambient app';
             cv.text(head, x, y, 22, t.crit, { font: 'bold' });
             const lines = [];
-            const words = COMFORT_WARNING[getLanguage()] || COMFORT_WARNING.en;
-            words[others.unknown ? 'unknown' : 'active'].split(' ').forEach((word) => {
+            // translated whole before wrapping, so a localized build wraps its own sentence
+            translate(COMFORT_WARNING).split(' ').forEach((word) => {
                 const last = lines.length - 1, joined = last >= 0 ? lines[last] + ' ' + word : word;
                 if (last >= 0 && cv.textWidth(joined, 18, { literal: true }) <= w) lines[last] = joined; else lines.push(word);
             });
@@ -417,6 +461,10 @@ mgu.run({
                 cv.text(label + (!ok && why ? ' · ' + why : ''), 70, y, 20, ok ? t.text : t.dim);
             });
             cv.text('Only for use on private property.', 44, 222, 20, t.warn, { font: 'bold' });
+            // a short pull of the flasher lever while parked starts it (lever.js), only while this is on
+            const lever = settings.get('strobeLever') === true;
+            G.button(cv, t, 520, 190, 220, 42, lever ? 'Lever start: On' : 'Lever start: Off', () => { settings.set('strobeLever', !lever); return redraw(); },
+                { primary: lever, key: 'strobe-lever', busy: !strobe });
             if (strobe && strobe.note) cv.text(strobe.note, 44, 248, 18, strobe.noteType === 'warn' ? t.warn : t.dim);
             const pat = ['both', 'alternate', 'police'].indexOf(settings.get('strobePattern')) >= 0 ? settings.get('strobePattern') : 'police';
             const rate = settings.get('strobeRate') || 'normal';
@@ -477,7 +525,7 @@ mgu.run({
             }
             const on = strobe && strobe.running === 'strobe';
             G.button(cv, t, 520, 428, 220, 48, on ? 'Stop' : 'Start strobe', () => {
-                if (on) strobe.stop(); else strobe.start(Object.assign({ lights, pattern: pat, rate, burst, flashMs, order }, timed ? { every: +every } : {})).catch((e) => log.warn('strobe: ' + e));
+                if (on) strobe.stop(); else strobe.start(strobeOptions(settings, strobe)).catch((e) => log.warn('strobe: ' + e));
                 return redraw();
             }, { primary: on, key: 'strobe-go', confirm: !on, busy: !strobe || !strobe.kind || strobe.running === 'show' || strobe.running === 'learn' });
 
