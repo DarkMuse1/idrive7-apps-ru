@@ -1,0 +1,154 @@
+{
+  "camera-500.m4a": {
+    "text": "Внимание, впереди камера",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 1.7493333333333334,
+    "sha256": "62e300b0cc21add6e601d1112147f1c049a975ee067084d52c967a741439c4e9"
+  },
+  "camera-200.m4a": {
+    "text": "Повторное предупреждение. Камера через двести метров",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 3.2426666666666666,
+    "sha256": "c86f1024629d2bb6dbf1d88bf367144ecba082ddcde13cce41f21ee556ec1f63"
+  },
+  "strelka.m4a": {
+    "text": "Внимание, впереди комплекс Стрелка",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 2.56,
+    "sha256": "c70e72592d6aa1190944fbf4b927b1d78f650bc839b77447844540e5e0a67565"
+  },
+  "strelka-200.m4a": {
+    "text": "Комплекс Стрелка через двести метров",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 2.2186666666666666,
+    "sha256": "bf44bc1da03e1b26d6f1e9c05797ea3d17dd5d77009dce8160ce789f4c8addac"
+  },
+  "avtodoria.m4a": {
+    "text": "Внимание, впереди комплекс Автодория",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 2.816,
+    "sha256": "e8226eed0a16c33838f4eaccbf0d11861e96e480cef6229c99fc0cad5c515ab6"
+  },
+  "avtodoria-200.m4a": {
+    "text": "Комплекс Автодория через двести метров",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 2.3466666666666667,
+    "sha256": "1ebc18c47a6b78e4608caa1f415d71d7f69ed61669ffc485c50303b0f562d62d"
+  },
+  "avtodoria-average.m4a": {
+    "text": "Внимание, впереди Автодория. Контроль средней скорости",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 3.6266666666666665,
+    "sha256": "25e4c7b5782d8e44c624eab3e5f657dea5957b27154f91de71255744fb9a9192"
+  },
+  "avtodoria-average-200.m4a": {
+    "text": "Автодория через двести метров. Контроль средней скорости",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 3.3706666666666667,
+    "sha256": "3b40f4187565a11533b9853ceb2175f62d4dccc415ebae77809c93236f734c71"
+  },
+  "dps-post.m4a": {
+    "text": "Внимание, впереди пост дэпээс",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 2.56,
+    "sha256": "bc81e54776c7a018a9912385fa12ef4bbd7faa5a19c85cad39a37fa8eefbb383"
+  },
+  "dps-post-200.m4a": {
+    "text": "Пост дэпээс через двести метров",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 2.176,
+    "sha256": "b97fb86499090d964e8eeed383283d4fd7ceace9f63ec925c677044cf2b83c84"
+  },
+  "dps-stationary.m4a": {
+    "text": "Внимание, впереди стационарный пост дэпээс",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 2.944,
+    "sha256": "d5ee4d1d555258126ff945b36e52b403590cb224bde66b44dd628d784dabe53f"
+  },
+  "dps-stationary-200.m4a": {
+    "text": "Стационарный пост дэпээс через двести метров",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 2.9013333333333335,
+    "sha256": "6f6554b3b80fe7d43bfd3b0e3c210a320b7cfa40b1f5c67dcb11a0de627d5c41"
+  },
+  "average-end.m4a": {
+    "text": "Контроль средней скорости завершён",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 2.005333333333333,
+    "sha256": "9b84b2c64eb4b80e2164a52fe0c1f527cd9e032e7de9264432ba2cb33f547fb3"
+  },
+  "beeper-choice-1.m4a": {
+    "durationSeconds": 1.0,
+    "sha256": "4f0a0f0a033fb723ee8934171dbf8e5becd6e7792d4be07daf8aaf4a7321f372",
+    "text": "Бипер 1",
+    "provider": "user audio"
+  },
+  "beeper-choice-2.m4a": {
+    "durationSeconds": 1.0,
+    "sha256": "fe781b06ff4f87abb85e206257851e5568715b29437030f5b67bcc3cd3d23588",
+    "text": "Бипер 2",
+    "provider": "user audio"
+  },
+  "beeper-choice-3.m4a": {
+    "durationSeconds": 1.0,
+    "sha256": "7779e179c366e13bf2f08b64cc7466c4ae6618d4ec0f5835ea8f679e17a29e04",
+    "text": "Бипер 3",
+    "provider": "user audio"
+  },
+  "beeper-choice-4.m4a": {
+    "durationSeconds": 1.0,
+    "sha256": "b606e26fe98d743ff74ead94265e92b45bdecafbcb1590fd7554a2bb03c7fc97",
+    "text": "Бипер 4",
+    "provider": "user audio"
+  },
+  "beeper-choice-5.m4a": {
+    "durationSeconds": 1.0,
+    "sha256": "8e02fb32d0d39637349df27d4400e946d4f819df6206ca54965752cd805cbe74",
+    "text": "Бипер 5",
+    "provider": "user audio"
+  },
+  "beeper-choice-6.m4a": {
+    "durationSeconds": 1.0,
+    "sha256": "1686bef8f843ab8ee8c4c2cdf816cf8609b1381a2d48207a426b6510946c5c71",
+    "text": "Бипер 6",
+    "provider": "user audio"
+  },
+  "beeper-choice-7.m4a": {
+    "durationSeconds": 1.0,
+    "sha256": "80970be24b51d4c586f9de623b29e8e29928fe4f63923f5f5501bd9cd7a9e599",
+    "text": "Бипер 7",
+    "provider": "user audio"
+  },
+  "beeper-choice-8.m4a": {
+    "durationSeconds": 1.0,
+    "sha256": "885fe517daee69ac3ca540db5f2c165efc875c0a810c9aa78267d004d759d823",
+    "text": "Бипер 8",
+    "provider": "user audio"
+  }
+}

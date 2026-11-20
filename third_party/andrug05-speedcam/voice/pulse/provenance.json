@@ -1,0 +1,726 @@
+{
+  "experimental": true,
+  "upstream": "PulseAudio 5.0 (Debian Jessie compatibility build)",
+  "patch": "PT_INTERP /lib64 -> /lib; no ELF code changes",
+  "packages": [
+    {
+      "Package": "libtdb1",
+      "Version": "1.3.6-0+deb8u1",
+      "Filename": "pool/main/t/tdb/libtdb1_1.3.6-0+deb8u1_amd64.deb",
+      "SHA256": "4799d4f4a90455515d3cdaba9ec5aa426c39ab1f7a3c350b570c14f03f6a62e5"
+    },
+    {
+      "Package": "libx11-xcb1",
+      "Version": "2:1.6.2-3+deb8u1",
+      "Filename": "pool/main/libx/libx11/libx11-xcb1_1.6.2-3+deb8u1_amd64.deb",
+      "SHA256": "1ef8ed1432b77d0be013c58b373ba5c776ac7392970b68bfe5443ee9b5c0b2a3"
+    },
+    {
+      "Package": "pulseaudio",
+      "Version": "5.0-13",
+      "Filename": "pool/main/p/pulseaudio/pulseaudio_5.0-13_amd64.deb",
+      "SHA256": "589f8addf0c165af3a039c3ee41829a31e805b84ffebf23f32a4ebb3de3fe633"
+    },
+    {
+      "Package": "pulseaudio-utils",
+      "Version": "5.0-13",
+      "Filename": "pool/main/p/pulseaudio/pulseaudio-utils_5.0-13_amd64.deb",
+      "SHA256": "74376aad1c44148b7c89c3689160485f00ce347616e77acd335cd59f258574d0"
+    },
+    {
+      "Package": "libpulse0",
+      "Version": "5.0-13",
+      "Filename": "pool/main/p/pulseaudio/libpulse0_5.0-13_amd64.deb",
+      "SHA256": "4958457ad7edff49073b77c7d86f93c3f4cd67c294a69082b57ea026f544124b"
+    },
+    {
+      "Package": "libjson-c2",
+      "Version": "0.11-4",
+      "Filename": "pool/main/j/json-c/libjson-c2_0.11-4_amd64.deb",
+      "SHA256": "bde89cf8ff7876889e17fda0245f4dd3e829b6f89e617272637c1692c84dd694"
+    },
+    {
+      "Package": "libwrap0",
+      "Version": "7.6.q-25",
+      "Filename": "pool/main/t/tcp-wrappers/libwrap0_7.6.q-25_amd64.deb",
+      "SHA256": "ee84eb5c88b2861337e8a695fdd4181c9f2757359cdd4e7eb1e70988ecf572cf"
+    },
+    {
+      "Package": "libsystemd0",
+      "Version": "215-17+deb8u7",
+      "Filename": "pool/main/s/systemd/libsystemd0_215-17+deb8u7_amd64.deb",
+      "SHA256": "ff84ae8db25dc8f4218c6a2161439a6f5f73f44d7115b8c930612657b865fb69"
+    },
+    {
+      "Package": "libudev1",
+      "Version": "215-17+deb8u7",
+      "Filename": "pool/main/s/systemd/libudev1_215-17+deb8u7_amd64.deb",
+      "SHA256": "35cbd0325c5300e86d0bb5c5bf3a538635b78b56e503dc2f22826b2d53343fcd"
+    },
+    {
+      "Package": "libcap2",
+      "Version": "1:2.24-8",
+      "Filename": "pool/main/libc/libcap2/libcap2_2.24-8_amd64.deb",
+      "SHA256": "3a6e19c975e594b5f251be2e1ac75da15515db7b324d2b62de3f823857eb3554"
+    },
+    {
+      "Package": "libasyncns0",
+      "Version": "0.8-5",
+      "Filename": "pool/main/liba/libasyncns/libasyncns0_0.8-5_amd64.deb",
+      "SHA256": "def39be949207b17a2ce75e8fdc2cab05d05b80c868a7ff9c51fb6372a13b924"
+    },
+    {
+      "Package": "libdbus-1-3",
+      "Version": "1.8.22-0+deb8u1",
+      "Filename": "pool/main/d/dbus/libdbus-1-3_1.8.22-0+deb8u1_amd64.deb",
+      "SHA256": "5902cf8264fe4630832bf88704fadf9f48c57cc64a3aee8db03aa123d89492ca"
+    },
+    {
+      "Package": "libsndfile1",
+      "Version": "1.0.25-9.1+deb8u1",
+      "Filename": "pool/main/libs/libsndfile/libsndfile1_1.0.25-9.1+deb8u1_amd64.deb",
+      "SHA256": "380f699ef71bf56689d85b3870c198ba233dfb631b9c0318e1107be507fecaff"
+    },
+    {
+      "Package": "libsamplerate0",
+      "Version": "0.1.8-8",
+      "Filename": "pool/main/libs/libsamplerate/libsamplerate0_0.1.8-8_amd64.deb",
+      "SHA256": "35c0351dbae4468bbb30b70f7e3431acc1b923b56cffca3a1b1c43bfdac95868"
+    },
+    {
+      "Package": "libspeexdsp1",
+      "Version": "1.2~rc1.2-1",
+      "Filename": "pool/main/s/speex/libspeexdsp1_1.2~rc1.2-1_amd64.deb",
+      "SHA256": "2c167859760ead0583498fff977ddab97479dfd536d35d3c16c693579f4ca239"
+    },
+    {
+      "Package": "liborc-0.4-0",
+      "Version": "1:0.4.22-1",
+      "Filename": "pool/main/o/orc/liborc-0.4-0_0.4.22-1_amd64.deb",
+      "SHA256": "71ec2d256d265f5857985b71b368b917edc912f530d5ea9d88c76f4589efca8c"
+    },
+    {
+      "Package": "libltdl7",
+      "Version": "2.4.2-1.11+b1",
+      "Filename": "pool/main/libt/libtool/libltdl7_2.4.2-1.11+b1_amd64.deb",
+      "SHA256": "a1ff3f476eb52161a65ab879aa9b56fff32dac986642ffc885d4cec714a6f577"
+    },
+    {
+      "Package": "libx11-6",
+      "Version": "2:1.6.2-3+deb8u1",
+      "Filename": "pool/main/libx/libx11/libx11-6_1.6.2-3+deb8u1_amd64.deb",
+      "SHA256": "380aa38372e949f74b57e962146626aae847850ed4f1fcb83784086f239d50c3"
+    },
+    {
+      "Package": "libxcb1",
+      "Version": "1.10-3+b1",
+      "Filename": "pool/main/libx/libxcb/libxcb1_1.10-3+b1_amd64.deb",
+      "SHA256": "07bf131f4f0f8a9f1a023ab88cce3a1d12cc7222d3c7f08f00b60a3699af5188"
+    },
+    {
+      "Package": "libxau6",
+      "Version": "1:1.0.8-1",
+      "Filename": "pool/main/libx/libxau/libxau6_1.0.8-1_amd64.deb",
+      "SHA256": "b03b2d0d400c2002a2d38300bd6630306abb0ff325c3d4a4447ecceb58335228"
+    },
+    {
+      "Package": "libxdmcp6",
+      "Version": "1:1.1.1-1+b1",
+      "Filename": "pool/main/libx/libxdmcp/libxdmcp6_1.1.1-1+b1_amd64.deb",
+      "SHA256": "6758bc820616254634fdd2354a2691e40d2973d6bf3a9c12417f02770f75081c"
+    },
+    {
+      "Package": "libogg0",
+      "Version": "1.3.2-1",
+      "Filename": "pool/main/libo/libogg/libogg0_1.3.2-1_amd64.deb",
+      "SHA256": "dc596aeecf952e2fba3b1650e50a146a595c8032aec5776c1711bcc4fb075ad0"
+    },
+    {
+      "Package": "libflac8",
+      "Version": "1.3.0-3",
+      "Filename": "pool/main/f/flac/libflac8_1.3.0-3_amd64.deb",
+      "SHA256": "a896332bb1d649b0ff8997d9f17a5c40275451d084de6227a3a4ef0269f5e4b0"
+    },
+    {
+      "Package": "libvorbis0a",
+      "Version": "1.3.4-2+deb8u1",
+      "Filename": "pool/main/libv/libvorbis/libvorbis0a_1.3.4-2+deb8u1_amd64.deb",
+      "SHA256": "10d5893b5c737c4f2f5aa0eeb7728236812d78f3776cfd5815e3d5dcba8da763"
+    },
+    {
+      "Package": "libvorbisenc2",
+      "Version": "1.3.4-2+deb8u1",
+      "Filename": "pool/main/libv/libvorbis/libvorbisenc2_1.3.4-2+deb8u1_amd64.deb",
+      "SHA256": "82d60d1fc34ec4f8e29cadbab9b7dbea71e4b179f7ce725297bcbbd1bfff7fce"
+    },
+    {
+      "Package": "libgcrypt20",
+      "Version": "1.6.3-2+deb8u4",
+      "Filename": "pool/main/libg/libgcrypt20/libgcrypt20_1.6.3-2+deb8u4_amd64.deb",
+      "SHA256": "9f9a582544a8922e92b7cca440d59a86f903fcb1e4e3c33a2050866f21159861"
+    },
+    {
+      "Package": "liblzma5",
+      "Version": "5.1.1alpha+20120614-2+b3",
+      "Filename": "pool/main/x/xz-utils/liblzma5_5.1.1alpha+20120614-2+b3_amd64.deb",
+      "SHA256": "a60661f537292862f9bfa4c421df5af126da5032def818a0bf38c49b68656328"
+    },
+    {
+      "Package": "libgpg-error0",
+      "Version": "1.17-3",
+      "Filename": "pool/main/libg/libgpg-error/libgpg-error0_1.17-3_amd64.deb",
+      "SHA256": "7b156391cb5aef83df692bf4f966313d5fbd96481945dc65b384471067d16124"
+    },
+    {
+      "Package": "libattr1",
+      "Version": "1:2.4.47-2",
+      "Filename": "pool/main/a/attr/libattr1_2.4.47-2_amd64.deb",
+      "SHA256": "ebe8b6a4c62b88db772f05c05b50d8b9f66f4d46488c547bda5042ae36865d88"
+    },
+    {
+      "Package": "libice6",
+      "Version": "2:1.0.9-1+b1",
+      "Filename": "pool/main/libi/libice/libice6_1.0.9-1+b1_amd64.deb",
+      "SHA256": "6b6aefe57b52ac77dc0891c96f6f00472fdd1e9d14128aa5a60e337c5602158d"
+    },
+    {
+      "Package": "libsm6",
+      "Version": "2:1.2.2-1+b1",
+      "Filename": "pool/main/libs/libsm/libsm6_1.2.2-1+b1_amd64.deb",
+      "SHA256": "4e2239321aaeffef7dc4a4b4196bb3b3d3b11a4b3b613818e18cc96ab9ee1508"
+    },
+    {
+      "Package": "libuuid1",
+      "Version": "2.25.2-6",
+      "Filename": "pool/main/u/util-linux/libuuid1_2.25.2-6_amd64.deb",
+      "SHA256": "ab7821a322a6c137eb7b36297eba11a5d2a3d3c27e480a238ff4538898570fb9"
+    },
+    {
+      "Package": "libxtst6",
+      "Version": "2:1.2.2-1+deb8u1",
+      "Filename": "pool/main/libx/libxtst/libxtst6_1.2.2-1+deb8u1_amd64.deb",
+      "SHA256": "caf381b445c684c1d8b46e14750bba16999ab71067ec823060c70778d19d3300"
+    },
+    {
+      "Package": "libxext6",
+      "Version": "2:1.3.3-1",
+      "Filename": "pool/main/libx/libxext/libxext6_1.3.3-1_amd64.deb",
+      "SHA256": "5105f77289a7e08faaf3bb4c16c6945cafca65b9bdb4792fef820045ab43e568"
+    },
+    {
+      "Package": "libxi6",
+      "Version": "2:1.7.4-1+deb8u1",
+      "Filename": "pool/main/libx/libxi/libxi6_1.7.4-1+deb8u1_amd64.deb",
+      "SHA256": "a99de627a07f54bc40e5dc77e3ca7e9d9b5619e068f1bb303f86edd138d6d037"
+    }
+  ],
+  "systemLibraries": [
+    "ld-linux-x86-64.so.2",
+    "libasound.so.2",
+    "libc.so.6",
+    "libdl.so.2",
+    "libgcc_s.so.1",
+    "libm.so.6",
+    "libnsl.so.1",
+    "libpthread.so.0",
+    "libresolv.so.2",
+    "librt.so.1"
+  ],
+  "files": [
+    {
+      "path": "lib/module-native-protocol-unix.so",
+      "sha256": "ec740820c7e90399bd65cf4a0004564b624627cf322c19220e2ecadf3f863d73",
+      "package": "pulseaudio",
+      "needed": [
+        "libpulsecore-5.0.so",
+        "libpulsecommon-5.0.so",
+        "libpulse.so.0",
+        "libprotocol-native.so",
+        "libcap.so.2",
+        "libpthread.so.0",
+        "librt.so.1",
+        "libdl.so.2",
+        "libm.so.6",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libcap.so.2",
+      "sha256": "195f33c1af2dd1f89c37c6c893b93498599d4c70e8180fc286a0babd3ff79f80",
+      "package": "libcap2",
+      "needed": [
+        "libattr.so.1",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libattr.so.1",
+      "sha256": "8a16c6dd3b6e17ddd48dae7d5ed5e5cd2891ccf4239ab3fce64d003445e97ee1",
+      "package": "libattr1",
+      "needed": [
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libprotocol-native.so",
+      "sha256": "7605f7d753b3aec689b035a92579e1526262a56ddf600b08eadba4cd3014a988",
+      "package": "pulseaudio",
+      "needed": [
+        "libpulsecore-5.0.so",
+        "libpulsecommon-5.0.so",
+        "libpulse.so.0",
+        "libdbus-1.so.3",
+        "libcap.so.2",
+        "libpthread.so.0",
+        "librt.so.1",
+        "libdl.so.2",
+        "libm.so.6",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libdbus-1.so.3",
+      "sha256": "d648577b9abbfb34aa9d5945e6139315916b4979f7d31e576173c934c4d12f39",
+      "package": "libdbus-1-3",
+      "needed": [
+        "libpthread.so.0",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libpulse.so.0",
+      "sha256": "8ebedad76b60340e1dd83c70b90b2cfa2b36ee280c46efc38a76d19432e636a1",
+      "package": "libpulse0",
+      "needed": [
+        "libjson-c.so.2",
+        "libpulsecommon-5.0.so",
+        "libdbus-1.so.3",
+        "libcap.so.2",
+        "libpthread.so.0",
+        "librt.so.1",
+        "libdl.so.2",
+        "libm.so.6",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libpulsecommon-5.0.so",
+      "sha256": "f04a4d08a62bb18f62501824706dd10b3d6aa5e39d43bbdab1b331b77a463cd3",
+      "package": "libpulse0",
+      "needed": [
+        "libX11-xcb.so.1",
+        "libX11.so.6",
+        "libxcb.so.1",
+        "libICE.so.6",
+        "libSM.so.6",
+        "libXtst.so.6",
+        "libsystemd.so.0",
+        "libjson-c.so.2",
+        "libwrap.so.0",
+        "libsndfile.so.1",
+        "libasyncns.so.0",
+        "libdbus-1.so.3",
+        "libcap.so.2",
+        "libpthread.so.0",
+        "librt.so.1",
+        "libdl.so.2",
+        "libm.so.6",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libasyncns.so.0",
+      "sha256": "b746541587b9da4f3ef93b9f39b1e22cd8810c3765bcc91c02040ee85eb69374",
+      "package": "libasyncns0",
+      "needed": [
+        "libnsl.so.1",
+        "libresolv.so.2",
+        "libpthread.so.0",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libsndfile.so.1",
+      "sha256": "1d6ad60e1bb3424697a024e7e14a0fb75f9b6dffbb9cc8a435e58ffd3c1913fa",
+      "package": "libsndfile1",
+      "needed": [
+        "libFLAC.so.8",
+        "libvorbisenc.so.2",
+        "libm.so.6",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libvorbisenc.so.2",
+      "sha256": "2c9d987082df36ff4d5c93e6e7302ac8bf464341bdc1ab9c053e68dff332ff79",
+      "package": "libvorbisenc2",
+      "needed": [
+        "libvorbis.so.0",
+        "libogg.so.0",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libogg.so.0",
+      "sha256": "b6ceea6526e8152efe1f0b0af43b48ed31d3d05498428449ff2a3f5d7e461508",
+      "package": "libogg0",
+      "needed": [
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libvorbis.so.0",
+      "sha256": "d4aa097817277976eba7114e0d8fab58e2cd2892cabf2e1d1841d3edda433001",
+      "package": "libvorbis0a",
+      "needed": [
+        "libm.so.6",
+        "libogg.so.0",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libFLAC.so.8",
+      "sha256": "aba8db7b02942248f3e09dc21c6c142d41d0ea7f3ab1d0624ce83b652981dff2",
+      "package": "libflac8",
+      "needed": [
+        "libogg.so.0",
+        "libm.so.6",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libwrap.so.0",
+      "sha256": "2016029abc8635f63dac3c01807b5d8768697e1eec3695323b719468ff71f62f",
+      "package": "libwrap0",
+      "needed": [
+        "libnsl.so.1",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libjson-c.so.2",
+      "sha256": "1926b2d8c814cebc627288437f571771083b78858be85e64c52da603dac84941",
+      "package": "libjson-c2",
+      "needed": [
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libsystemd.so.0",
+      "sha256": "08c8c558b6f425ceaf3300922fab15738b36cf117f9d5e4f65b9c652b87cf10b",
+      "package": "libsystemd0",
+      "needed": [
+        "librt.so.1",
+        "liblzma.so.5",
+        "libgcrypt.so.20",
+        "libresolv.so.2",
+        "libdl.so.2",
+        "libpthread.so.0",
+        "libc.so.6",
+        "ld-linux-x86-64.so.2"
+      ]
+    },
+    {
+      "path": "lib/libgcrypt.so.20",
+      "sha256": "a47b5b9f51c93c15fb412d3350c33eb55da5569ecd3c7f81b2489d0f839e6c9e",
+      "package": "libgcrypt20",
+      "needed": [
+        "libgpg-error.so.0",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libgpg-error.so.0",
+      "sha256": "741c19e9f7e87b81fb3805379f2fa6e78d5771af9fcf10b0f05e6f629aecd72e",
+      "package": "libgpg-error0",
+      "needed": [
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/liblzma.so.5",
+      "sha256": "e8100238425f16cc86efeb995383d6ad041f332e22f82883cb73dd9f0550967d",
+      "package": "liblzma5",
+      "needed": [
+        "libdl.so.2",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libXtst.so.6",
+      "sha256": "e972abbfd9915f841594291f13894ae95ec05c1d01ad68c0d26c7072aa8147d6",
+      "package": "libxtst6",
+      "needed": [
+        "libX11.so.6",
+        "libXext.so.6",
+        "libXi.so.6",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libXi.so.6",
+      "sha256": "8a9d5e471fb9220e32b5e4cefc2da5bd2e1f96404c4c336e7b266fb4aa9f9d4d",
+      "package": "libxi6",
+      "needed": [
+        "libX11.so.6",
+        "libXext.so.6",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libXext.so.6",
+      "sha256": "05b4584fc0cdc9a25decc4e7775c13b192cfc7775f59576b8d81e3d2e6021154",
+      "package": "libxext6",
+      "needed": [
+        "libX11.so.6",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libX11.so.6",
+      "sha256": "52dd367fd15275e3345b9f5b1802240275cb00107b75ca5e758d7c8795586d93",
+      "package": "libx11-6",
+      "needed": [
+        "libxcb.so.1",
+        "libdl.so.2",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libxcb.so.1",
+      "sha256": "b2e5691497f20d9746f1094e1f96cfc00035a5d7f575f8edd383805b293c8361",
+      "package": "libxcb1",
+      "needed": [
+        "libXau.so.6",
+        "libXdmcp.so.6",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libXdmcp.so.6",
+      "sha256": "8cd9200484b5547fe8fd3bd7ba669fe8080331b436659c1e5d138d482ff6d197",
+      "package": "libxdmcp6",
+      "needed": [
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libXau.so.6",
+      "sha256": "6ab8808d49b7fe6013f6c1698807d75353ce144f7f6d480b93c4d18acd1a7d64",
+      "package": "libxau6",
+      "needed": [
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libSM.so.6",
+      "sha256": "b7344ce20031998df4ab24ae9e24a745bf78dd76d1fe11ecd55cf01810adc871",
+      "package": "libsm6",
+      "needed": [
+        "libICE.so.6",
+        "libuuid.so.1",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libuuid.so.1",
+      "sha256": "b15bce2edd91a61b139d8a21764c1fb1c52ce218db60cdace0a9b8d84365a73a",
+      "package": "libuuid1",
+      "needed": [
+        "libc.so.6",
+        "ld-linux-x86-64.so.2"
+      ]
+    },
+    {
+      "path": "lib/libICE.so.6",
+      "sha256": "9b359ee3a0d591e1d9c705b4ac5378fc8c4ce1f4f50deaed9a3a0c26d6e8f188",
+      "package": "libice6",
+      "needed": [
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libX11-xcb.so.1",
+      "sha256": "b0d75094b6d2d9b8ade1524a0cc4b69d89becaf7904f33e2bb3413eb80ceff33",
+      "package": "libx11-xcb1",
+      "needed": [
+        "libX11.so.6",
+        "libdl.so.2",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libpulsecore-5.0.so",
+      "sha256": "bea45d7c7607d9ee3f59f95a704b7bcfe90bb28baa715e01cf10f776c471b63d",
+      "package": "pulseaudio",
+      "needed": [
+        "libX11-xcb.so.1",
+        "libX11.so.6",
+        "libxcb.so.1",
+        "libICE.so.6",
+        "libSM.so.6",
+        "libXtst.so.6",
+        "libltdl.so.7",
+        "libsamplerate.so.0",
+        "libspeexdsp.so.1",
+        "libsndfile.so.1",
+        "libpulsecommon-5.0.so",
+        "libpulse.so.0",
+        "liborc-0.4.so.0",
+        "libdbus-1.so.3",
+        "libtdb.so.1",
+        "libcap.so.2",
+        "libpthread.so.0",
+        "librt.so.1",
+        "libdl.so.2",
+        "libm.so.6",
+        "libc.so.6",
+        "ld-linux-x86-64.so.2"
+      ]
+    },
+    {
+      "path": "lib/libtdb.so.1",
+      "sha256": "83bddb56ed1035356d9a0ad56c2d8f0ca63b05de7f29fc14c86a396d38bd05e9",
+      "package": "libtdb1",
+      "needed": [
+        "libpthread.so.0",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/liborc-0.4.so.0",
+      "sha256": "4d79fd7cdedc5e9ff828dd8cd8e53fa5019a00a40679b979bee924ede81d8478",
+      "package": "liborc-0.4-0",
+      "needed": [
+        "libm.so.6",
+        "libpthread.so.0",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libspeexdsp.so.1",
+      "sha256": "fff3d644b9ae1248d8dbb3be65b0d0f2f6e22b8d02170a1233e68815a4521b61",
+      "package": "libspeexdsp1",
+      "needed": [
+        "libm.so.6",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libsamplerate.so.0",
+      "sha256": "6682d7c99fa50163f0918eaf7949a4890a4c1a87a08035133024cfec9a7fd076",
+      "package": "libsamplerate0",
+      "needed": [
+        "libm.so.6",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libltdl.so.7",
+      "sha256": "d9d327e61b593af3f0a406f55d03431eeb5996b0a3f06e0c37961c54abfb9b46",
+      "package": "libltdl7",
+      "needed": [
+        "libdl.so.2",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/module-alsa-sink.so",
+      "sha256": "11817641699ae3387556e2a05d7d42a8241eea871428eb38149803c16cc43f73",
+      "package": "pulseaudio",
+      "needed": [
+        "libpulsecore-5.0.so",
+        "libpulsecommon-5.0.so",
+        "libpulse.so.0",
+        "libasound.so.2",
+        "libalsa-util.so",
+        "libcap.so.2",
+        "libpthread.so.0",
+        "librt.so.1",
+        "libdl.so.2",
+        "libm.so.6",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libalsa-util.so",
+      "sha256": "bb305f443fbd36242dcdae5de3e55a560a8c8884bcdc45a6095000181b82311f",
+      "package": "pulseaudio",
+      "needed": [
+        "libpulsecore-5.0.so",
+        "libpulsecommon-5.0.so",
+        "libpulse.so.0",
+        "libasound.so.2",
+        "libudev.so.1",
+        "libdbus-1.so.3",
+        "libcap.so.2",
+        "libpthread.so.0",
+        "librt.so.1",
+        "libdl.so.2",
+        "libm.so.6",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "lib/libudev.so.1",
+      "sha256": "18278a96153361ecee4cde5407a0583410db8684bd0d690f3fcdefae1bbe9a5a",
+      "package": "libudev1",
+      "needed": [
+        "librt.so.1",
+        "libdl.so.2",
+        "libpthread.so.0",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "bin/pactl",
+      "sha256": "d5cfb29109fcd821397cba054f183305c7f4b269e11be0c334732e21dfef075e",
+      "package": "pulseaudio-utils",
+      "needed": [
+        "libpulse.so.0",
+        "libpulsecommon-5.0.so",
+        "libsndfile.so.1",
+        "libcap.so.2",
+        "libpthread.so.0",
+        "librt.so.1",
+        "libdl.so.2",
+        "libm.so.6",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "bin/pacat",
+      "sha256": "0b0ed25bd0817377d7881cd648f9bb29416b34f8c004ca1a06bf7959abb743ec",
+      "package": "pulseaudio-utils",
+      "needed": [
+        "libpulse.so.0",
+        "libpulsecommon-5.0.so",
+        "libsndfile.so.1",
+        "libcap.so.2",
+        "libpthread.so.0",
+        "librt.so.1",
+        "libdl.so.2",
+        "libm.so.6",
+        "libc.so.6"
+      ]
+    },
+    {
+      "path": "bin/pulseaudio",
+      "sha256": "2af8b5e08be76d3d3ebb1571b63366c7af72572e2856e3425b60d91c2b62ca1a",
+      "package": "pulseaudio",
+      "needed": [
+        "libpulsecore-5.0.so",
+        "libpulsecommon-5.0.so",
+        "libpulse.so.0",
+        "libltdl.so.7",
+        "libdbus-1.so.3",
+        "libcap.so.2",
+        "libpthread.so.0",
+        "librt.so.1",
+        "libdl.so.2",
+        "libm.so.6",
+        "libc.so.6"
+      ]
+    }
+  ]
+}

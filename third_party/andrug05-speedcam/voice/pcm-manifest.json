@@ -1,0 +1,112 @@
+{
+  "pcm/average-end.pcm": {
+    "sha256": "cc88e4786da08c496317be7bfbdb34aba4f78e1eab7fc6e824624b340c1dd59b",
+    "durationSeconds": 2.005333333333333,
+    "peak": 0.70709228515625
+  },
+  "pcm/avtodoria-200.pcm": {
+    "sha256": "1cb5a870987eed258307d93a8b2f17f7dd0dedc101239b52c03f36e77d13627b",
+    "durationSeconds": 2.3466666666666667,
+    "peak": 0.709320068359375
+  },
+  "pcm/avtodoria-average-200.pcm": {
+    "sha256": "614b12345d1783fce488796b6f7b1c7f9e20a3eac090018d98cb328039a2c4d1",
+    "durationSeconds": 3.3706666666666667,
+    "peak": 0.71368408203125
+  },
+  "pcm/avtodoria-average.pcm": {
+    "sha256": "0230d8f0bb82df6c440eb96aa11d6dbfb61e1e3f0d9106d1ead0c56322ce5b9c",
+    "durationSeconds": 3.6266666666666665,
+    "peak": 0.700469970703125
+  },
+  "pcm/avtodoria.pcm": {
+    "sha256": "48e34b8a5da8b84a0c9bca2124eb451c5f5219814cc7d23996af4a4f168b32de",
+    "durationSeconds": 2.816,
+    "peak": 0.70703125
+  },
+  "pcm/beeper-sonar.pcm": {
+    "sha256": "19e315c8a4559ec517858882135695f369eddd122e28d7fff8e8877e70388a34",
+    "durationSeconds": 2.0,
+    "peak": 0.647918701171875
+  },
+  "pcm/camera-200.pcm": {
+    "sha256": "31e287ff5f52da546475ecc9f02fb59b063b1f27d2f24982f97223c280a02440",
+    "durationSeconds": 3.2426666666666666,
+    "peak": 0.703582763671875
+  },
+  "pcm/camera-500.pcm": {
+    "sha256": "2674fbc5ba7ea966852d0a8d120d4250fbc3f3baf65e17bd55a20e7a6735f22e",
+    "durationSeconds": 1.7493333333333334,
+    "peak": 0.707489013671875
+  },
+  "pcm/dps-post-200.pcm": {
+    "sha256": "00c20fb761bf16223817bac9cc592d8e9d3c6508f28086baf2fef6af6c6ee2eb",
+    "durationSeconds": 2.176,
+    "peak": 0.707550048828125
+  },
+  "pcm/dps-post.pcm": {
+    "sha256": "741a69bfb200f6e3f3adcd63a97701ad0f65de0e13d5e5c389bf70821df62e4c",
+    "durationSeconds": 2.56,
+    "peak": 0.707275390625
+  },
+  "pcm/dps-stationary-200.pcm": {
+    "sha256": "9c29a611eae2fcb744ff53888097bb0aca7c530ba50eaea25bd9179c26d0f42e",
+    "durationSeconds": 2.9013333333333335,
+    "peak": 0.70611572265625
+  },
+  "pcm/dps-stationary.pcm": {
+    "sha256": "42d1d0d3e52caeb2d6f763ebd69808e1cbb580195c1505ecdf25b630d3883f4e",
+    "durationSeconds": 2.944,
+    "peak": 0.70819091796875
+  },
+  "pcm/strelka-200.pcm": {
+    "sha256": "d9a1934d7c92c46dd54870835d92eae69346184e138c88f734b3e78faf18dd3b",
+    "durationSeconds": 2.2186666666666666,
+    "peak": 0.7088623046875
+  },
+  "pcm/strelka.pcm": {
+    "sha256": "c6086bc6c5d30316bc8fb1754149e49bf187e841b0be9ae99c215698ad197f06",
+    "durationSeconds": 2.56,
+    "peak": 0.7076416015625
+  },
+  "pcm/beeper-choice-1.pcm": {
+    "sha256": "5fa6e9963df61f00e25e4d0b0f79284bc9342c9f4eaf8a3a8efaebbfb3568892",
+    "durationSeconds": 1.0,
+    "peak": 0.25
+  },
+  "pcm/beeper-choice-2.pcm": {
+    "sha256": "c22d0ae71219935e8f61026976c11bc9a905e098fbf2a17f2378ba3f45580950",
+    "durationSeconds": 1.0,
+    "peak": 0.25
+  },
+  "pcm/beeper-choice-3.pcm": {
+    "sha256": "3d0064c47138518d7af719b0c880bb54468913875095aa40890937bb04357d5b",
+    "durationSeconds": 1.0,
+    "peak": 0.25
+  },
+  "pcm/beeper-choice-4.pcm": {
+    "sha256": "2c55323d0dae7ecc4ec0894940f9a63abc0c82e405fb3a5d805e0ac547407d4d",
+    "durationSeconds": 1.0,
+    "peak": 0.25
+  },
+  "pcm/beeper-choice-5.pcm": {
+    "sha256": "5c057719ccdfbca3cb15b5ca348a199e1604863f922ac9f1a6aaf013347e7304",
+    "durationSeconds": 1.0,
+    "peak": 0.25
+  },
+  "pcm/beeper-choice-6.pcm": {
+    "sha256": "35ffcd9af4e6b71d2ca0d7a1d9528703070a8aa85b8e2a68875eb0ead46907a0",
+    "durationSeconds": 1.0,
+    "peak": 0.25
+  },
+  "pcm/beeper-choice-7.pcm": {
+    "sha256": "c2b05205407c1aae956fef41c038989f912b528ed949f906c5b16f318788d13e",
+    "durationSeconds": 1.0,
+    "peak": 0.25
+  },
+  "pcm/beeper-choice-8.pcm": {
+    "sha256": "926eae2ab957c65beec83b7c1b5725756f21a65c3a87871ea038346103d31fdc",
+    "durationSeconds": 1.0,
+    "peak": 0.25
+  }
+}

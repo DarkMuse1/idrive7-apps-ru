@@ -1,0 +1,6 @@
+# The author's release files, stored byte for byte (several have CRLF line endings).
+* -text
+# Left out of the repository's source tarball: the Store reads at most 64 MiB of that tarball, and before
+# mgu-updater 0.8.40 hands all of it to every app's build. Newer updaters read a component's own files.
+app/*.tgz export-ignore
+voice export-ignore

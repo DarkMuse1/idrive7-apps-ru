@@ -1,0 +1,19 @@
+[Unit]
+Description=BMW Camera Voice Service (ALSA / M4A)
+After=local-fs.target
+RequiresMountsFor=/var/opt
+
+[Service]
+Type=simple
+User=root
+RuntimeDirectory=bmwcaminfo-voice
+RuntimeDirectoryMode=0755
+ExecStart=/usr/bin/node /var/opt/bmwcaminfo-voice/current/voice.js
+ExecStopPost=/usr/bin/node /var/opt/bmwcaminfo-voice/current/report-network.js cleanup
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=25
+LimitCORE=1
+
+[Install]
+WantedBy=multi-user.target

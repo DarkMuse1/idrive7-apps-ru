@@ -71,6 +71,21 @@
     {
       "id": "iteriodev-turnview",
       "path": "third_party/iteriodev-turnview/tool"
+    },
+    {
+      "id": "bmwcaminfo-voice",
+      "path": "third_party/andrug05-speedcam/voice",
+      "description": "Голосовые уведомления и бипер SpeedCAM. Устанавливается магазином вместе с приложением.",
+      "optional": true,
+      "requires": {
+        "mgu-deploy": "0.7.0",
+        "mgu-updater": "0.8.40"
+      },
+      "texts": {
+        "ru": {
+          "title": "SpeedCAM — звуковой сервис"
+        }
+      }
     }
   ],
   "components": [
@@ -275,6 +290,32 @@
       "id": "iteriodev_turnview",
       "kind": "app",
       "path": "third_party/iteriodev-turnview/app"
+    },
+    {
+      "id": "aurelm_speed_camera_warning",
+      "kind": "app",
+      "path": "third_party/andrug05-speedcam/app",
+      "manifest": "app.json",
+      "icon": "icon.png",
+      "mguHmi": [
+        "ID7"
+      ],
+      "build": {
+        "node": "tools/prebuilt_package.js",
+        "args": [
+          "{dir}"
+        ],
+        "output": "{dir}/{id}@{version}.tgz",
+        "shared": [
+          "tools/prebuilt_package.js"
+        ]
+      },
+      "requires": {
+        "idrive7-renderd": "2.1.18",
+        "mgu-inputgate": "1.1.0",
+        "bmwcaminfo-voice": "0.1.48",
+        "mgu-updater": "0.8.40"
+      }
     }
   ]
 }

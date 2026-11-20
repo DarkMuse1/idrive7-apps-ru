@@ -1,0 +1,74 @@
+{
+  "1": {
+    "sha256": "5fa6e9963df61f00e25e4d0b0f79284bc9342c9f4eaf8a3a8efaebbfb3568892",
+    "durationSeconds": 1.0,
+    "peak": 0.25,
+    "source": "Create_soft_speed_ra_#1-1794955964002.mp3",
+    "sourceSha256": "5f26132565eb4f1893b2933031717079ceaa3aae90d9bdaf77306cefd1ec23d2",
+    "gain": 2.2927511894766304,
+    "label": "Бипер 1"
+  },
+  "2": {
+    "sha256": "c22d0ae71219935e8f61026976c11bc9a905e098fbf2a17f2378ba3f45580950",
+    "durationSeconds": 1.0,
+    "peak": 0.25,
+    "source": "Create_soft_speed_ra_#1-1794955987357.mp3",
+    "sourceSha256": "21208a4b53a4b8c802444c552b47cb4abe8c80e1c8c2939d07e75bbdac522405",
+    "gain": 30.91320754716981,
+    "label": "Бипер 2"
+  },
+  "3": {
+    "sha256": "3d0064c47138518d7af719b0c880bb54468913875095aa40890937bb04357d5b",
+    "durationSeconds": 1.0,
+    "peak": 0.25,
+    "source": "Create_soft_speed_ra_#1-1794956048729.mp3",
+    "sourceSha256": "b2341c18701a0d68f58a5281973a38547b27b74511246ae5765a6d7b4f9002e5",
+    "gain": 3.833411324286383,
+    "label": "Бипер 3"
+  },
+  "4": {
+    "sha256": "2c55323d0dae7ecc4ec0894940f9a63abc0c82e405fb3a5d805e0ac547407d4d",
+    "durationSeconds": 1.0,
+    "peak": 0.25,
+    "source": "Create_soft_speed_ra_#1-1794956070873.mp3",
+    "sourceSha256": "1cf84522bf5ffaddc7e8b1f5cf6307019b99e947edcb0e9b14823a1dce42cc1e",
+    "gain": 0.9961089494163424,
+    "label": "Бипер 4"
+  },
+  "5": {
+    "sha256": "5c057719ccdfbca3cb15b5ca348a199e1604863f922ac9f1a6aaf013347e7304",
+    "durationSeconds": 1.0,
+    "peak": 0.25,
+    "source": "Create_soft_speed_ra_#2-1794955931171.mp3",
+    "sourceSha256": "5c633b82a00333555a80bdc4100d67543a879c942985fd94b2bcffa416230dd3",
+    "gain": 1.6276574607589906,
+    "label": "Бипер 5"
+  },
+  "6": {
+    "sha256": "35ffcd9af4e6b71d2ca0d7a1d9528703070a8aa85b8e2a68875eb0ead46907a0",
+    "durationSeconds": 1.0,
+    "peak": 0.25,
+    "source": "Create_soft_speed_ra_#2-1794956014933.mp3",
+    "sourceSha256": "06ed30f1e9ac1fd0d91e4d11a1c80e451d0db9cb599089aae8d80d8c9d3cd579",
+    "gain": 7.606313834726091,
+    "label": "Бипер 6"
+  },
+  "7": {
+    "sha256": "c2b05205407c1aae956fef41c038989f912b528ed949f906c5b16f318788d13e",
+    "durationSeconds": 1.0,
+    "peak": 0.25,
+    "source": "Create_soft_speed_ra_#3-1794956025486.mp3",
+    "sourceSha256": "060465a49ad2cfd1e80b1c02fdf5937eef2f2a98c88f89bc6b759657a1e6b890",
+    "gain": 1.8032137354171252,
+    "label": "Бипер 7"
+  },
+  "8": {
+    "sha256": "926eae2ab957c65beec83b7c1b5725756f21a65c3a87871ea038346103d31fdc",
+    "durationSeconds": 1.0,
+    "peak": 0.25,
+    "source": "Create_soft_speed_ra_#4-1794956265970.mp3",
+    "sourceSha256": "19201fdd7a6095d628d75b9c9dbf1709798244566806a6cd2299fb84f8b44cfe",
+    "gain": 3.208773991382687,
+    "label": "Бипер 8"
+  }
+}

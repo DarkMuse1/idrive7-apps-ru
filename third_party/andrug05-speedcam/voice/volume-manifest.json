@@ -1,0 +1,1136 @@
+{
+  "audio/volume-10/camera-500.m4a": {
+    "volume": 10,
+    "source": "camera-500.m4a",
+    "sha256": "f13bbe116997acaf1f6be90c0c0aaf68491721448031b061fc0ac33e6fcdbc3f",
+    "rmsRatio": 0.09981
+  },
+  "audio/volume-20/camera-500.m4a": {
+    "volume": 20,
+    "source": "camera-500.m4a",
+    "sha256": "5f9d585aa05e20f1fd84a1ea5e60c72d1a88f43f3791c56474f162672c452743",
+    "rmsRatio": 0.19973
+  },
+  "audio/volume-30/camera-500.m4a": {
+    "volume": 30,
+    "source": "camera-500.m4a",
+    "sha256": "9bc9ad1e0c070fe70416928b0ad151feee39e6b4b0a460e2f34197e902dbcfd4",
+    "rmsRatio": 0.30001
+  },
+  "audio/volume-40/camera-500.m4a": {
+    "volume": 40,
+    "source": "camera-500.m4a",
+    "sha256": "875a330416dc4dc7022ffd6208ac437f41453deed40bff8fca561d67d444591c",
+    "rmsRatio": 0.39983
+  },
+  "audio/volume-50/camera-500.m4a": {
+    "volume": 50,
+    "source": "camera-500.m4a",
+    "sha256": "754b1200011dded823e0bb9fc618ce58192a75bd37c92582834dcf281223d9b2",
+    "rmsRatio": 0.49979
+  },
+  "audio/volume-60/camera-500.m4a": {
+    "volume": 60,
+    "source": "camera-500.m4a",
+    "sha256": "811741f3f0a2e980d19742ce7c897426d25d4a1bc57686eb82ebe40192a8b313",
+    "rmsRatio": 0.59995
+  },
+  "audio/volume-70/camera-500.m4a": {
+    "volume": 70,
+    "source": "camera-500.m4a",
+    "sha256": "448d0ecbb50c997518fd34f4f67eecb658153d6fbb82c3b11db24374d403d428",
+    "rmsRatio": 0.69985
+  },
+  "audio/volume-80/camera-500.m4a": {
+    "volume": 80,
+    "source": "camera-500.m4a",
+    "sha256": "3be5d8e8e672082b72fcf806a1fded836fbf31b130a93523e44ea6068a2a1155",
+    "rmsRatio": 0.79972
+  },
+  "audio/volume-90/camera-500.m4a": {
+    "volume": 90,
+    "source": "camera-500.m4a",
+    "sha256": "e75eb5c12739dedba458755216027c641d8585d7c85e3b44b2a11cc68eeb2201",
+    "rmsRatio": 0.89962
+  },
+  "audio/volume-10/camera-200.m4a": {
+    "volume": 10,
+    "source": "camera-200.m4a",
+    "sha256": "2c6f432201781cca8bcf3ac1e20831d2ebff1bceb1a30c934a4d4c4d54f78476",
+    "rmsRatio": 0.0999
+  },
+  "audio/volume-20/camera-200.m4a": {
+    "volume": 20,
+    "source": "camera-200.m4a",
+    "sha256": "cb731d8e6f212d046746e4dbc7c3e9ba5efed537b04afd5595845b59d7a2c543",
+    "rmsRatio": 0.20007
+  },
+  "audio/volume-30/camera-200.m4a": {
+    "volume": 30,
+    "source": "camera-200.m4a",
+    "sha256": "dc2c143265620822ddbba2422371b53ad42ff80ea9e9772f7644bb87e92ce693",
+    "rmsRatio": 0.30019
+  },
+  "audio/volume-40/camera-200.m4a": {
+    "volume": 40,
+    "source": "camera-200.m4a",
+    "sha256": "50fa36e6bf3be21b0710ade25f81e54faed1fca9cc5c2b0539e78291a952148b",
+    "rmsRatio": 0.4001
+  },
+  "audio/volume-50/camera-200.m4a": {
+    "volume": 50,
+    "source": "camera-200.m4a",
+    "sha256": "beede2aabbc3adfae984e1dfe612b2de5bbdee5d10eb1ed6e842c7bf2088c49d",
+    "rmsRatio": 0.5004
+  },
+  "audio/volume-60/camera-200.m4a": {
+    "volume": 60,
+    "source": "camera-200.m4a",
+    "sha256": "7eb11298fe3a9b43e1ef8a8f61f6f8d0618057ccc997b679d59301cb30d107e8",
+    "rmsRatio": 0.60031
+  },
+  "audio/volume-70/camera-200.m4a": {
+    "volume": 70,
+    "source": "camera-200.m4a",
+    "sha256": "0af1eeaf1a6e088c5e3e2a00690cdb147f575dae80dbee1a764cf374bf7f6a09",
+    "rmsRatio": 0.70023
+  },
+  "audio/volume-80/camera-200.m4a": {
+    "volume": 80,
+    "source": "camera-200.m4a",
+    "sha256": "8a20b56f76ec3ea7def009fa1c337b02fbdf7f585642eea6f07f56f8dd79adfd",
+    "rmsRatio": 0.79996
+  },
+  "audio/volume-90/camera-200.m4a": {
+    "volume": 90,
+    "source": "camera-200.m4a",
+    "sha256": "b302704337b1b0c869f9731e45bd8f248a5a40640661c143f21a8431ac8d10fc",
+    "rmsRatio": 0.89973
+  },
+  "audio/volume-10/strelka.m4a": {
+    "volume": 10,
+    "source": "strelka.m4a",
+    "sha256": "b257a55cfc45a311233585ed56f3a68bbf557643a026bd86a1169a138b408e66",
+    "rmsRatio": 0.09987
+  },
+  "audio/volume-20/strelka.m4a": {
+    "volume": 20,
+    "source": "strelka.m4a",
+    "sha256": "4c45ab971974ef8ce6402b385f592254031b019072ccb565ac3305274df04783",
+    "rmsRatio": 0.2
+  },
+  "audio/volume-30/strelka.m4a": {
+    "volume": 30,
+    "source": "strelka.m4a",
+    "sha256": "04d1b78567f843be239f5c11848287e1da2dba780651c6849254e611dc1396f0",
+    "rmsRatio": 0.30007
+  },
+  "audio/volume-40/strelka.m4a": {
+    "volume": 40,
+    "source": "strelka.m4a",
+    "sha256": "cdce3cd51d2639134b720790a4da87cc38edfc2c10b37abd7b20ac73141f91b8",
+    "rmsRatio": 0.40028
+  },
+  "audio/volume-50/strelka.m4a": {
+    "volume": 50,
+    "source": "strelka.m4a",
+    "sha256": "dc7297bdb3cba22d4b87f908b5ed7edd83b32654620f550719347e49b2998079",
+    "rmsRatio": 0.50025
+  },
+  "audio/volume-60/strelka.m4a": {
+    "volume": 60,
+    "source": "strelka.m4a",
+    "sha256": "3e4d9a8caeffa76a6db1b1687abf026bba64fd189f877dd5cf80370ba93083ff",
+    "rmsRatio": 0.60045
+  },
+  "audio/volume-70/strelka.m4a": {
+    "volume": 70,
+    "source": "strelka.m4a",
+    "sha256": "a6c665801d38dd2cbae57e2117a57c91b9e8f65502691e153d7cb1895dbdd3d1",
+    "rmsRatio": 0.70041
+  },
+  "audio/volume-80/strelka.m4a": {
+    "volume": 80,
+    "source": "strelka.m4a",
+    "sha256": "5e364ccd6b430058534f4314580c9680748d1c66fddc3998b52bb7552f022ff1",
+    "rmsRatio": 0.80066
+  },
+  "audio/volume-90/strelka.m4a": {
+    "volume": 90,
+    "source": "strelka.m4a",
+    "sha256": "7036f53df71d5a4e7bedbbfa940603970f0fbd770d4e23906b0ed67ca84e6bb1",
+    "rmsRatio": 0.90051
+  },
+  "audio/volume-10/strelka-200.m4a": {
+    "volume": 10,
+    "source": "strelka-200.m4a",
+    "sha256": "c3f8999acb81dc1363d44864858accd0324fa4dcd37529642b17b3d014b63ea6",
+    "rmsRatio": 0.09992
+  },
+  "audio/volume-20/strelka-200.m4a": {
+    "volume": 20,
+    "source": "strelka-200.m4a",
+    "sha256": "9f5180fc061a95c048dbaaac589fb481278027386d72b3fd1d8a06069cd5c5e8",
+    "rmsRatio": 0.19997
+  },
+  "audio/volume-30/strelka-200.m4a": {
+    "volume": 30,
+    "source": "strelka-200.m4a",
+    "sha256": "1effcaa6e18d088417b8b826ff841bca143d866aac147efc8b0db61541271574",
+    "rmsRatio": 0.30002
+  },
+  "audio/volume-40/strelka-200.m4a": {
+    "volume": 40,
+    "source": "strelka-200.m4a",
+    "sha256": "997833b5909bbb8eea1f84366b02480298f6e85d02a1b93d5f258fee04fa70d6",
+    "rmsRatio": 0.40003
+  },
+  "audio/volume-50/strelka-200.m4a": {
+    "volume": 50,
+    "source": "strelka-200.m4a",
+    "sha256": "ad2b8d46f85feb90acc31465df1690dfb57d1852ae7ac695b6a805ef91e382b4",
+    "rmsRatio": 0.50025
+  },
+  "audio/volume-60/strelka-200.m4a": {
+    "volume": 60,
+    "source": "strelka-200.m4a",
+    "sha256": "eebe1c9af46e33a9b7a5c06526d0367595c23e2adee916ca88a8b505c415310c",
+    "rmsRatio": 0.60007
+  },
+  "audio/volume-70/strelka-200.m4a": {
+    "volume": 70,
+    "source": "strelka-200.m4a",
+    "sha256": "62699d9373cbb7df8049c3e002bb6657bdeca845524da4884089af45ad81e6a9",
+    "rmsRatio": 0.69986
+  },
+  "audio/volume-80/strelka-200.m4a": {
+    "volume": 80,
+    "source": "strelka-200.m4a",
+    "sha256": "06db63f97d09be0ea372780e1f685407e6220dc0e4544c7417ada5046567ec72",
+    "rmsRatio": 0.79955
+  },
+  "audio/volume-90/strelka-200.m4a": {
+    "volume": 90,
+    "source": "strelka-200.m4a",
+    "sha256": "efc08c0b1a4622e1962ab2876d807dc566c77529c0849c0d8edca7722ebed536",
+    "rmsRatio": 0.89994
+  },
+  "audio/volume-10/avtodoria.m4a": {
+    "volume": 10,
+    "source": "avtodoria.m4a",
+    "sha256": "6997e304bfc6cf7260336c62079260f2028e34e5ba2ea68559d4bedf60ee83bd",
+    "rmsRatio": 0.09988
+  },
+  "audio/volume-20/avtodoria.m4a": {
+    "volume": 20,
+    "source": "avtodoria.m4a",
+    "sha256": "8100fe79266635745898c18fff4c8084a0871dfdf88c7a9f7fb7fd014230c813",
+    "rmsRatio": 0.19998
+  },
+  "audio/volume-30/avtodoria.m4a": {
+    "volume": 30,
+    "source": "avtodoria.m4a",
+    "sha256": "4a86afb96e0546084d375e8aca6c937146905a0c50d15a40b5bacb5eacab9fda",
+    "rmsRatio": 0.29992
+  },
+  "audio/volume-40/avtodoria.m4a": {
+    "volume": 40,
+    "source": "avtodoria.m4a",
+    "sha256": "06dc8f060304ecf9cc11583df3206b1e380f2b0f850f4188fad0de51f82333e8",
+    "rmsRatio": 0.40021
+  },
+  "audio/volume-50/avtodoria.m4a": {
+    "volume": 50,
+    "source": "avtodoria.m4a",
+    "sha256": "f6fbd464769acebe05d334a670c41960cabb54d5dfb07d9e7885515d6a9093e7",
+    "rmsRatio": 0.50005
+  },
+  "audio/volume-60/avtodoria.m4a": {
+    "volume": 60,
+    "source": "avtodoria.m4a",
+    "sha256": "286b4eb8345f40a063c9a34078bf6aabf23188d082ed8a663782da3c460b7256",
+    "rmsRatio": 0.60025
+  },
+  "audio/volume-70/avtodoria.m4a": {
+    "volume": 70,
+    "source": "avtodoria.m4a",
+    "sha256": "2f90d52ce640b2deef47e39c8de24a8d28ebcf26e815ba427e37cf9296a9c7b5",
+    "rmsRatio": 0.70019
+  },
+  "audio/volume-80/avtodoria.m4a": {
+    "volume": 80,
+    "source": "avtodoria.m4a",
+    "sha256": "ba7430bd7df43ca74ef68bf17a888bc03e0af9e4563d15447aadfed2f77ec059",
+    "rmsRatio": 0.80044
+  },
+  "audio/volume-90/avtodoria.m4a": {
+    "volume": 90,
+    "source": "avtodoria.m4a",
+    "sha256": "bbbd556d7a5f4833339f762c12b7b3f32f14f0e5f7077a5399f0b201efdf48bb",
+    "rmsRatio": 0.90012
+  },
+  "audio/volume-10/avtodoria-200.m4a": {
+    "volume": 10,
+    "source": "avtodoria-200.m4a",
+    "sha256": "bcbdeb42e0d49214ef0c172d1cfef1692bdf45029bbb89eda1c23d73922820d7",
+    "rmsRatio": 0.09976
+  },
+  "audio/volume-20/avtodoria-200.m4a": {
+    "volume": 20,
+    "source": "avtodoria-200.m4a",
+    "sha256": "71893a1b1b8fad1638ac5caa3535cfb2ecb487316d8ac77a42dfce8f944075c8",
+    "rmsRatio": 0.19991
+  },
+  "audio/volume-30/avtodoria-200.m4a": {
+    "volume": 30,
+    "source": "avtodoria-200.m4a",
+    "sha256": "a3878d2eee1cb47ae64b78a338192de0a7d9e624938faf76b860298dc0f29450",
+    "rmsRatio": 0.29997
+  },
+  "audio/volume-40/avtodoria-200.m4a": {
+    "volume": 40,
+    "source": "avtodoria-200.m4a",
+    "sha256": "657651ca3fa5f3079859822639d9c7457a552c05aff81b4b5d7a3501d5257213",
+    "rmsRatio": 0.3999
+  },
+  "audio/volume-50/avtodoria-200.m4a": {
+    "volume": 50,
+    "source": "avtodoria-200.m4a",
+    "sha256": "c65918a248c5da38fbf192c26e19926d354f5946d8d13531c2b5664476228d7e",
+    "rmsRatio": 0.50015
+  },
+  "audio/volume-60/avtodoria-200.m4a": {
+    "volume": 60,
+    "source": "avtodoria-200.m4a",
+    "sha256": "5e5db44869bf774d10b2e1a0bdeef1f07be464d08047cc55b61282fa3dd98924",
+    "rmsRatio": 0.59955
+  },
+  "audio/volume-70/avtodoria-200.m4a": {
+    "volume": 70,
+    "source": "avtodoria-200.m4a",
+    "sha256": "e5a6502e6771fc0ac82a8920220ce73cfcb35c961bf98a7aca05059dce2567c6",
+    "rmsRatio": 0.69967
+  },
+  "audio/volume-80/avtodoria-200.m4a": {
+    "volume": 80,
+    "source": "avtodoria-200.m4a",
+    "sha256": "774db45c5a88e4835d9bf255a55596dd0dfde7a7150d70a5cf0a3024c3ca7c1a",
+    "rmsRatio": 0.79974
+  },
+  "audio/volume-90/avtodoria-200.m4a": {
+    "volume": 90,
+    "source": "avtodoria-200.m4a",
+    "sha256": "5ec559d9421a0dc2117138624c0fc052a6aef4949af59370736d5a3d6d2864fc",
+    "rmsRatio": 0.89948
+  },
+  "audio/volume-10/avtodoria-average.m4a": {
+    "volume": 10,
+    "source": "avtodoria-average.m4a",
+    "sha256": "048d26ea7d3a3da008446bfb79737a265200ac08f84e32e9c8dbf7bbacdb3d59",
+    "rmsRatio": 0.09988
+  },
+  "audio/volume-20/avtodoria-average.m4a": {
+    "volume": 20,
+    "source": "avtodoria-average.m4a",
+    "sha256": "07dd31e3b9b1870feea1097abcf8f08060b6f96d7582d7919cc5c673e699499d",
+    "rmsRatio": 0.19985
+  },
+  "audio/volume-30/avtodoria-average.m4a": {
+    "volume": 30,
+    "source": "avtodoria-average.m4a",
+    "sha256": "c163d7649d5178dfa2566e6afbd1d1064609670e00b7839dade34ef453e23bad",
+    "rmsRatio": 0.30002
+  },
+  "audio/volume-40/avtodoria-average.m4a": {
+    "volume": 40,
+    "source": "avtodoria-average.m4a",
+    "sha256": "b122e68585aff9018062ce3f8fe0f71ab2f46763566847a26b849cf0b7b8503d",
+    "rmsRatio": 0.4
+  },
+  "audio/volume-50/avtodoria-average.m4a": {
+    "volume": 50,
+    "source": "avtodoria-average.m4a",
+    "sha256": "cb4b58ec845e500fb5858a5aded8352d7d9b95621a4315e708795d1a9176cab1",
+    "rmsRatio": 0.50001
+  },
+  "audio/volume-60/avtodoria-average.m4a": {
+    "volume": 60,
+    "source": "avtodoria-average.m4a",
+    "sha256": "696fc2d955e68bb4acb062c49e9d9239105b16163a3af9e92905241266678581",
+    "rmsRatio": 0.6001
+  },
+  "audio/volume-70/avtodoria-average.m4a": {
+    "volume": 70,
+    "source": "avtodoria-average.m4a",
+    "sha256": "81c64308cbd3a7f7f4b1b83f35e136c1acd43b887864f9e13846404ae22edf24",
+    "rmsRatio": 0.70012
+  },
+  "audio/volume-80/avtodoria-average.m4a": {
+    "volume": 80,
+    "source": "avtodoria-average.m4a",
+    "sha256": "5b2ad3f9d447d61ab127335c57b3ea9fd17fd26b9d78d332aa97ac2789aa4eb1",
+    "rmsRatio": 0.80006
+  },
+  "audio/volume-90/avtodoria-average.m4a": {
+    "volume": 90,
+    "source": "avtodoria-average.m4a",
+    "sha256": "1639a8373141c85668fd80cd7c651779c3a282700bcbdc47d62d3895585f5386",
+    "rmsRatio": 0.90021
+  },
+  "audio/volume-10/avtodoria-average-200.m4a": {
+    "volume": 10,
+    "source": "avtodoria-average-200.m4a",
+    "sha256": "05d8b75311c3c4c5200d0471c3c0fc5465fddb06cd5393264e9c01158f6abe6d",
+    "rmsRatio": 0.0998
+  },
+  "audio/volume-20/avtodoria-average-200.m4a": {
+    "volume": 20,
+    "source": "avtodoria-average-200.m4a",
+    "sha256": "612f36b5465ad4ff182ced5c1084d185cb80475a3599ec3c9f3835f4d9f04eca",
+    "rmsRatio": 0.19978
+  },
+  "audio/volume-30/avtodoria-average-200.m4a": {
+    "volume": 30,
+    "source": "avtodoria-average-200.m4a",
+    "sha256": "9d1a9b2e9a9561f65010a4722fba7cb85f019fd1039fd9099f67550e07a6e606",
+    "rmsRatio": 0.29978
+  },
+  "audio/volume-40/avtodoria-average-200.m4a": {
+    "volume": 40,
+    "source": "avtodoria-average-200.m4a",
+    "sha256": "2d19665921e426b8e8768ef2e11247542a9100af097802c5279e5ba75c9bb080",
+    "rmsRatio": 0.39981
+  },
+  "audio/volume-50/avtodoria-average-200.m4a": {
+    "volume": 50,
+    "source": "avtodoria-average-200.m4a",
+    "sha256": "e30430b62e9b80cee43fd81d7b196a30f4d74af092f5e17e387e6074495fd565",
+    "rmsRatio": 0.49986
+  },
+  "audio/volume-60/avtodoria-average-200.m4a": {
+    "volume": 60,
+    "source": "avtodoria-average-200.m4a",
+    "sha256": "02ec9e7ac29230507b48669b0c688a27ae0facadb161dfc5f1dddf39e182d032",
+    "rmsRatio": 0.59994
+  },
+  "audio/volume-70/avtodoria-average-200.m4a": {
+    "volume": 70,
+    "source": "avtodoria-average-200.m4a",
+    "sha256": "842f95838b2281c6137a431af9336ce0ba3ce3779612d15fddd6e31fcccc0858",
+    "rmsRatio": 0.69976
+  },
+  "audio/volume-80/avtodoria-average-200.m4a": {
+    "volume": 80,
+    "source": "avtodoria-average-200.m4a",
+    "sha256": "6b62be2d5fde818abb0e27a800142e3221480d55399cdb50bac56721e3da54cc",
+    "rmsRatio": 0.79964
+  },
+  "audio/volume-90/avtodoria-average-200.m4a": {
+    "volume": 90,
+    "source": "avtodoria-average-200.m4a",
+    "sha256": "372669f6057d5e947ed919ab31a51f5cf457eace4f416d512537920b5e618bd2",
+    "rmsRatio": 0.89974
+  },
+  "audio/volume-10/dps-post.m4a": {
+    "volume": 10,
+    "source": "dps-post.m4a",
+    "sha256": "900816bd90818e6156976bac58a2d5500d47576215a3ae1505ec8022b7987bd8",
+    "rmsRatio": 0.09984
+  },
+  "audio/volume-20/dps-post.m4a": {
+    "volume": 20,
+    "source": "dps-post.m4a",
+    "sha256": "c2750848b395b49b15eefd45ecb93076382cb0d250f636b5870130b099e04e71",
+    "rmsRatio": 0.2
+  },
+  "audio/volume-30/dps-post.m4a": {
+    "volume": 30,
+    "source": "dps-post.m4a",
+    "sha256": "740c19f3773814813cad4d4765c709e2967b2f45cdc796a8d6a75bd797f88553",
+    "rmsRatio": 0.30003
+  },
+  "audio/volume-40/dps-post.m4a": {
+    "volume": 40,
+    "source": "dps-post.m4a",
+    "sha256": "e1730b68e7db1d69a77dc411ff3738e6816f9c6750dd85f74f5ded27d048b417",
+    "rmsRatio": 0.40011
+  },
+  "audio/volume-50/dps-post.m4a": {
+    "volume": 50,
+    "source": "dps-post.m4a",
+    "sha256": "a3cc7859ac4aff6a508125ed9c0fca4fe38ea08362f0bfbc4589d20ee0a6ccc3",
+    "rmsRatio": 0.5
+  },
+  "audio/volume-60/dps-post.m4a": {
+    "volume": 60,
+    "source": "dps-post.m4a",
+    "sha256": "e64f74b9325f3b8b6e26d229cd0936fb0e24712ed53954c6c62a06878eea3343",
+    "rmsRatio": 0.60029
+  },
+  "audio/volume-70/dps-post.m4a": {
+    "volume": 70,
+    "source": "dps-post.m4a",
+    "sha256": "ada43508ad123b045efbecf0a6e51e662a2a11c74b7bb96650b05a9ea3a13cc5",
+    "rmsRatio": 0.70051
+  },
+  "audio/volume-80/dps-post.m4a": {
+    "volume": 80,
+    "source": "dps-post.m4a",
+    "sha256": "e015921cc36f97d44ed1cd92ad8fb2b9b47bfbc7afb7f4183b6ab42ddc63309f",
+    "rmsRatio": 0.80014
+  },
+  "audio/volume-90/dps-post.m4a": {
+    "volume": 90,
+    "source": "dps-post.m4a",
+    "sha256": "b2816003f3fe4a2c3a4e3f19350158a1d69d78deee841b378c0e540f85397b5a",
+    "rmsRatio": 0.89998
+  },
+  "audio/volume-10/dps-post-200.m4a": {
+    "volume": 10,
+    "source": "dps-post-200.m4a",
+    "sha256": "3175a4a2c48fe8597e02a54c33de980310d877cb9ef300ba2a54d3e7bfc2326a",
+    "rmsRatio": 0.09977
+  },
+  "audio/volume-20/dps-post-200.m4a": {
+    "volume": 20,
+    "source": "dps-post-200.m4a",
+    "sha256": "5d9c9970a28d8c0385eb53fc399972ab30d6ed7b5da03f7dc7ce7839aef4fc97",
+    "rmsRatio": 0.19989
+  },
+  "audio/volume-30/dps-post-200.m4a": {
+    "volume": 30,
+    "source": "dps-post-200.m4a",
+    "sha256": "c9af8709282fc49e48bc5321cc4777cb8b2cef59dbf05198d4496a5f7117210d",
+    "rmsRatio": 0.30006
+  },
+  "audio/volume-40/dps-post-200.m4a": {
+    "volume": 40,
+    "source": "dps-post-200.m4a",
+    "sha256": "b5b2fd780ec4305c60ef7e9c0371cc4147e895f7e8c0ed3c16912c470036adf8",
+    "rmsRatio": 0.40013
+  },
+  "audio/volume-50/dps-post-200.m4a": {
+    "volume": 50,
+    "source": "dps-post-200.m4a",
+    "sha256": "41f3732092d333f435a8f93f409f215592d1c935eebd6be7ee0b1819eee61a25",
+    "rmsRatio": 0.50014
+  },
+  "audio/volume-60/dps-post-200.m4a": {
+    "volume": 60,
+    "source": "dps-post-200.m4a",
+    "sha256": "a461dcbf10c686f64903f612f48182a64046f9410501babc50bdd6a347a4dfd0",
+    "rmsRatio": 0.60027
+  },
+  "audio/volume-70/dps-post-200.m4a": {
+    "volume": 70,
+    "source": "dps-post-200.m4a",
+    "sha256": "f4ae649ef5a0ac4913e136c07827da093b20152826206beb31f1e299feefcd33",
+    "rmsRatio": 0.70026
+  },
+  "audio/volume-80/dps-post-200.m4a": {
+    "volume": 80,
+    "source": "dps-post-200.m4a",
+    "sha256": "c0dcb4920cbf498b599be2326da4eefc1b5e2c43add8e7f7ef0f8525c18d4e72",
+    "rmsRatio": 0.80006
+  },
+  "audio/volume-90/dps-post-200.m4a": {
+    "volume": 90,
+    "source": "dps-post-200.m4a",
+    "sha256": "00cae7b0b73f103df1261ca3af2ffc96ff5f02bda9739f43ee7d757f0c46b5e9",
+    "rmsRatio": 0.9
+  },
+  "audio/volume-10/dps-stationary.m4a": {
+    "volume": 10,
+    "source": "dps-stationary.m4a",
+    "sha256": "fcb9a087371f211649c6c5e5d57b682fb9310589ac589655e606e43a57fdbe9c",
+    "rmsRatio": 0.09987
+  },
+  "audio/volume-20/dps-stationary.m4a": {
+    "volume": 20,
+    "source": "dps-stationary.m4a",
+    "sha256": "e3386e902cca7d3c22a2c82e1de1daed5dba3ce8045f5a754b8cb64cf2a5e1d4",
+    "rmsRatio": 0.19992
+  },
+  "audio/volume-30/dps-stationary.m4a": {
+    "volume": 30,
+    "source": "dps-stationary.m4a",
+    "sha256": "e0c1b1570e35309d9d9061b6c17298a5656c32e03f617682a3f2687ec826ab95",
+    "rmsRatio": 0.29993
+  },
+  "audio/volume-40/dps-stationary.m4a": {
+    "volume": 40,
+    "source": "dps-stationary.m4a",
+    "sha256": "6d7ae9d02e3e630816723a1f8e1e3ba8edcfb16c3796606498a8282927e9db47",
+    "rmsRatio": 0.40007
+  },
+  "audio/volume-50/dps-stationary.m4a": {
+    "volume": 50,
+    "source": "dps-stationary.m4a",
+    "sha256": "b4f78da90bc00b4df9bf6a3951a60adde4dada6857b0185bd427f7da2eed3a36",
+    "rmsRatio": 0.50019
+  },
+  "audio/volume-60/dps-stationary.m4a": {
+    "volume": 60,
+    "source": "dps-stationary.m4a",
+    "sha256": "7fadb79d57c4996ee35b1220b27b4aa440d77871f3a8c115a2d49a1ca317d2b4",
+    "rmsRatio": 0.60011
+  },
+  "audio/volume-70/dps-stationary.m4a": {
+    "volume": 70,
+    "source": "dps-stationary.m4a",
+    "sha256": "5c9fe91614824d1e4b8bb2c3fc0a94ffbc729c9c840fa4aadc0dd2f7fd4a1258",
+    "rmsRatio": 0.70025
+  },
+  "audio/volume-80/dps-stationary.m4a": {
+    "volume": 80,
+    "source": "dps-stationary.m4a",
+    "sha256": "321aa6038cb9c727a3f3e42a24c6e27fa0b24d58e1086d6c661ba34ed9fe0273",
+    "rmsRatio": 0.80013
+  },
+  "audio/volume-90/dps-stationary.m4a": {
+    "volume": 90,
+    "source": "dps-stationary.m4a",
+    "sha256": "15055365ff12aec2aeffddffe8f807e3172a9916f1c30f1a66a9356e911d25d9",
+    "rmsRatio": 0.89982
+  },
+  "audio/volume-10/dps-stationary-200.m4a": {
+    "volume": 10,
+    "source": "dps-stationary-200.m4a",
+    "sha256": "1abe37413438be48488c2520114b27f5fff9942bc1b0b9ab5216440fa626e45e",
+    "rmsRatio": 0.09982
+  },
+  "audio/volume-20/dps-stationary-200.m4a": {
+    "volume": 20,
+    "source": "dps-stationary-200.m4a",
+    "sha256": "4556ce23825adb19106a1d66ef9ed934e7cc6f7dca39a6ee4a545b42ed3bf409",
+    "rmsRatio": 0.19978
+  },
+  "audio/volume-30/dps-stationary-200.m4a": {
+    "volume": 30,
+    "source": "dps-stationary-200.m4a",
+    "sha256": "068b51e2f89f293f9d1a3efb64c615e8fbfebc923dca2254a6ee1959084c51a7",
+    "rmsRatio": 0.29982
+  },
+  "audio/volume-40/dps-stationary-200.m4a": {
+    "volume": 40,
+    "source": "dps-stationary-200.m4a",
+    "sha256": "1bf2e347180b30099f14635099961ca76b19ee4ebfd66ef83a4fc95800051094",
+    "rmsRatio": 0.39987
+  },
+  "audio/volume-50/dps-stationary-200.m4a": {
+    "volume": 50,
+    "source": "dps-stationary-200.m4a",
+    "sha256": "660fef443b0b4ef795568520a473c4c0257b733f3b941b59a9424325ef1ae28f",
+    "rmsRatio": 0.49999
+  },
+  "audio/volume-60/dps-stationary-200.m4a": {
+    "volume": 60,
+    "source": "dps-stationary-200.m4a",
+    "sha256": "3e855e6a99390f8eb8641e1798ed89edd14bd43c4df35fd42efb41a896b08d62",
+    "rmsRatio": 0.59981
+  },
+  "audio/volume-70/dps-stationary-200.m4a": {
+    "volume": 70,
+    "source": "dps-stationary-200.m4a",
+    "sha256": "9bc904c7defb7acf395fb975c1cdd84e82e1a3a6d5010de1b4970a841e36e9dc",
+    "rmsRatio": 0.69976
+  },
+  "audio/volume-80/dps-stationary-200.m4a": {
+    "volume": 80,
+    "source": "dps-stationary-200.m4a",
+    "sha256": "76ae00fb5b43c4699f185b6680fb73d557d6142b8506daffbfafe0576130d39c",
+    "rmsRatio": 0.79993
+  },
+  "audio/volume-90/dps-stationary-200.m4a": {
+    "volume": 90,
+    "source": "dps-stationary-200.m4a",
+    "sha256": "f3e4a132b01ae1d027c59f8948adda9343a687e3d2935d5dcff75dc70a98683f",
+    "rmsRatio": 0.8999
+  },
+  "audio/volume-10/average-end.m4a": {
+    "volume": 10,
+    "source": "average-end.m4a",
+    "sha256": "86283f7b8d174f5af087cd2e6a1590a653b34f48a0b0dc98dddee8ff6bd8b39d",
+    "rmsRatio": 0.09989
+  },
+  "audio/volume-20/average-end.m4a": {
+    "volume": 20,
+    "source": "average-end.m4a",
+    "sha256": "45e321cdd4bf5e194477be4933dac79427da27eaf1130e2bc0d93b88c9da5dfe",
+    "rmsRatio": 0.19996
+  },
+  "audio/volume-30/average-end.m4a": {
+    "volume": 30,
+    "source": "average-end.m4a",
+    "sha256": "7e3f42bd30e255fca5fcdde0e7ea3e0cb0870b94e809e27ef549e79467192d56",
+    "rmsRatio": 0.3
+  },
+  "audio/volume-40/average-end.m4a": {
+    "volume": 40,
+    "source": "average-end.m4a",
+    "sha256": "ef007b3174efe5cccc4590808944001e95b68010a6be47d667866d1d7c33d057",
+    "rmsRatio": 0.4002
+  },
+  "audio/volume-50/average-end.m4a": {
+    "volume": 50,
+    "source": "average-end.m4a",
+    "sha256": "3d3b76544708ba6bff152a1e6bfb0d3dee55286cb27582cf8403a657684e12a2",
+    "rmsRatio": 0.50011
+  },
+  "audio/volume-60/average-end.m4a": {
+    "volume": 60,
+    "source": "average-end.m4a",
+    "sha256": "3b44f13b6d5817b1b03946c6e2f21fb13ac5ff9649f29a9d9a59d91c8e25b88c",
+    "rmsRatio": 0.59998
+  },
+  "audio/volume-70/average-end.m4a": {
+    "volume": 70,
+    "source": "average-end.m4a",
+    "sha256": "9de1199448ee3d8d2b729a02e87c042f9279a6deeadc9122fe282f3c50135737",
+    "rmsRatio": 0.70009
+  },
+  "audio/volume-80/average-end.m4a": {
+    "volume": 80,
+    "source": "average-end.m4a",
+    "sha256": "6ada36ec026e84505ffbc58cd95e3881131c5f864f0fe6600ed96c7f11e27c33",
+    "rmsRatio": 0.8005
+  },
+  "audio/volume-90/average-end.m4a": {
+    "volume": 90,
+    "source": "average-end.m4a",
+    "sha256": "eae2d6e7da6cedb5797748eb9748f254e4dcc7b603baacafa18c30e5aaa0dd33",
+    "rmsRatio": 0.90021
+  },
+  "audio/volume-10/beeper-choice-1.m4a": {
+    "volume": 10,
+    "source": "beeper-choice-1.m4a",
+    "sha256": "d5d077ead4385b998aec2e92a148e53e13843cf05ec3294dc958f35541685b26",
+    "rmsRatio": 0.09998
+  },
+  "audio/volume-20/beeper-choice-1.m4a": {
+    "volume": 20,
+    "source": "beeper-choice-1.m4a",
+    "sha256": "85465efcc0b74d41c0c253e2dfae0ae8cb0fa8cceedc23f2069e883333571407",
+    "rmsRatio": 0.20004
+  },
+  "audio/volume-30/beeper-choice-1.m4a": {
+    "volume": 30,
+    "source": "beeper-choice-1.m4a",
+    "sha256": "bafbd3fbd97e3d678f0cbb5395282075c50390a2753addbd526c73cff97db38b",
+    "rmsRatio": 0.2999
+  },
+  "audio/volume-40/beeper-choice-1.m4a": {
+    "volume": 40,
+    "source": "beeper-choice-1.m4a",
+    "sha256": "7b42eceba80f6ea0bcd484380e90651b76cccaa144e5b66b41b309f5d0916e56",
+    "rmsRatio": 0.39952
+  },
+  "audio/volume-50/beeper-choice-1.m4a": {
+    "volume": 50,
+    "source": "beeper-choice-1.m4a",
+    "sha256": "cab2c8c258e6b198ecd5bdd2a61e31c25fe18ae403cacbbc52d2dc75e010bb63",
+    "rmsRatio": 0.49953
+  },
+  "audio/volume-60/beeper-choice-1.m4a": {
+    "volume": 60,
+    "source": "beeper-choice-1.m4a",
+    "sha256": "f8bbbc967a609e9f7ee07843af393173766858919dc9c5a3092ab4e6d47e0515",
+    "rmsRatio": 0.59968
+  },
+  "audio/volume-70/beeper-choice-1.m4a": {
+    "volume": 70,
+    "source": "beeper-choice-1.m4a",
+    "sha256": "662f22e29add46adf59a7b30c4de50ed57c77318d617e52e2b4ff52903bdd2ee",
+    "rmsRatio": 0.69936
+  },
+  "audio/volume-80/beeper-choice-1.m4a": {
+    "volume": 80,
+    "source": "beeper-choice-1.m4a",
+    "sha256": "55f76d3540696594648bdd09857149b86d905c6bdfd6acffd9f91623fd099eb2",
+    "rmsRatio": 0.79946
+  },
+  "audio/volume-90/beeper-choice-1.m4a": {
+    "volume": 90,
+    "source": "beeper-choice-1.m4a",
+    "sha256": "94e18501300568a49cdf269978d4e20cab7c1f6c2e15f324eea77fb05564f082",
+    "rmsRatio": 0.89903
+  },
+  "audio/volume-10/beeper-choice-2.m4a": {
+    "volume": 10,
+    "source": "beeper-choice-2.m4a",
+    "sha256": "129a7efaff6e614091aa5dc0b7a58bf35c0c7caf51d3f581c651e292806797e9",
+    "rmsRatio": 0.09982
+  },
+  "audio/volume-20/beeper-choice-2.m4a": {
+    "volume": 20,
+    "source": "beeper-choice-2.m4a",
+    "sha256": "995fde7d40aa12f3de04a9e8cf2aaae7a0e14f041763870d4cf336890fae9be7",
+    "rmsRatio": 0.19993
+  },
+  "audio/volume-30/beeper-choice-2.m4a": {
+    "volume": 30,
+    "source": "beeper-choice-2.m4a",
+    "sha256": "43f57c840c02f27f1ca295f10cb1b524008df689be3aff7c5d4438d8ad7adfd3",
+    "rmsRatio": 0.29945
+  },
+  "audio/volume-40/beeper-choice-2.m4a": {
+    "volume": 40,
+    "source": "beeper-choice-2.m4a",
+    "sha256": "cd0c6989a575101893551b734a6d53ec15df0e76cfb80edea0a62aa4eff4727d",
+    "rmsRatio": 0.39949
+  },
+  "audio/volume-50/beeper-choice-2.m4a": {
+    "volume": 50,
+    "source": "beeper-choice-2.m4a",
+    "sha256": "05b7b5d2f92477284c278064eda13b38e1d0810fa521f752432563d29afbe234",
+    "rmsRatio": 0.4992
+  },
+  "audio/volume-60/beeper-choice-2.m4a": {
+    "volume": 60,
+    "source": "beeper-choice-2.m4a",
+    "sha256": "7d485ef0c0f179b279b869ed4f383958a7ca74dbdc1bb334c2cbcc6c80e59a54",
+    "rmsRatio": 0.5995
+  },
+  "audio/volume-70/beeper-choice-2.m4a": {
+    "volume": 70,
+    "source": "beeper-choice-2.m4a",
+    "sha256": "000dacb4adc96c07e091767307b63400da135c1d4f11816827bd9c797a45bee1",
+    "rmsRatio": 0.69911
+  },
+  "audio/volume-80/beeper-choice-2.m4a": {
+    "volume": 80,
+    "source": "beeper-choice-2.m4a",
+    "sha256": "07d9e3f7290cfa396d984315c780b2a77b12f27592b8bd5306a7e27b36bffba5",
+    "rmsRatio": 0.79962
+  },
+  "audio/volume-90/beeper-choice-2.m4a": {
+    "volume": 90,
+    "source": "beeper-choice-2.m4a",
+    "sha256": "2be5653b3c51e9203e556e7912386db4059a3050cb2b6c0b5ecf514791a09f15",
+    "rmsRatio": 0.89945
+  },
+  "audio/volume-10/beeper-choice-3.m4a": {
+    "volume": 10,
+    "source": "beeper-choice-3.m4a",
+    "sha256": "961131fbef3ab78b41699ce01a9585cfe6f0d09c6162d3cec4ce1a8f8820f378",
+    "rmsRatio": 0.09994
+  },
+  "audio/volume-20/beeper-choice-3.m4a": {
+    "volume": 20,
+    "source": "beeper-choice-3.m4a",
+    "sha256": "5a9068fbc48c41a7f597fccf7eae9c1153ae12ce40f8df60be6fee346c2134b6",
+    "rmsRatio": 0.19966
+  },
+  "audio/volume-30/beeper-choice-3.m4a": {
+    "volume": 30,
+    "source": "beeper-choice-3.m4a",
+    "sha256": "fc57c3645c02aa887ba38b4270527205165da7deb6b116b62aa1b4d42bf9320e",
+    "rmsRatio": 0.29962
+  },
+  "audio/volume-40/beeper-choice-3.m4a": {
+    "volume": 40,
+    "source": "beeper-choice-3.m4a",
+    "sha256": "50b626a38e6adb7605f2d308f605f984b1792ee18da28991cd7ee80936d6f2cc",
+    "rmsRatio": 0.39947
+  },
+  "audio/volume-50/beeper-choice-3.m4a": {
+    "volume": 50,
+    "source": "beeper-choice-3.m4a",
+    "sha256": "d91879f4da8c55eeae7b967b48ce798957805a97a253e1ca6471b20273cb187b",
+    "rmsRatio": 0.49916
+  },
+  "audio/volume-60/beeper-choice-3.m4a": {
+    "volume": 60,
+    "source": "beeper-choice-3.m4a",
+    "sha256": "b8f7caaf15ed6d445832db56ff7b4fc6809a1fe929606a04dc7b33d74f1afa5a",
+    "rmsRatio": 0.59864
+  },
+  "audio/volume-70/beeper-choice-3.m4a": {
+    "volume": 70,
+    "source": "beeper-choice-3.m4a",
+    "sha256": "cfca2a069bb34dad938c3da9402d18956a838c41d4017e03734b15da1c59c1b6",
+    "rmsRatio": 0.69896
+  },
+  "audio/volume-80/beeper-choice-3.m4a": {
+    "volume": 80,
+    "source": "beeper-choice-3.m4a",
+    "sha256": "7fc07138e490dff06976b31f90c1e3552483705469b2dd68158ca39bd6cef93a",
+    "rmsRatio": 0.79754
+  },
+  "audio/volume-90/beeper-choice-3.m4a": {
+    "volume": 90,
+    "source": "beeper-choice-3.m4a",
+    "sha256": "daf55ee2cbabf7158b492de24d58ce4be68e82d01b9c1362642cf9dccb70eb92",
+    "rmsRatio": 0.89899
+  },
+  "audio/volume-10/beeper-choice-4.m4a": {
+    "volume": 10,
+    "source": "beeper-choice-4.m4a",
+    "sha256": "d3763140033152fac24308bd77eb3b6b75c9a36a718d8673a92cd09563c3572e",
+    "rmsRatio": 0.10019
+  },
+  "audio/volume-20/beeper-choice-4.m4a": {
+    "volume": 20,
+    "source": "beeper-choice-4.m4a",
+    "sha256": "37d7c4aeddcbf0e8546c4221dee549a28b32e12a8ed45c38df0a812f97ce92e3",
+    "rmsRatio": 0.19822
+  },
+  "audio/volume-30/beeper-choice-4.m4a": {
+    "volume": 30,
+    "source": "beeper-choice-4.m4a",
+    "sha256": "f2801b1c6a363d042a4b875dda2bac580dbaec5bc6d09df61d0b07d086445cfc",
+    "rmsRatio": 0.29329
+  },
+  "audio/volume-40/beeper-choice-4.m4a": {
+    "volume": 40,
+    "source": "beeper-choice-4.m4a",
+    "sha256": "6409d6eeabd984e7577a7cb210039871e43311b023a7fad5934fe382978046a0",
+    "rmsRatio": 0.39261
+  },
+  "audio/volume-50/beeper-choice-4.m4a": {
+    "volume": 50,
+    "source": "beeper-choice-4.m4a",
+    "sha256": "25db079e55b43485a6f559b8f0e9f84068d4bace9dc49106a02f0b9025075320",
+    "rmsRatio": 0.50043
+  },
+  "audio/volume-60/beeper-choice-4.m4a": {
+    "volume": 60,
+    "source": "beeper-choice-4.m4a",
+    "sha256": "d0ea251740cdcabc65b6a80dee43a8ca28f7ad3139079172797ab16f7e500d80",
+    "rmsRatio": 0.59698
+  },
+  "audio/volume-70/beeper-choice-4.m4a": {
+    "volume": 70,
+    "source": "beeper-choice-4.m4a",
+    "sha256": "d638117f5b25be2b4fad1a50894eedb447e11760321febd7ecd4c3c07938ce57",
+    "rmsRatio": 0.69533
+  },
+  "audio/volume-80/beeper-choice-4.m4a": {
+    "volume": 80,
+    "source": "beeper-choice-4.m4a",
+    "sha256": "83f8f7bed8de40f9c5bdd7137a1e8509dfc3118231ca2ac9fc65bc055532f1d1",
+    "rmsRatio": 0.80222
+  },
+  "audio/volume-90/beeper-choice-4.m4a": {
+    "volume": 90,
+    "source": "beeper-choice-4.m4a",
+    "sha256": "ba773de37076e79dcc4f99b6f59be6ae29089913348cfb516677f399223bac19",
+    "rmsRatio": 0.89951
+  },
+  "audio/volume-10/beeper-choice-5.m4a": {
+    "volume": 10,
+    "source": "beeper-choice-5.m4a",
+    "sha256": "db795f2601b3d1327d30835d0a7ec14e9de55b5e174798d425cae1d2eaf82814",
+    "rmsRatio": 0.09998
+  },
+  "audio/volume-20/beeper-choice-5.m4a": {
+    "volume": 20,
+    "source": "beeper-choice-5.m4a",
+    "sha256": "768b59d1248578d3fd5b834cbdd4f582e41a9d295bc77225f54ea8f740c103c8",
+    "rmsRatio": 0.19979
+  },
+  "audio/volume-30/beeper-choice-5.m4a": {
+    "volume": 30,
+    "source": "beeper-choice-5.m4a",
+    "sha256": "d28d22ffc5a3dcc3a07784ea874eab2597f6bf292a80741241a5b05bc5a191f9",
+    "rmsRatio": 0.29964
+  },
+  "audio/volume-40/beeper-choice-5.m4a": {
+    "volume": 40,
+    "source": "beeper-choice-5.m4a",
+    "sha256": "8da79da76098e231dd11da9d3121693f7e409106d5f1ab9ea7472b0387f43689",
+    "rmsRatio": 0.39996
+  },
+  "audio/volume-50/beeper-choice-5.m4a": {
+    "volume": 50,
+    "source": "beeper-choice-5.m4a",
+    "sha256": "6d6855a918027eacddcae5c0ff92b1aed29b01c6a3dfc48195750d86cacff8f5",
+    "rmsRatio": 0.50017
+  },
+  "audio/volume-60/beeper-choice-5.m4a": {
+    "volume": 60,
+    "source": "beeper-choice-5.m4a",
+    "sha256": "282f02e0b1e043a2b2e8e395d91d68f636ab9129d71e5c6dd1e3b07f6a7d15b6",
+    "rmsRatio": 0.59942
+  },
+  "audio/volume-70/beeper-choice-5.m4a": {
+    "volume": 70,
+    "source": "beeper-choice-5.m4a",
+    "sha256": "c2db88000a357034b01e8f798cd5685a117587c2643acf5a9aad03bee0b1210c",
+    "rmsRatio": 0.69956
+  },
+  "audio/volume-80/beeper-choice-5.m4a": {
+    "volume": 80,
+    "source": "beeper-choice-5.m4a",
+    "sha256": "a6032e2bc41de1c1824e6a3bd64507c819582772fc1adfae3ac3dbd324d91986",
+    "rmsRatio": 0.79938
+  },
+  "audio/volume-90/beeper-choice-5.m4a": {
+    "volume": 90,
+    "source": "beeper-choice-5.m4a",
+    "sha256": "bb6e62930df52b7b0bbf4330d14762b34510da254af978cb002aa5d4826c228c",
+    "rmsRatio": 0.89917
+  },
+  "audio/volume-10/beeper-choice-6.m4a": {
+    "volume": 10,
+    "source": "beeper-choice-6.m4a",
+    "sha256": "27bf426e954f6d757490bf55bc02ed4ca31f429184be4e382c1b03f035fb49ce",
+    "rmsRatio": 0.10069
+  },
+  "audio/volume-20/beeper-choice-6.m4a": {
+    "volume": 20,
+    "source": "beeper-choice-6.m4a",
+    "sha256": "23146d2fe2ecd8c2263b01fb3b8a07f94babdf2a4841fe7301c228b213c55055",
+    "rmsRatio": 0.20168
+  },
+  "audio/volume-30/beeper-choice-6.m4a": {
+    "volume": 30,
+    "source": "beeper-choice-6.m4a",
+    "sha256": "8d43d8512e6872ac69eda3298151acdc4eb3752b1e09e78e21815963f7eb25e6",
+    "rmsRatio": 0.29525
+  },
+  "audio/volume-40/beeper-choice-6.m4a": {
+    "volume": 40,
+    "source": "beeper-choice-6.m4a",
+    "sha256": "51e84218c33ebd05685057996865944f8d3818ae8aff2d94a35b84aa47160643",
+    "rmsRatio": 0.40748
+  },
+  "audio/volume-50/beeper-choice-6.m4a": {
+    "volume": 50,
+    "source": "beeper-choice-6.m4a",
+    "sha256": "3599fc5d38192627de325100c3ee8fabe6f8db5d322f72f92491970a3a271f30",
+    "rmsRatio": 0.50835
+  },
+  "audio/volume-60/beeper-choice-6.m4a": {
+    "volume": 60,
+    "source": "beeper-choice-6.m4a",
+    "sha256": "6f4b501e9c62601b2d87f150d39fd96ae7b329d0d5309c743994059816eb7677",
+    "rmsRatio": 0.5913
+  },
+  "audio/volume-70/beeper-choice-6.m4a": {
+    "volume": 70,
+    "source": "beeper-choice-6.m4a",
+    "sha256": "bcf420102975fb4ca36f252fe167687bca0157bba89ccf590cc2ee7b191aaa09",
+    "rmsRatio": 0.6906
+  },
+  "audio/volume-80/beeper-choice-6.m4a": {
+    "volume": 80,
+    "source": "beeper-choice-6.m4a",
+    "sha256": "51d1ed3320b1592836cb4639041897eaca30762851bc2ac40bb8d0e3a0116f66",
+    "rmsRatio": 0.80898
+  },
+  "audio/volume-90/beeper-choice-6.m4a": {
+    "volume": 90,
+    "source": "beeper-choice-6.m4a",
+    "sha256": "2d0b031cf2e77903c2f915bb3995ebb67e16f44c91f9ea864c3658ac941efbeb",
+    "rmsRatio": 0.89557
+  },
+  "audio/volume-10/beeper-choice-7.m4a": {
+    "volume": 10,
+    "source": "beeper-choice-7.m4a",
+    "sha256": "84bffd67b09af0ac5760245fa32dfa8236fbd2ef16e2e97dbedc85aa9ab9e2c2",
+    "rmsRatio": 0.0998
+  },
+  "audio/volume-20/beeper-choice-7.m4a": {
+    "volume": 20,
+    "source": "beeper-choice-7.m4a",
+    "sha256": "93bd40e04e672df9cf412b7a8f39729dee95fb5d1bba3cc49c768a498b239160",
+    "rmsRatio": 0.19976
+  },
+  "audio/volume-30/beeper-choice-7.m4a": {
+    "volume": 30,
+    "source": "beeper-choice-7.m4a",
+    "sha256": "b3c3483e38776007ebf348996f49c4dc7a686671985e055105b9a32e9ad16a04",
+    "rmsRatio": 0.29969
+  },
+  "audio/volume-40/beeper-choice-7.m4a": {
+    "volume": 40,
+    "source": "beeper-choice-7.m4a",
+    "sha256": "6d74234043936e4b14a78d7466061deff34bd6861ee78dd76af486decb52c68a",
+    "rmsRatio": 0.39994
+  },
+  "audio/volume-50/beeper-choice-7.m4a": {
+    "volume": 50,
+    "source": "beeper-choice-7.m4a",
+    "sha256": "adbf0650fbc11a3cef7e44bd83a16314e1d86415fe88f6953bf428c361e882ba",
+    "rmsRatio": 0.49928
+  },
+  "audio/volume-60/beeper-choice-7.m4a": {
+    "volume": 60,
+    "source": "beeper-choice-7.m4a",
+    "sha256": "264b5ed96819415680a3d919a921f9df984ca141b487df936ce9b60dde69de93",
+    "rmsRatio": 0.59962
+  },
+  "audio/volume-70/beeper-choice-7.m4a": {
+    "volume": 70,
+    "source": "beeper-choice-7.m4a",
+    "sha256": "807bba7bbb8ab5e91fb79b64d41f0d1f2e15670739df008fbf9aa0bb49473265",
+    "rmsRatio": 0.69952
+  },
+  "audio/volume-80/beeper-choice-7.m4a": {
+    "volume": 80,
+    "source": "beeper-choice-7.m4a",
+    "sha256": "39346a0fb8d1d089aeff15d745ff9a4b63eabedcb9223f8b58c5793326a12002",
+    "rmsRatio": 0.79962
+  },
+  "audio/volume-90/beeper-choice-7.m4a": {
+    "volume": 90,
+    "source": "beeper-choice-7.m4a",
+    "sha256": "0826b693bb3b117f1b273522e8d6aed02070861e1c1538b702fc0102fdb96b29",
+    "rmsRatio": 0.89935
+  },
+  "audio/volume-10/beeper-choice-8.m4a": {
+    "volume": 10,
+    "source": "beeper-choice-8.m4a",
+    "sha256": "2858fc08c04625aca56d2cc0aff12c1633ad34d1016e61a716c6d220489c373e",
+    "rmsRatio": 0.09981
+  },
+  "audio/volume-20/beeper-choice-8.m4a": {
+    "volume": 20,
+    "source": "beeper-choice-8.m4a",
+    "sha256": "dc15b8d8f5a8fc511e3c46d1b87b810c45206fcc3a6c446a9d4f9eab764cd280",
+    "rmsRatio": 0.19983
+  },
+  "audio/volume-30/beeper-choice-8.m4a": {
+    "volume": 30,
+    "source": "beeper-choice-8.m4a",
+    "sha256": "bb2b4971122a94591604cfa3ad33399b786e5ac23ab338ef7d6265ec17fed6d7",
+    "rmsRatio": 0.29988
+  },
+  "audio/volume-40/beeper-choice-8.m4a": {
+    "volume": 40,
+    "source": "beeper-choice-8.m4a",
+    "sha256": "11562297030073cdaf8effd226f08520f88c68a277c6b2d32bcc47006475fcb7",
+    "rmsRatio": 0.39975
+  },
+  "audio/volume-50/beeper-choice-8.m4a": {
+    "volume": 50,
+    "source": "beeper-choice-8.m4a",
+    "sha256": "0d1560396311bf7c3e48cb0d4a93b1fc161589571b032e98c63dc8da4b767847",
+    "rmsRatio": 0.49901
+  },
+  "audio/volume-60/beeper-choice-8.m4a": {
+    "volume": 60,
+    "source": "beeper-choice-8.m4a",
+    "sha256": "74435022784f0dcb7281b941db9b83fda349046a75a288e90a74739d2db84fdd",
+    "rmsRatio": 0.59913
+  },
+  "audio/volume-70/beeper-choice-8.m4a": {
+    "volume": 70,
+    "source": "beeper-choice-8.m4a",
+    "sha256": "0a438697f9b1858d7f1134a0fe9bce57cf906398e3f90be84e7ffe9d34ee7a2e",
+    "rmsRatio": 0.69843
+  },
+  "audio/volume-80/beeper-choice-8.m4a": {
+    "volume": 80,
+    "source": "beeper-choice-8.m4a",
+    "sha256": "5f3044311f54a7a2466632e7f812e799ee2dd03ddbbbf9903220b98add186c6f",
+    "rmsRatio": 0.80057
+  },
+  "audio/volume-90/beeper-choice-8.m4a": {
+    "volume": 90,
+    "source": "beeper-choice-8.m4a",
+    "sha256": "babefd78cc1ae6518eaad9c3aadac7e59715cf736cc26a47a36f57ecdc098bd3",
+    "rmsRatio": 0.89563
+  }
+}
