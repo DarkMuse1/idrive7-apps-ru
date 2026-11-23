@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "id": "iteriodev_seats",
-  "version": "1.6.2",
-  "tree": "iteriodev_seats@1.6.2",
+  "version": "1.6.3",
+  "tree": "iteriodev_seats@1.6.3",
   "modules": [
     "src/main.js",
     "src/online-host.js",
@@ -23,7 +23,7 @@
     "renderer"
   ],
   "requires": {
-    "iteriodev-comfort": "0.6.0",
+    "iteriodev-comfort": "0.6.1",
     "mgu-deploy": "0.7.5"
   },
   "texts": {

@@ -65,6 +65,15 @@ def main():
         assert body.startswith(b"'use strict';")
         entry.write_bytes(body.replace(b"'use strict';", b"'use strict';\nrequire('./ru-fonts');", 1))
         if args.app in ('cluster_layouts', 'cluster_centre'):
+            # These authors mark UI labels as literal; install our existing
+            # display translator at the build boundary, leaving source intact.
+            body = entry.read_text(encoding='utf8')
+            marker = '    async start(ctx) {'
+            hook = "        require('./ru-display')(ctx);"
+            if hook not in body:
+                if body.count(marker) != 1:
+                    raise ValueError('Review display localization entry for ' + args.app)
+                entry.write_text(body.replace(marker, marker + '\n' + hook, 1), encoding='utf8')
             for p in (assets / 'cluster-sdf').iterdir():
                 shutil.copyfile(p, js / p.name)
     else:

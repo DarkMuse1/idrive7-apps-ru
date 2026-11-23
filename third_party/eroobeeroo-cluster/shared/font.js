@@ -1,5 +1,4 @@
 'use strict';
-const localText = require('./ru-text');
 /**
  * font.js - the glyph atlas the cluster's shaders read: one row of cells, one glyph each, as a signed
  * distance field in one byte a pixel (0.5 at the outline, more inside). A distance field scales cleanly,
@@ -154,4 +153,4 @@ function codes(s) {
     return out;
 }
 
-module.exports = { atlas, codes: (s) => codes(localText(s)), codeOf, smallPrint: (s) => smallPrint(localText(s)), line: (s, w, a, tr, f) => line(localText(s), w, a, tr, f), digitAdvance, CHARS, CELL_W, CELL_H, SPREAD, FAMILIES };
+module.exports = { atlas, codes, codeOf, smallPrint, line, digitAdvance, CHARS, CELL_W, CELL_H, SPREAD, FAMILIES };

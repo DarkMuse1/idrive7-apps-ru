@@ -2,9 +2,10 @@
   "id": "cluster_themes",
   "title": "Cluster Themes",
   "description": "Redraws the instrument cluster: GT3 race dash, M-style, M view, Vector (with a music panel), Sport, Minimal, Track, Drag, Rally, Retro 80s, Cruise, Dyno (BMW-coloured readout tiles) or Ribbon (with holiday editions), with shift lights, boost, temps, tyres, a G-meter and a 0-60 timer",
-  "version": "0.19.2",
+  "version": "0.19.9",
   "vendor": "custom",
   "loggingId": "OAC1",
+  "autostart": true,
   "iconGlyph": "CLU",
   "shared": [
     "hud.js",
@@ -382,6 +383,154 @@
       ]
     },
     {
+      "key": "inHybrid",
+      "label": "In Hybrid",
+      "type": "choice",
+      "default": "same",
+      "options": [
+        [
+          "same",
+          "Same as the drive mode"
+        ],
+        [
+          "off",
+          "Off (BMW's own cluster)"
+        ],
+        [
+          "gt3",
+          "GT3"
+        ],
+        [
+          "m",
+          "M"
+        ],
+        [
+          "mview",
+          "M view"
+        ],
+        [
+          "vector",
+          "Vector"
+        ],
+        [
+          "sport",
+          "Sport"
+        ],
+        [
+          "minimal",
+          "Minimal"
+        ],
+        [
+          "track",
+          "Track"
+        ],
+        [
+          "drag",
+          "Drag"
+        ],
+        [
+          "rally",
+          "Rally"
+        ],
+        [
+          "retro80s",
+          "Retro 80s"
+        ],
+        [
+          "cruise",
+          "Cruise"
+        ],
+        [
+          "dyno",
+          "Dyno"
+        ],
+        [
+          "ribbon",
+          "Ribbon"
+        ]
+      ]
+    },
+    {
+      "key": "inElectric",
+      "label": "In Electric",
+      "type": "choice",
+      "default": "same",
+      "options": [
+        [
+          "same",
+          "Same as the drive mode"
+        ],
+        [
+          "off",
+          "Off (BMW's own cluster)"
+        ],
+        [
+          "gt3",
+          "GT3"
+        ],
+        [
+          "m",
+          "M"
+        ],
+        [
+          "mview",
+          "M view"
+        ],
+        [
+          "vector",
+          "Vector"
+        ],
+        [
+          "sport",
+          "Sport"
+        ],
+        [
+          "minimal",
+          "Minimal"
+        ],
+        [
+          "track",
+          "Track"
+        ],
+        [
+          "drag",
+          "Drag"
+        ],
+        [
+          "rally",
+          "Rally"
+        ],
+        [
+          "retro80s",
+          "Retro 80s"
+        ],
+        [
+          "cruise",
+          "Cruise"
+        ],
+        [
+          "dyno",
+          "Dyno"
+        ],
+        [
+          "ribbon",
+          "Ribbon"
+        ]
+      ]
+    },
+    {
+      "key": "keepStrip",
+      "label": "Leave BMW's bottom strip clear",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "autoStart",
+      "label": "Start with the car",
+      "type": "bool",
+      "default": true
+    },
+    {
       "key": "mapInTheme",
       "label": "Show Waze map inside the theme",
       "type": "bool",
@@ -400,6 +549,46 @@
         [
           "metric",
           "km/h, °C, bar"
+        ]
+      ]
+    },
+    {
+      "key": "tempUnits",
+      "label": "Temperature",
+      "type": "choice",
+      "default": "speed",
+      "options": [
+        [
+          "speed",
+          "Match speed"
+        ],
+        [
+          "c",
+          "°C"
+        ],
+        [
+          "f",
+          "°F"
+        ]
+      ]
+    },
+    {
+      "key": "pressureUnits",
+      "label": "Pressure",
+      "type": "choice",
+      "default": "speed",
+      "options": [
+        [
+          "speed",
+          "Match speed"
+        ],
+        [
+          "bar",
+          "bar"
+        ],
+        [
+          "psi",
+          "psi"
         ]
       ]
     },

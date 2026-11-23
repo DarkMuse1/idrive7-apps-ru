@@ -2,7 +2,7 @@
   "id": "cluster_centre",
   "title": "Cluster Centre",
   "description": "Pages of engine, gearbox and eDrive data, warm-up, turbo cool-down, a shift light and a 0-60 timer in the centre of the factory cluster, drawn by the cluster itself",
-  "version": "0.9.1",
+  "version": "0.10.0",
   "startType": "autostart",
   "vendor": "custom",
   "loggingId": "OA9M",

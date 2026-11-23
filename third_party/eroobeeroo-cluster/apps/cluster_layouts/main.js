@@ -49,7 +49,6 @@ function creditFooter(cv, t) {
 
 mgu.run({
     async start(ctx) {
-        require('./ru-display')(ctx);
         const { ui, settings, log } = ctx;
         // the clock's zone and format (clock.js: the unit runs its apps on UTC)
         const clockNow = () => { clock.setZone(settings.get('timeZone')); clock.setTwelve(settings.get('clock') !== '24'); };

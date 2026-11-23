@@ -2,9 +2,10 @@
   "id": "idrive_hud_widgets",
   "title": "HUD Widgets",
   "description": "Gear, shift lights, boost, oil, coolant and intake temperatures, a G-meter, trip figures and the song playing on the windshield HUD, in Classic, M or Night themes",
-  "version": "0.15.2",
+  "version": "0.15.8",
   "vendor": "custom",
   "loggingId": "OAH1",
+  "autostart": true,
   "iconGlyph": "HUD",
   "shared": [
     "hud.js",
@@ -1050,6 +1051,12 @@
           "Off"
         ]
       ]
+    },
+    {
+      "key": "autoStart",
+      "label": "Start with the car",
+      "type": "bool",
+      "default": true
     },
     {
       "key": "demo",

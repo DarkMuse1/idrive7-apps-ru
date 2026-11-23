@@ -105,7 +105,14 @@ function headUnit(stage, o) {
     hu.start = () => {
         const realLoad = Module._load;
         const run = live ? async (impl) => {
-            // as mgu.js: the settings screen / sheet, the app, then its entry state opened
+            // as mgu.js: impl.background (app.json "autostart"; o.noScreens = the car started the app without its
+            // screens, so only that runs), the settings screen / sheet, the app, then its entry state opened
+            if (impl.background) {
+                try {
+                    ctx.background = await impl.background({ app: null, log: ctx.log, settings, signals: ctx.signals, spec, dataDir: ctx.dataDir });
+                } catch (e) { log.error('background start', e); }
+                if (o.noScreens) { log.info('no screens for this start: running in the background'); return ctx; }
+            }
             try { await wireSettings(src, kitDir, spec)(ctx); } catch (e) { log.error('settings screen', e); }
             try { await impl.start(ctx); } catch (e) { log.error('app start', e); }
             log.info('initialized');

@@ -9,12 +9,26 @@
  * The pick per layout and slot is kept in <data>/slots.json (hud.js slotSensor / setSlot).
  *
  * Each sensor: id, name (the page), cat (the page's chips), head (upper case, the cluster's heading fonts), tok (a
- * hud.js token, the value; digits, '.', ':' and '-' only, so it fits every value font), unit(us) (upper case).
+ * hud.js token, the value; digits, '.', ':' and '-' only, so it fits every value font), unit(us) (upper case; its
+ * .kind says which units setting `us` comes from, see imperial).
  * Plain Node 8 (the car's 8.16.2).
  */
 const CATS = ['Engine', 'Temps', 'Chassis', 'Fuel', 'Tyres', 'Drive'];
 const T = (us) => (us ? '°F' : '°C');
 const P = (us) => (us ? 'PSI' : 'BAR');
+T.kind = 'temp'; P.kind = 'pressure';      // which units setting their `us` follows (imperial below)
+
+/**
+ * Whether `kind` ('temp', 'pressure', anything else = speed) shows in US units. get(key) -> a setting. Cluster Themes
+ * has Temperature and Pressure settings (issues #24, #32: mph with °C and psi in the UK); "speed" (Match speed, the
+ * default) or no such setting (HUD Widgets) follows Units.
+ */
+function imperial(get, kind) {
+    const v = kind === 'temp' ? get('tempUnits') : kind === 'pressure' ? get('pressureUnits') : null;
+    if (v === 'f' || v === 'psi') return true;
+    if (v === 'c' || v === 'bar') return false;
+    return get('units') === 'us';
+}
 
 const LIST = [
     { id: 'rpm', name: 'Engine speed', cat: 'Engine', head: 'RPM', tok: 'rpm', unit: () => '' },
@@ -49,4 +63,4 @@ const LIST = [
 const BY_ID = {};
 LIST.forEach((s) => { BY_ID[s.id] = s; });
 
-module.exports = { CATS, LIST, get: (id) => BY_ID[id] || null };
+module.exports = { CATS, LIST, get: (id) => BY_ID[id] || null, imperial };

@@ -14,8 +14,16 @@ function helper(exec,bin,arg){return new Promise(resolve=>exec(bin,[arg],{timeou
  resolve({ok:!err,exitCode:err?err.code:0,error:err?text(err.message):null,stderr:text(stderr),result:result||null});
 }));}
 async function smallFile(file){const stat=await io('stat',file);if(!stat.isFile()||stat.size>65536)throw Error('File omitted: not regular or larger than 64 KiB');return io('readFile',file,'utf8');}
+function gpsSnapshot(value){
+ if(!value)return {available:false,reason:'app_did_not_supply_gps_snapshot'};
+ if(value.schema!==1||typeof value.capturedAt!=='string'||!value.decision||!Array.isArray(value.history))return {available:false,reason:'invalid_gps_snapshot'};
+ const raw=JSON.stringify(value);
+ if(Buffer.byteLength(raw)>24576)return {available:false,reason:'gps_snapshot_exceeds_24kib'};
+ return JSON.parse(raw);
+}
 async function collect(d,request,options){
  const o=options||{},s=d.s,report={format:'SpeedCAM-audio-diagnostics',schema:2,createdAt:new Date().toISOString(),serviceVersion:o.serviceVersion||null,appVersion:text(request.appVersion),readOnly:true,audibilityTested:false,
+  gps:gpsSnapshot(request.gps),
   mixerSettings:d.mix?d.mix.snapshot():null,
   beeperSound:d.beeperSounds?d.beeperSounds.snapshot():null,
   pulseAudio:s.pulseDiagnostics?JSON.parse(JSON.stringify(s.pulseDiagnostics)):null,

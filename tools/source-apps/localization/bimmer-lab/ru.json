@@ -3274,5 +3274,13 @@
   "M3 / M5 look": "Оформление M3 / M5",
   "music panel": "Музыкальная панель",
   "rev band · km/h": "Шкала оборотов · км/ч",
-  "lights · now playing": "Индикаторы · музыка"
+  "lights · now playing": "Индикаторы · музыка",
+  "In Hybrid": "В гибридном режиме",
+  "Same as the drive mode": "Как в режиме движения",
+  "In Electric": "В электрическом режиме",
+  "Start with the car": "Запускать вместе с автомобилем",
+  "Match speed": "Согласовать скорость",
+  "Start with the car is off: waiting to be opened": "Автозапуск выключен: ожидает открытия",
+  "Pressure": "Давление",
+  "Same": "Так же"
 }

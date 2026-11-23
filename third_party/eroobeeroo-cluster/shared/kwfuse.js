@@ -40,6 +40,14 @@ const A_TAU_MS = 80;          // the acceleration's smoothing (its sensor is noi
 const SIG_FRESH_MS = 2500;    // a car signal older than this: not used (some only notify on a change: held that long)
 const MIN_FITS = 12;          // readings a car signal's model needs before it shows
 const ERR_TAU = 0.9;          // the error's average: about the last 10 readings
+// The anchor: a car signal is fast but coarse (the eDRIVE needle steps ~7.5 kW) and a quantised signal leaves the
+// fitted line with a small standing bias, so each car-signal model carries an offset - the average gap between its
+// prediction and the real reading, tracked fast - so the shown value rides the fast signal but sits on the
+// accurate reading. The wheels' model is continuous and already unbiased, so it carries no offset (adding one there
+// only feeds the read's own lag back in). No output easing: a low-pass would just add lag, which is the one thing
+// this is here to remove; the value is shown as computed.
+const OFF_ALPHA = 0.4;        // the offset's tracking per reading (~2 readings: faster than the fit, slower than noise)
+const OFF_MAX = 40;           // kW: the offset is bounded, so a bad reading can't throw the gauge
 
 /** The power at the wheels (kW, + driving the car): speed km/h, the sensor's longitudinal acceleration in g. */
 function wheelKw(speedKmh, gLong) {
@@ -67,7 +75,7 @@ const MODELS = {
     },
     wheel: {
         feat: (s) => (s.electric ? [Math.max(0, s.wheel), Math.min(0, s.wheel), 1] : null),
-        start: [1 / 0.85, 0.7, 1.5], P: [0.05, 0.05, 4],
+        start: [1 / 0.85, 0.7, 1.5], P: [0.05, 0.05, 4], noOffset: true,
         clamp: (th) => { th[0] = Math.min(2, Math.max(1, th[0])); th[1] = Math.min(0.95, Math.max(0.3, th[1])); th[2] = Math.min(15, Math.max(-2, th[2])); },
     },
 };
@@ -75,10 +83,13 @@ const ORDER = ['rel', 'sport', 'cons', 'wheel'];
 
 function createModel(def) {
     const n = def.start.length;
-    const m = { def, theta: def.start.slice(), P: def.P.map((p, i) => def.P.map((q, j) => (i === j ? p : 0))), fits: 0, err: null };
+    const m = { def, theta: def.start.slice(), P: def.P.map((p, i) => def.P.map((q, j) => (i === j ? p : 0))), fits: 0, err: null, offset: 0 };
     m.predict = (x) => x.reduce((a, v, i) => a + v * m.theta[i], 0);
     m.update = (x, kw) => {
         const e = kw - m.predict(x);
+        // the offset rides the reading: the average gap between the prediction and the real reading (bounded).
+        // not for the wheels' model - it is already unbiased, so an offset there only re-adds the read's lag.
+        if (!def.noOffset) m.offset = Math.max(-OFF_MAX, Math.min(OFF_MAX, m.offset + OFF_ALPHA * (e - m.offset)));
         m.err = m.err === null ? Math.abs(e) : ERR_TAU * m.err + (1 - ERR_TAU) * Math.abs(e);
         const Px = m.P.map((r) => r.reduce((a, v, j) => a + v * x[j], 0));
         const den = LAMBDA + x.reduce((a, v, i) => a + v * Px[i], 0);
@@ -148,8 +159,8 @@ function createFuse() {
         const s = state(t);
         const quiet = !last || t - (hist.length ? hist[hist.length - 1][0] : 0) > 1000;
         const b = quiet ? null : pick(s, t);
-        if (!b) return { kw: meas, fused: false, model: null, measuredKw: meas, measuredAge: t - measT };
-        return { kw: b.m.predict(b.x), fused: true, model: b.k, measuredKw: meas, measuredAge: t - measT };
+        const kw = b ? b.m.predict(b.x) + b.m.offset : meas;       // the fast signal, sat on the accurate reading
+        return { kw, fused: !!b, model: b ? b.k : null, measuredKw: meas, measuredAge: t - measT };
     }
     function fit() {
         const s = state(Date.now()), b = last ? pick(s, s.t) : null;

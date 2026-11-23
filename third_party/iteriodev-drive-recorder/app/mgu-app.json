@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "id": "oap-driverecorder-next",
-  "version": "2.5.1",
-  "tree": "oap-driverecorder-next@2.5.0",
+  "version": "2.5.2",
+  "tree": "oap-driverecorder-next@2.5.1",
   "modules": [
     "src/main.js",
     "src/online-host.js",

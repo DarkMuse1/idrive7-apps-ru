@@ -32,6 +32,9 @@
  * then its memories), press = tap; a hold control moves the seat while the knob stays pressed down.
  * 1.6.1: the controller on the car (mgu-m4): only the first states came, the FrontCCU proxy was not kept (collected).
  * 1.6.2 (issue #29): a half without controls says what its seat module answered (<- seats.found, Comfort 0.6.0).
+ * 1.6.3 (issue #37, iDrive 7): FrontCCU waited for with a plain timeout (oap-shared/frontccu.js: iDrive 7's SDK timed
+ * { timeoutMs } out at once); the builder's newer controller runtime (the ring follows the screen). Needs Comfort 0.6.1
+ * (issue #42: Make room / easy exit only on a known standing car).
  *
  * Screens: drawn by the GPU renderer, designed in the HMI UI builder: apps/hmi-ui-builder/projects/seats.json
  * (scripts/oap-tools/make_seats_project.js), exported into this folder (rhmiData/ = one empty RHMI host state per

@@ -1,4 +1,0 @@
-oap-driverecorder-next@2.4.0.tgz: source package oap-driverecorder-next@2.4.0, 47 files, modules main.js online-host.js recorder.js player.js meta.js ui.js
-check iDrive 7: linked against x_call@4.25.3.tgz:javascript/app.js, entry x_call@4.25.3:javascript/xcall.js, 549 modules, app.js 1153733 bytes, node --check v8.16.2 ok
-check iDrive 8: linked against ts_diagnostic_service@6.26.2.tgz:package/javascript/app.js, entry ts_diagnostic_service@6.26.2:javascript/diagnostic.js, 658 modules, app.js 1606507 bytes, node --check v8.16.2 ok
-RC=True

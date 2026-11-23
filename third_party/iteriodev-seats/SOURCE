@@ -1,6 +1,6 @@
 Upstream: https://github.com/IterioDev/car-apps
-Commit: 2c511a79ac0f246d1f4529a02dca3e89c2c04676
-Seats 1.6.2 and Comfort 0.6.0
+Commit: f67a602df54f3e31cc10387aca453e4cfdee3c9e
+Seats 1.6.3 and Comfort 0.6.7
 Russian display localization by DarkMuse1. Original author notices are retained.
 
-Comfort source update: 0f03f32d5b607103cd0c8f184dfdd5d3c0f83cb7
+Comfort source update: f67a602df54f3e31cc10387aca453e4cfdee3c9e

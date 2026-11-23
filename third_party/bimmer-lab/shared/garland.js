@@ -24,7 +24,7 @@ const visible = require('./visible');
 // sizes at scale 1, target px. sag: the swag's dip; swag: hang point spacing; sp: bulb spacing along it;
 // bl / bw: a bulb's length and widest half-width; capH / capW: the dark socket; wire: thickness; glow: halo sigma
 const SIZE = {
-    panel: { sag: 13, swag: 210, sp: 44, bl: 21, bw: 6.6, capH: 6, capW: 7.5, wire: 2.2, glow: 8, margin: 7, minSpan: 150,
+    panel: { sag: 13, swag: 210, sp: 44, bl: 21, bw: 6.6, capH: 6, capW: 7.5, wire: 2.2, glow: 8, margin: 7, minSpan: 200,
         x0: 110, x1: 1810, bottom: 640, scales: [1, 0.85, 0.72, 0.6, 0.5], offs: [0, 15, 30, 45], pad: 5 },
     hud: { sag: 6, swag: 120, sp: 25, bl: 11, bw: 3.6, capH: 3.2, capW: 4.2, wire: 1.3, glow: 4.5, margin: 1, minSpan: 110,
         x0: 124, x1: 676, bottom: 378, scales: [1, 0.8, 0.65, 0.52], offs: [0], pad: 3 },
@@ -71,6 +71,24 @@ function obstacles(target, shown, camera) {
             // the Sport dash: its top lines run at geo[0]; nothing under them (the dash's own space)
             add(w.x, w.y + w.geo[0] - 4, w.x + w.w, w.y + w.h);
         }
+        // a backdrop drawn by a shader (M view, Vector): the string stays above its top outline, everything under it
+        // is the theme's own; col(x, y) keeps x's column free only above y
+        const col = (x, y) => add(x - 3, y, x + 3, w.y + w.h);
+        if (w.type === 'mview' && Array.isArray(w.path)) {
+            // M view: its scale line (left, and mirrored right) with the red / orange rev marks just outside it
+            pathPoints(w.path, w.arcs, 6).forEach((pt) => { col(w.x + pt[0], w.y + pt[1] - 22); col(1920 - (w.x + pt[0]), w.y + pt[1] - 22); });
+        }
+        if (w.type === 'vdash') {
+            // Vector: its bracket lines, the rev counter's ring, the gauge rings and the music panel
+            (w.segs || []).forEach((g) => {
+                const n = Math.max(1, Math.ceil(Math.hypot(g[2] - g[0], g[3] - g[1]) / 6));
+                for (let i = 0; i <= n; i++) col(w.x + g[0] + (g[2] - g[0]) * i / n, w.y + g[1] + (g[3] - g[1]) * i / n - 6);
+            });
+            const t = w.tach;
+            if (Array.isArray(t)) for (let x = t[0] - t[3]; x <= t[0] + t[3]; x += 6) col(w.x + x, w.y + t[1] - Math.sqrt(Math.max(0, t[3] * t[3] - (x - t[0]) * (x - t[0]))) - 8);
+            (w.rings || []).forEach((r) => add(w.x + r.cx - r.r - 8, w.y + r.cy - r.r - 8, w.x + r.cx + r.r + 8, w.y + r.cy + r.r + 8));
+            if (Array.isArray(w.panel)) add(w.x + w.panel[0], w.y + w.panel[1], w.x + w.panel[0] + w.panel[2], w.y + w.panel[1] + w.panel[3]);
+        }
         if (w.type === 'mdash') {
             // the M dash: under its cards' top curve (both sides) and round its M stripes
             const ct = w.cardTop, cx0 = Array.isArray(w.card) ? w.card[0] : null;
@@ -92,6 +110,25 @@ function obstacles(target, shown, camera) {
     });
     if (panel && camera) add(visible.CAMERA[0], visible.CAMERA[1], visible.CAMERA[2], visible.CAMERA[3]);
     if (!panel) add(visible.HUD_BMW[0], visible.HUD_BMW[1], visible.HUD_BMW[2], visible.HUD_BMW[3]);
+    // on the cluster the string is hung the same on both sides (Nov 22 2026: one-sided stubs looked broken): whatever
+    // is in the way on one side keeps the string off the other side too
+    if (panel) out.slice().forEach((o) => out.push([1920 - o[2], o[1], 1920 - o[0], o[3]]));
+    return out;
+}
+
+/** Points every `step` px along a line of points whose pieces may be arcs (arcs[i]: [cx, cy, r, sweep] or r 0). */
+function pathPoints(path, arcs, step) {
+    const out = [];
+    for (let i = 1; i < path.length; i++) {
+        const a = path[i - 1], b = path[i], g = (arcs || [])[i - 1];
+        if (g && g[2]) {
+            const a0 = Math.atan2(a[1] - g[1], a[0] - g[0]), n = Math.max(1, Math.ceil(Math.abs(g[2] * g[3]) / step));
+            for (let k = 0; k <= n; k++) out.push([g[0] + g[2] * Math.cos(a0 + g[3] * k / n), g[1] + g[2] * Math.sin(a0 + g[3] * k / n)]);
+        } else {
+            const n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / step));
+            for (let k = 0; k <= n; k++) out.push([a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n]);
+        }
+    }
     return out;
 }
 
@@ -118,11 +155,13 @@ function spans(target, obs, h, off) {
  * left are filled with smaller ones (down to 60 % of the biggest used, and only well away from a bigger stretch), each
  * stretch a little apart from the others.
  */
-function fit(target, obs) {
+function fit(target, obs, deep) {
     const P = SIZE[target], taken = [], gap = target === 'panel' ? 30 : 12, apart = target === 'panel' ? 140 : 40;
+    // deep: a theme that fills the top edge (M view) gets its string lower down, between its scales under the M stripes
+    const offs = deep ? P.offs.concat([60, 72, 84, 96, 108, 120]) : P.offs;
     P.scales.forEach((s) => {
         if (taken.length && s < taken[0][2] * 0.6) return;
-        P.offs.forEach((off) => spans(target, obs, need(P, s), off).forEach((r) => {
+        offs.forEach((off) => spans(target, obs, need(P, s), off).forEach((r) => {
             // what of r is not taken yet (and keeps clear of the stretches already placed)
             let pieces = [[r[0], r[1]]];
             taken.forEach((t) => {
@@ -183,7 +222,8 @@ function stretch(target, x0, x1, s, off, first) {
  */
 function place(target, shown, opts) {
     if (!SIZE[target] || !opts || !opts.colors) return [];
-    let f = fit(target, obstacles(target, shown, !!opts.camera)), kind = target;
+    const deep = target === 'panel' && (shown || []).some((w) => w && w.type === 'mview');
+    let f = fit(target, obstacles(target, shown, !!opts.camera), deep), kind = target;
     if (target === 'hud') {
         // the fairy lights when the full-size string gets less than half as much of the window's top
         const m = fit('micro', obstacles('micro', shown, false)), len = (q) => (q ? q.len : 0);

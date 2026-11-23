@@ -45,6 +45,7 @@ Besides its own code, the app ships with:
 7. The M view theme (shaders.js mview, its map window opened without a rebuild in hud.js, and the scale geometry in
    the layout mview.json) is ported from Asksket's f90 branch of a fork of this repository
    (https://github.com/Asksket/apps), offered in issue #15: MIT, the same licence as this repository.
+8. The separate Hybrid and Electric theme slots are an idea from FDX100's KurdBimmer Themes (https://github.com/FDX100/KB, MIT), pointed out in issue #31. The code here is our own.
 
 ----------------------------------------------------------------------------------------------
 Copyright 2017 The Barlow Project Authors (https://github.com/jpt/barlow)

@@ -8,7 +8,7 @@ const ROOT = '/var/opt/bmwcaminfo-voice/current';
 const SRC_ID = 1046;
 const SINK_ID = 1024;
 const LANG = 7695972;
-const SERVICE_VERSION='0.1.48';
+const SERVICE_VERSION='0.1.49';
 const ASSETS = require('./audio-manifest.json');
 const ALLOWED = Object.create(null);
 Object.keys(ASSETS).forEach(function (file) {
@@ -340,7 +340,7 @@ var server = net.createServer(function (socket) {
   var buffer = '';
   socket.on('data', function (chunk) {
     buffer += chunk;
-    if (buffer.length > 4096) {
+    if (Buffer.byteLength(buffer) > 32768) {
       reply(socket, { ok: false, error: 'Request too large' });
       socket.destroy();
       return;
@@ -354,6 +354,10 @@ var server = net.createServer(function (socket) {
       try { request = JSON.parse(line); } catch (e) {
         reply(socket, { ok: false, error: 'Invalid JSON' });
         continue;
+      }
+      // GPS evidence is allowed only on read-only report requests. Other commands keep the old limit.
+      if(Buffer.byteLength(line)>4096&&['audio-report','audio-report-share-start'].indexOf(request.action)<0){
+        reply(socket,{ok:false,error:'Request too large'});continue;
       }
       if (['beeper-sounds-get','beeper-sounds-save','beeper-sounds-listen','audio-mixer-get','audio-mixer-save','audio-mixer-listen','audio-report-share-start','audio-report-share-status','audio-report-share-stop','audio-report','audio-current','audio-scan','audio-test','audio-save','audio-reset','audio-stop','audio-overlay-scan','audio-overlay-test','audio-overlay-converter-test','audio-carplay-duck-test','audio-carplay-duck-recover'].includes(request.action)) {
         diagnostics.handle(request,()=>connected).then(r=>reply(socket,r),e=>reply(socket,{ok:false,error:e.message}));

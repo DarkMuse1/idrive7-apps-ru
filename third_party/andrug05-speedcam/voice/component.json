@@ -1,7 +1,7 @@
 {
   "id": "bmwcaminfo-voice",
   "kind": "tool",
-  "version": "0.1.48",
+  "version": "0.1.49",
   "title": "BMW Camera Voice Service",
   "description": "ALSA voice and beeper mixer, M4A compatibility mode, experimental private PulseAudio + Overlay",
   "enable": [
@@ -38,7 +38,7 @@
     {
       "path": "voice.js",
       "mode": "0644",
-      "sha256": "1759eb82257553446f3101ce46c785dfdeab03205c524ee983b512ce897d220e"
+      "sha256": "0b95bf7d8e6c0059c3198a5acafc936babc61002cb8e699c0ed6fee33aa067a2"
     },
     {
       "path": "audio-manifest.json",
@@ -868,7 +868,7 @@
     {
       "path": "audio-report.js",
       "mode": "0644",
-      "sha256": "e3857d7cce968f5d103be802010fe89d1476e6c3e028b6b3902d5a1d64bc4bf0"
+      "sha256": "03083d015cb063bc535e97856aad5beec1c0497deada5510da37d85b11fc0759"
     },
     {
       "path": "converter-output.js",
@@ -878,7 +878,7 @@
     {
       "path": "report-share.js",
       "mode": "0644",
-      "sha256": "417f8115173925a92ceb23c9ad5b84fffc816ae9787bc0d195723ee00ad9d29a"
+      "sha256": "ba414dbd7adc5983e00e4c9ee4bcaadf678056c3be94202784d763c56c4d1b78"
     },
     {
       "path": "report-network.js",

@@ -1418,8 +1418,9 @@ precision mediump float;
 #endif
 varying vec2 v_uv;
 uniform vec2 u_size;
-uniform vec2 u_path[32];   // the left scale's line, layer px
-uniform float u_cum[32];   // arc length at each point
+uniform vec2 u_path[16];   // the left scale's line, layer px: the points where its straight pieces and arcs meet
+uniform vec4 u_arc[16];    // piece i (point i to i + 1): arc centre x, y, radius, sweep (radians); radius 0 = straight
+uniform float u_cum[16];   // arc length at each point
 uniform float u_n;         // points used
 uniform vec4 u_scale;      // arc length at 0 and at the top mark, -, the line's whole length
 uniform vec4 u_ticks;      // speed: numbered marks, steps per number; rpm: the same
@@ -1454,16 +1455,33 @@ void main() {
     vec2 q = right ? vec2(u_size.x - p.x, p.y) : p;
     vec3 c = vec3(0.0);
 
-    // the nearest point of the line: its arc length s and the signed distance sd (+ inside the scale)
+    // the nearest point of the line: its arc length s and the signed distance sd (+ inside the scale); the corners
+    // are true arcs, so the curve stays round
     float best = 1e6, s = 0.0, sd = 0.0;
-    for (int i = 0; i < 31; i++) {
+    for (int i = 0; i < 15; i++) {
         if (float(i) >= u_n - 1.0) break;
-        vec2 a = u_path[i], b = u_path[i + 1], ba = b - a;
-        float L = max(length(ba), 0.001);
-        float h = clamp(dot(q - a, ba) / (L * L), 0.0, 1.0);
-        vec2 d = q - (a + ba * h);
+        vec2 a = u_path[i], b = u_path[i + 1];
+        vec4 ar = u_arc[i];
+        vec2 n, t;
+        float along;
+        if (ar.z > 0.5) {
+            vec2 ca = a - ar.xy, cq = q - ar.xy;
+            float rel = atan(ca.x * cq.y - ca.y * cq.x, dot(ca, cq));     // q's angle from a's, signed
+            float h = clamp(rel / ar.w, 0.0, 1.0);
+            float ang = atan(ca.y, ca.x) + ar.w * h;
+            vec2 u = vec2(cos(ang), sin(ang));
+            n = ar.xy + u * ar.z;
+            t = vec2(-u.y, u.x) * sign(ar.w);
+            along = abs(ar.w) * ar.z * h;
+        } else {
+            vec2 ba = b - a;
+            float L = max(length(ba), 0.001);
+            float h = clamp(dot(q - a, ba) / (L * L), 0.0, 1.0);
+            n = a + ba * h; t = ba / L; along = h * L;
+        }
+        vec2 d = q - n;
         float dist = length(d);
-        if (dist < best) { best = dist; s = u_cum[i] + h * L; sd = (ba.x * d.y - ba.y * d.x) / L; }
+        if (dist < best) { best = dist; s = u_cum[i] + along; sd = t.x * d.y - t.y * d.x; }
     }
     float total = u_scale.w, s0 = u_scale.x, s1 = u_scale.y;
     float v = right ? u_rpm : u_speed;

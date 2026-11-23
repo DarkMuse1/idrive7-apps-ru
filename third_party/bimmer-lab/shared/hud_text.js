@@ -1,5 +1,4 @@
 'use strict';
-const localText = require('./ru-text');
 /**
  * Draws text into a widget's RGBA buffer from the pre-baked bitmap fonts in
  * hud/fonts/ (made on the Mac by tools/bake_fonts.py; the car does no font
@@ -132,4 +131,4 @@ function tint(m, boxW, boxH, opts) {
     return out;
 }
 
-module.exports = { drawText: (w, h, s, o) => drawText(w, h, localText(s), o), mask: (w, h, s, o) => mask(w, h, localText(s), o), tint, measure: (s, f, sp) => measure(localText(s), f, sp), loadFont };
+module.exports = { drawText, mask, tint, measure, loadFont };

@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "1.0.0",
+  "application": {
+    "uuid": "56108616-e527-4d84-a7b0-894a86effdda",
+    "type": "OnlineApp",
+    "name": "iteriodev_turnview",
+    "vendor": "custom",
+    "version": "1.0.0",
+    "defaultLanguage": "en_GB",
+    "uiDescriptions": [
+      {
+        "applicationFilePath": "./uiDescriptions/ID7/application.xml",
+        "uiDescriptionFilePath": "./uiDescriptions/ID7/uiDescription.json",
+        "hmi": [
+          "ID7"
+        ]
+      },
+      {
+        "applicationFilePath": "./uiDescriptions/ID8/application.xml",
+        "uiDescriptionFilePath": "./uiDescriptions/ID8/uiDescription.json",
+        "hmi": [
+          "ID8"
+        ]
+      }
+    ],
+    "stringBundleUuid": "98e3d7b9-2e30-4ea7-b628-86d4f5688382",
+    "resourceBundleUuid": "e2a291d3-8970-437e-a289-c822db5253c0",
+    "variantGroups": [
+      {
+        "stringsPath": "./variantGroups/Common/texts",
+        "hmi": [
+          "ID7",
+          "ID8"
+        ],
+        "brands": [
+          "BMW"
+        ],
+        "resourcesPath": "./resources"
+      }
+    ],
+    "entryPoints": [
+      {
+        "uuid": "dcee2ce2-8f55-4bde-8e17-810b5a99f41e",
+        "textId": "SID_3",
+        "insertionStateId": 20974,
+        "insertionFocusId": 2,
+        "appearance": "DEFAULT",
+        "insertionMode": "INSERT_BELOW",
+        "insertionOrder": 0,
+        "insertionPriority": 0,
+        "insertionGroup": 0,
+        "isGroupHeader": false,
+        "availability": "ENABLED",
+        "icon": "iteriodev_turnview_icon.png"
+      }
+    ],
+    "appletId": 20125
+  }
+}

@@ -2,7 +2,7 @@
   "id": "cluster_layouts",
   "title": "Cluster Layouts",
   "description": "Your own layout on the whole instrument cluster (round dials, gear, temperatures), drawn by the cluster itself",
-  "version": "0.28.2",
+  "version": "0.29.0",
   "startType": "autostart",
   "vendor": "custom",
   "loggingId": "OA9L",

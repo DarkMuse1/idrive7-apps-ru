@@ -12,26 +12,37 @@ const mgu = require('./kit/mgu');
 const HudApp = require('./hud');
 const Page = require('./page');
 
-mgu.run({
-    start(ctx) {
-        require('./ru-display')(ctx);
-        let hud;
-        try {
-            hud = new HudApp(ctx);
-        } catch (e) {
-            // nothing drawn, but stay up: an exit here would count as a crash on the car
-            ctx.log.error('Cluster failed to start: ' + (e && e.stack || e));
-            return;
-        }
+/** The engine, started once: by background() when the car starts the app (app.json "autostart", issue #16), or by
+ * start() when it was opened first. null when it failed (nothing drawn, but the app stays up: an exit here would
+ * count as a crash on the car). */
+function startHud(ctx) {
+    try {
+        const hud = new HudApp(ctx);
         hud.start();
+        process.on('exit', () => { try { hud.stop(); } catch (e) { /* exiting anyway */ } });
+        return hud;
+    } catch (e) {
+        ctx.log.error('Cluster failed to start: ' + (e && e.stack || e));
+        return null;
+    }
+}
+
+mgu.run({
+    background(bg) {
+        // "Start with the car" off: nothing drawn until the app is opened (start() then starts the engine)
+        if (bg.settings.get('autoStart') === false) { bg.log.info('Start with the car is off: waiting to be opened'); return null; }
+        return startHud(bg);
+    },
+    start(ctx) {
+        const hud = ctx.background || startHud(ctx);
+        if (!hud) return;
         new Page(ctx, hud, {
             title: ctx.spec.title, what: 'cluster',
             look: { name: 'Themes', style: 'hero', tags: { gt3: 'race dash', m: 'M8 style', mview: 'M3 / M5 look', vector: 'music panel', sport: 'Live Cockpit', minimal: 'just the speed', track: 'tyres + temps', drag: '0-60 timer', rally: 'rev arc · G-meter', retro80s: '80s digital', cruise: 'calm · trip', dyno: 'safety tiles', ribbon: 'calm · holidays' } },
             tabs: ['look', 'readouts', 'badge', 'map', 'alerts', 'gmeter', 'settings'],
-            settings: ['units', 'clock', 'timeZone', 'tankLitres', 'redline', 'shiftBefore', 'coldGuard', 'showBoost', 'nightDim', 'cameraNotch', 'holiday', 'demo'],
+            settings: ['units', 'tempUnits', 'pressureUnits', 'clock', 'timeZone', 'tankLitres', 'redline', 'shiftBefore', 'coldGuard', 'showBoost', 'nightDim', 'cameraNotch', 'keepStrip', 'autoStart', 'holiday', 'demo'],
             // the drive mode check's candidates this app's app.json listens to (issue #8; shared/hud.js modeDiagLines)
             modeCheck: ['HMI', 'MDrive', 'Engine', 'Sport2'],
         }).start();
-        process.on('exit', () => { try { hud.stop(); } catch (e) { /* exiting anyway */ } });
     },
 });

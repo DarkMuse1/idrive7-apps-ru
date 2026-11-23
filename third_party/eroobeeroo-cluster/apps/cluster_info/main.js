@@ -36,7 +36,6 @@ const VALUES = {
 
 mgu.run({
     async start(ctx) {
-        require('./ru-display')(ctx);
         const { ui, settings, log } = ctx;
         const car = new Car(ctx, ['temps', 'rpm', 'torque']);
         const providers = startProviders(log);

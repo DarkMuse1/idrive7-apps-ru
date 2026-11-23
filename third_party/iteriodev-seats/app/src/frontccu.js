@@ -7,6 +7,10 @@
  * robertnisipeanu's DOOM on iDrive 8 and idrive7-apps on iDrive 7. The HMI acts on the same states: on the app's
  * empty RHMI host state it has nothing to move; BACK and a push left still leave the page.
  * Not there (the VM, an older car): tried again every 30 s; the touchscreen works as before.
+ * 2026-11-18 (car-apps issue #37, G20 iDrive 7): the proxy's timeout as a number. iDrive 7's oap-sdk 24.x hands the
+ * argument to the native waitUntilAvailable unchanged, where { timeoutMs } times out at once (Drive Recorder 2.3.6,
+ * PR #9): the knob then depended on FrontCCU being known at that instant (else tried again 30 s later).
+ * iDrive 8's oap-sdk 50.x takes a number or { timeoutMs }.
  */
 const someipBuilders = require('oap-sdk/src/someip/someipBuilders');
 
@@ -22,7 +26,7 @@ function watchController(fn, log) {
         if (n < LOGGED) { n++; log(`controller ${JSON.stringify(v)}`); }
         try { fn(v); } catch (e) { log('controller state failed:', e); }
     };
-    const go = () => someipBuilders.buildAndInitTypedProxy(IF, '1', { timeoutMs: 10000 })
+    const go = () => someipBuilders.buildAndInitTypedProxy(IF, '1', 10000)
         .then((p) => { held.push(p); return p.statusRotaryEncoderState.subscribe(each); })
         .then(() => log('controller: subscribed'))
         .catch((e) => { log('controller:', String((e && e.message) || e)); setTimeout(go, RETRY_MS); });
