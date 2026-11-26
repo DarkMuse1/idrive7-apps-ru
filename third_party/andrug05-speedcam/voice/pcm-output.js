@@ -43,6 +43,7 @@ class MixedOutput {
  }
  clear(owner){this.core.clear(owner);}
  async speak(file,volume,permit){
+  file=require('./speech-language').file(file);
   if(this.closed)return {ok:false,error:'Audio service stopping'};
   if(this.now()<this.retryAt)return {ok:false,error:this.service.lastError||'PCM output retry pending'};
   const name=file.replace(/\.m4a$/,'.pcm');

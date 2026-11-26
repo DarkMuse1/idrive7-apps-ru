@@ -91,12 +91,12 @@ class OverlayProbe {
    }
    if(!ready||!alive())throw Error('Overlay route did not become ready or test cancelled');
    if(backend==='file'){
-   const file=path.join(this.o.root||'/var/opt/bmwcaminfo-voice/current',combined?'diagnostics/both.m4a':'audio/volume-40/strelka.m4a');
+   const file=path.join(this.o.root||'/var/opt/bmwcaminfo-voice/current',combined?'diagnostics/'+require('./speech-language').file('both.m4a'):'audio/volume-40/'+require('./speech-language').file('strelka.m4a'));
    const played=await mp.callMethod('playFile',{path:file,languageCode:7695972},3000);
    if(!played||played.EntError!=='OK')throw Error('Overlay MediaPlayer rejected test phrase');
    accepted=true;
    const manifest=require('./audio-manifest');
-   const duration=combined?6:manifest['strelka.m4a']&&manifest['strelka.m4a'].durationSeconds;
+   const duration=combined?6:manifest[require('./speech-language').file('strelka.m4a')]&&manifest[require('./speech-language').file('strelka.m4a')].durationSeconds;
    if(!(duration>0&&duration<10))throw Error('Invalid Overlay sample duration');
    // Permit decoder startup and the complete short phrase. No global STOP/PLAY.
    const ticks=Math.ceil((duration*1000+1800)/250);

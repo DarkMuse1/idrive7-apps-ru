@@ -26,6 +26,7 @@ class StableOutput {
  }
  clear(owner){if(this.beep&&this.beep.owner===owner){this.beep=null;if(this.accepting)this.send(packet(4));}}
  speak(file,volume,permit){
+  file=require('./speech-language').file(file);
   if(this.closed||this.now()<this.retryAt)return Promise.resolve({ok:false,error:this.s.lastError||'Audio unavailable'});
   const name=file.replace(/\.m4a$/,'.pcm');if(!/^[a-z0-9-]+\.pcm$/.test(name)||!Number.isInteger(volume)||volume<0||volume>100)throw Error('Invalid stable voice');
   // Read the COMPLETE phrase before it is enqueued. The native renderer never

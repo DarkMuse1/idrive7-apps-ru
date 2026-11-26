@@ -150,5 +150,173 @@
     "sha256": "885fe517daee69ac3ca540db5f2c165efc875c0a810c9aa78267d004d759d823",
     "text": "Бипер 8",
     "provider": "user audio"
+  },
+  "school.m4a": {
+    "text": "Внимание, впереди школа или опасный пешеходный переход",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 3.7546666666666666,
+    "sha256": "fdc4f2c64e37599e852bb02e454c30b20f5bdbc4e011efb136f2918bb7056f36"
+  },
+  "school-200.m4a": {
+    "text": "Школа или опасный пешеходный переход через двести метров",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 3.6266666666666665,
+    "sha256": "04360209cc72c443d840c07834b89a203bff7ffdfc282f6d06268f50b7aa22ac"
+  },
+  "speed-bump.m4a": {
+    "text": "Впереди лежачий полицейский",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 1.9626666666666666,
+    "sha256": "feca58a3c20b1d3286f0e4bdb18036cbc9f80d8ca54fefd62f3fdcbd6a555030"
+  },
+  "speed-bump-200.m4a": {
+    "text": "Лежачий полицейский через двести метров",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 2.3466666666666667,
+    "sha256": "cda99141ce9645700be7fd5c1d9ed9fee879661e7df7c039f79b31e27785b083"
+  },
+  "en-camera-500.m4a": {
+    "text": "Speed camera ahead.",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 1.408,
+    "sha256": "5e3d758db21322eefb69493fb6ebaf6c82aeff0c384b5f68ef6b601dc5f4e276"
+  },
+  "en-camera-200.m4a": {
+    "text": "Speed camera in two hundred metres.",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 2.2186666666666666,
+    "sha256": "186479d18754a92a511948599c2353eea34abe7a23ff6d2fb778b0516aacc2fc"
+  },
+  "en-strelka.m4a": {
+    "text": "Strelka speed camera ahead.",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 2.2186666666666666,
+    "sha256": "6f4ebc01a26f6c3859cdde3b694de32c9b3a7c20a925290c792b806d0822e320"
+  },
+  "en-strelka-200.m4a": {
+    "text": "Strelka speed camera in two hundred metres.",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 2.7733333333333334,
+    "sha256": "cb41256c31bec0adcc220ad192dede28441c500965034adc4876fa581331448d"
+  },
+  "en-avtodoria.m4a": {
+    "text": "Avtodoria camera ahead.",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 1.8773333333333333,
+    "sha256": "158b1a809077347aad64508d81fbeae9cb3ad3189e991329a5df75631710f8da"
+  },
+  "en-avtodoria-200.m4a": {
+    "text": "Avtodoria camera in two hundred metres.",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 2.432,
+    "sha256": "4772ebc78b9ff675e1af4778249f94cf981679f06ceedcbb2f3f6b05fd21377a"
+  },
+  "en-avtodoria-average.m4a": {
+    "text": "Average speed check ahead. Avtodoria.",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 2.6453333333333333,
+    "sha256": "9c00868a3ef4d84729f7caf11eb406225608120d2ddde81472a904bf57b5cf33"
+  },
+  "en-avtodoria-average-200.m4a": {
+    "text": "Average speed check in two hundred metres. Avtodoria.",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 3.498666666666667,
+    "sha256": "17523be4b9aaaafe1540349b4f0b55c431e7f34532d0a6124795f8cbb5b37576"
+  },
+  "en-dps-post.m4a": {
+    "text": "Police checkpoint ahead.",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 1.5786666666666667,
+    "sha256": "8646d0b35f4341352c1e4ba2f5bb5722dc6b356790b35271ad1a50484066c2b0"
+  },
+  "en-dps-post-200.m4a": {
+    "text": "Police checkpoint in two hundred metres.",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 2.3466666666666667,
+    "sha256": "16a3a8ebf90e23a861b56c55518be8330bf009f48127e4a82975391d30829ce4"
+  },
+  "en-dps-stationary.m4a": {
+    "text": "Permanent police checkpoint ahead.",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 2.005333333333333,
+    "sha256": "5c797bc62a6477a292546b98dc83c2d2c3f3aea51dd93ae239bf5360283f7ccd"
+  },
+  "en-dps-stationary-200.m4a": {
+    "text": "Permanent police checkpoint in two hundred metres.",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 2.7733333333333334,
+    "sha256": "79e140315f0fba28a1d60d9f0894ac860aedb9a35e2f4bbffb8583bf069e7acf"
+  },
+  "en-average-end.m4a": {
+    "text": "Average speed check ends.",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 1.7066666666666668,
+    "sha256": "108daf4cd3840d13dfdefffeb06e7252702e6fa65524d8c70af2315d9d80499f"
+  },
+  "en-school.m4a": {
+    "text": "School or hazardous pedestrian crossing ahead.",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 2.6453333333333333,
+    "sha256": "de72b63d5ef2208bbb14b768ac78c8992335de4f2337d91d1e6135fdad248da7"
+  },
+  "en-school-200.m4a": {
+    "text": "School or hazardous pedestrian crossing in two hundred metres.",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 3.4133333333333336,
+    "sha256": "9b88111b3140ca90fc23ebd786c6d87d496dadc57bf538d444c3a00546bd5984"
+  },
+  "en-speed-bump.m4a": {
+    "text": "Speed bump ahead.",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 1.3653333333333333,
+    "sha256": "a476e78ac12c96474c44f10481e57e3922b58ed7019ecc6e1eaf3a93c64e0127"
+  },
+  "en-speed-bump-200.m4a": {
+    "text": "Speed bump in two hundred metres.",
+    "provider": "ElevenLabs",
+    "voiceId": "ycbyWsnf4hqZgdpKHqiU",
+    "modelId": "eleven_v4",
+    "durationSeconds": 2.0906666666666665,
+    "sha256": "48849754b0eca972f57bc15fee1dd8e2f78b44d4127fd2e550d8b9773bbee817"
   }
 }

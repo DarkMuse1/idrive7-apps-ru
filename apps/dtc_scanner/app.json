@@ -1,8 +1,8 @@
 {
   "id": "dtc_scanner",
   "title": "Fault Scanner",
-  "description": "Read and clear fault memory of every control unit, plus active Check Control messages",
-  "version": "2.9.15",
+  "description": "Read and clear fault memory of every control unit, what each unit kept about a fault, how fast units answer, plus active Check Control messages and values that do not fit together or arrive late",
+  "version": "2.15.1",
   "vendor": "custom",
   "loggingId": "OA95",
   "iconGlyph": "engine",
@@ -29,7 +29,26 @@
     },
     "de.bmw.infotainment.KombiInterface_2": {
       "ccList": "rs",
-      "newCCMessage": "rs"
+      "newCCMessage": "rs",
+      "cbsDataServiceList": "rs"
+    },
+    "de.bmw.infotainment.vehicle.CDS": {
+      "_optional": "the health report's 12 V charge, oil and coolant, and the Plausibility tab's rpm and temperatures",
+      "statusBattery2": "rs",
+      "statusEngineSpeed2": "rs",
+      "statusEngineTemperature": "rs"
+    },
+    "de.bmw.infotainment.vehicle.Vehicle2": {
+      "_optional": "the Plausibility tab's speed",
+      "statusCarSpeed2": "rs"
+    },
+    "de.bmw.infotainment.vehicle.CDS2": {
+      "_optional": "the Plausibility tab's forward g",
+      "statusLongitudinalAccelerationMassCenter": "rs"
+    },
+    "de.bmw.infrastructure.EnvironmentalInformation": {
+      "_optional": "the Plausibility tab's outside temperature",
+      "ExteriorTemperature": "s"
     }
   },
   "screens": [
@@ -45,6 +64,10 @@
         [
           "BTN_CLEAR",
           "Clear all"
+        ],
+        [
+          "BTN_DETAIL",
+          "Fault details"
         ],
         [
           "BTN_PAGE",
@@ -83,6 +106,12 @@
     {
       "key": "autoScan",
       "label": "Scan when opened",
+      "type": "bool",
+      "default": true
+    },
+    {
+      "key": "plausibility",
+      "label": "Plausibility checks",
       "type": "bool",
       "default": true
     },

@@ -108,5 +108,110 @@
     "sha256": "926eae2ab957c65beec83b7c1b5725756f21a65c3a87871ea038346103d31fdc",
     "durationSeconds": 1.0,
     "peak": 0.25
+  },
+  "pcm/school.pcm": {
+    "sha256": "83795cb66b2fe0174c6e1d7cd1d3bf9545fa3dba997a336c7ec860a71b66be8b",
+    "durationSeconds": 3.7546666666666666,
+    "peak": 0.83837890625
+  },
+  "pcm/school-200.pcm": {
+    "sha256": "eece0467b041a247fe1bfacc2045728692aeca0b3fcd5532d7515affc2f9b769",
+    "durationSeconds": 3.6266666666666665,
+    "peak": 0.88458251953125
+  },
+  "pcm/speed-bump.pcm": {
+    "sha256": "325537d860658e8476e9aecca5633f9508b49ce854d45d16adda8fe42c7c4815",
+    "durationSeconds": 1.9626666666666666,
+    "peak": 0.93011474609375
+  },
+  "pcm/speed-bump-200.pcm": {
+    "sha256": "ef864f0e5e63df21dcbd8b396d880175af6c576c4e494d1ef4f19f07404a37f1",
+    "durationSeconds": 2.3466666666666667,
+    "peak": 0.764190673828125
+  },
+  "pcm/en-camera-500.pcm": {
+    "sha256": "808fb60c5f896cafaa36c1876cc0977c033bc7b479ae2c12ae243dc6306ee553",
+    "durationSeconds": 1.408,
+    "peak": 0.855712890625
+  },
+  "pcm/en-camera-200.pcm": {
+    "sha256": "f676ccd7dc3db9102781295e957a0338dc402852b0303b50877c4ca473dbf500",
+    "durationSeconds": 2.2186666666666666,
+    "peak": 0.751617431640625
+  },
+  "pcm/en-strelka.pcm": {
+    "sha256": "be30963b689091ec6740a3f62713b3c2ae9f8b73610cc232eaa85754ab7d7e97",
+    "durationSeconds": 2.2186666666666666,
+    "peak": 0.8653564453125
+  },
+  "pcm/en-strelka-200.pcm": {
+    "sha256": "74a873fc4d311c61d56a35ae432cea2b65949566598c5f8e406f19dd64b7d69b",
+    "durationSeconds": 2.7733333333333334,
+    "peak": 0.8280029296875
+  },
+  "pcm/en-avtodoria.pcm": {
+    "sha256": "cdb945655db2daa7dab6cd29a22f1542f4352de44f11007f367473d8f7c344ac",
+    "durationSeconds": 1.8773333333333333,
+    "peak": 0.82574462890625
+  },
+  "pcm/en-avtodoria-200.pcm": {
+    "sha256": "1827cd161d4919b2f0fa2d3a7751a07b3fa654e4d28e53e5a449f533699c6971",
+    "durationSeconds": 2.432,
+    "peak": 0.827606201171875
+  },
+  "pcm/en-avtodoria-average.pcm": {
+    "sha256": "4404b21584cc97438c60b07e843db6a2efc8ba4e4be297f01c8f64be2052b626",
+    "durationSeconds": 2.6453333333333333,
+    "peak": 0.895843505859375
+  },
+  "pcm/en-avtodoria-average-200.pcm": {
+    "sha256": "4cf7a3e30f45c6cfc2df845ad5fa9867ce13e62265259b64f02c8f95e7622fe8",
+    "durationSeconds": 3.498666666666667,
+    "peak": 0.849456787109375
+  },
+  "pcm/en-dps-post.pcm": {
+    "sha256": "1d7d1266043d7f03769d4c07c54aa604a4ce8e9010b2d0f79590379f662b8db7",
+    "durationSeconds": 1.5786666666666667,
+    "peak": 0.73309326171875
+  },
+  "pcm/en-dps-post-200.pcm": {
+    "sha256": "d293ee35406ec02478f7cf33bc9004b787ba0af2f316d2fdd50e019e4fdbea5b",
+    "durationSeconds": 2.3466666666666667,
+    "peak": 0.753662109375
+  },
+  "pcm/en-dps-stationary.pcm": {
+    "sha256": "56d80badd0222ea37cb4e80ed133b53724ff8bab025af97ed9692caea8baf121",
+    "durationSeconds": 2.005333333333333,
+    "peak": 0.754913330078125
+  },
+  "pcm/en-dps-stationary-200.pcm": {
+    "sha256": "b0af3a634ee32d661f91f6ea4b11f1dc2a4da8d14575e396674028fc61e93bb0",
+    "durationSeconds": 2.7733333333333334,
+    "peak": 0.83013916015625
+  },
+  "pcm/en-average-end.pcm": {
+    "sha256": "cce5e6b22dacfccff50e91f4b98c07d72d754f6b73724b1e5ec9171f8abb9b58",
+    "durationSeconds": 1.7066666666666668,
+    "peak": 0.7811279296875
+  },
+  "pcm/en-school.pcm": {
+    "sha256": "272ad0d2e03e7415291050f06d699468132a8ad41262900b189b4bb98163016f",
+    "durationSeconds": 2.6453333333333333,
+    "peak": 0.868133544921875
+  },
+  "pcm/en-school-200.pcm": {
+    "sha256": "3acb136b14640aeed9e39a5df2dedaa64e95b3462bb3b4ea18c7d8dbe0c96558",
+    "durationSeconds": 3.4133333333333336,
+    "peak": 0.90838623046875
+  },
+  "pcm/en-speed-bump.pcm": {
+    "sha256": "c8391fa0fa4fbe6b920df9b21a0076497903d661bb4956064c7f72e7bb0e5a56",
+    "durationSeconds": 1.3653333333333333,
+    "peak": 0.8482666015625
+  },
+  "pcm/en-speed-bump-200.pcm": {
+    "sha256": "c229446b1915736b8a7008c7402d3b40ac1385ef1e4bb29a16f5a0d1d57bb0d3",
+    "durationSeconds": 2.0906666666666665,
+    "peak": 0.824249267578125
   }
 }

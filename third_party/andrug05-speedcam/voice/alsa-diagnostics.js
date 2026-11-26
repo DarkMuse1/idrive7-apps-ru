@@ -120,7 +120,7 @@ class AlsaDiagnostics {
   const read=n=>{const b=fs.readFileSync(path.join(this.root,'pcm',n));if(!b.length||b.length%2||b.length>960000)throw Error('Invalid PCM sample');return b;};
   let clock=0,output='',errors='',stderrPending='',closed=false,tick=null,watch=null,cancelWatch=null,killTimer=null,voiceQueued=false,lastPump=null;
   const core=new PcmMixer(require('./beeper-sounds').pulse(this.s,read),{now:()=>clock});
-  const voice=kind==='beeper'?null:read('camera-500.pcm'),owner={};
+  const voice=kind==='beeper'?null:read(require('./speech-language').file('camera-500.pcm')),owner={};
   return new Promise((resolve,reject)=>{
    const record=telemetry.start(this.s,{converter,overlay:overlay===true,diagnosticOrigin:'probe'});record.phase='stream';
    let terminal=null;const child=this.child=this.spawn(this.bin,[converter?'--play-converter':overlay?'--play-overlay':'--play'],{stdio:['pipe','pipe','pipe']});

@@ -15,6 +15,7 @@ class AlsaOutput {
  set(r,owner){if(this.closed)throw Error('Audio service stopping');if(this.now()<this.retryAt)throw Error(this.s.lastError||'ALSA retry pending');this.core.set(r,owner);this.kick();return {ok:true,backend:this.converter?'converter':'alsa',audibleConfirmed:false};}
  clear(owner){this.core.clear(owner);}
  async speak(file,volume,permit){
+  file=require('./speech-language').file(file);
   if(this.closed)return {ok:false,error:'Audio service stopping'};
   if(this.now()<this.retryAt)return {ok:false,error:this.s.lastError||'ALSA retry pending'};
   const name=file.replace(/\.m4a$/,'.pcm');if(!/^[a-z0-9-]+\.pcm$/.test(name))throw Error('Invalid PCM asset');

@@ -14,7 +14,8 @@
  *
  * Pages: tach / shift log / learned (what it learned from this car, with resets) / HUD looks (a live
  * preview of the HUD as set up, layouts to tap, an editor: look, items on / off, effects, place;
- * Play on HUD). The tach's
+ * Play on HUD) / Shift times, Pull, Kickdown, Cold vs hot (shiftpages.js: every upshift under load timed, the pull
+ * per gear, kickdowns per driving mode, against the gearbox oil; from Shift Lab, #253). The tach's
  * peak marker drops back after "Peak hold" seconds; BTN_RESET clears it and the session stats.
  *
  * Experimental parts (README.md in this folder has the whole story):
@@ -25,6 +26,8 @@
  *   limiter.js   learns the real rev limit from the rpm plateau on the limiter
  *   shiftmap.js  learns the full-load torque curve and the gear ratios, and from them the best
  *                upshift rpm for each gear
+ *   shiftlab.js  times each upshift under load (rpm drop, the dip in g), the pull per gear and 250 rpm;
+ *   kickdown.js  how fast the gearbox drops a gear on a kick (from the jump in engine torque), or holds it
  *   gearbox.js   gearbox oil temperature for the HUD (EGS over read-only UDS, or BasicDataSet)
  *   knock.js     knock retard from the engine unit for the HUD's knock warning and readout (read-only UDS)
  *   fuel.js      fuel use from the engine unit for the HUD's fuel readout (read-only UDS / OBD)
@@ -46,6 +49,8 @@
  * methods differ from canvas.js (no convex/triangle: use quad), the HUD on a Canvas; nothing is
  * learned from the demo drive.
  */
+const fs = require('fs');
+const path = require('path');
 const mgu = require('./kit/mgu');
 const { withAlpha, ramp } = require('./kit/canvas');
 const G = require('./kit/gauges');
@@ -56,6 +61,7 @@ const HudDraw = require('./hud-draw');
 const GearboxTemp = require('./gearbox');
 const KnockWatch = require('./knock');
 const FuelWatch = require('./fuel');
+const { DmeGear } = require('./dmegear');
 const TwinDme = require('./kit/twin_dme');
 const PowerLog = require('./powerlog');
 const Electrical = require('./electrical');
@@ -66,6 +72,10 @@ const LaunchScore = require('./launch');
 const Limiter = require('./limiter');
 const ShiftMap = require('./shiftmap');
 const { ShiftShare } = require('./shareshift');
+const { ShiftLog, perGear, pullCurves } = require('./shiftlab');
+const { KickLog, torqueAt } = require('./kickdown');
+const ShiftPages = require('./shiftpages');
+const shiftDemo = require('./shiftdemo');
 const LogView = require('./logview');
 const Call = require('./call');
 const Sheet = require('./kit/sheet');
@@ -107,8 +117,34 @@ function migrateSettings(settings, log) {
     } catch (e) { log.warn('settings migration: ' + e); }
 }
 
+/**
+ * Started with the head unit (app.json "autostart", #207): everything runs at once when the HUD is on, so the HUD
+ * is back after a restart or a long sleep without opening the app. With the HUD off it stays idle (nothing watched
+ * or asked) until the page is first shown or the HUD is switched on. Opened from its tile: at once, as before.
+ */
+async function lazyStart(ctx) {
+    const { ui, settings, log } = ctx;
+    const hudOn = () => settings.get('hud') === 'on';
+    const atBoot = ctx.app && String(ctx.app.startReason) === 'AUTOSTART';
+    if (!atBoot || hudOn() || (ui.isVisible && ui.isVisible('MAIN'))) return runRedline(ctx);
+    log.info('started with the head unit, the HUD off: idle until opened or the HUD is switched on');
+    let done = false;
+    const go = (why) => {
+        if (done) return;
+        done = true;
+        log.info('starting now (' + why + ')');
+        runRedline(ctx).catch((e) => log.error('start: ' + (e && e.stack || e)));
+    };
+    if (ui.onVisible) ui.onVisible((name, on) => { if (name === 'MAIN' && on) go('opened'); });
+    settings.onChange((key) => { if (key === 'hud' && hudOn()) go('HUD on'); });
+}
+
 mgu.run({
-    async start(ctx) {
+    start: lazyStart,
+});
+
+async function runRedline(ctx) {
+    {
         // redline.log kept small: the same kind of line at most every 10 minutes (quietlog.js); every part
         // below logs through this
         ctx.log = QuietLog.wrap(ctx.log);
@@ -204,6 +240,14 @@ mgu.run({
             Object.keys(set).forEach((iface) => { merged[iface] = Object.assign(merged[iface] || {}, set[iface]); });
         });
         car = new Car(ctx, ['rpm', 'speed', 'temps', 'gear', 'condition'], merged);
+        // a car that sends no gear (a manual, #209): the engine unit's own, asked only while Redline's page or HUD is
+        // in use, the engine running and the car still sending none (an automatic's gearbox gear is never replaced)
+        const dmeGear = new DmeGear(ctx, () => gearbox.diag());
+        car.gearSource = () => dmeGear.value();
+        setInterval(() => {
+            const d = car.data(), inUse = ui.isVisible('MAIN') || settings.get('hud') === 'on';
+            if (inUse && !d.demo && (d.gearGuessed || d.gearFrom === 'engine') && G.isNum(d.rpm) && d.rpm > 400) dmeGear.start(); else dmeGear.stop();
+        }, 1000);
 
         /* ---------- derived limits ----------
          * Redline, first that has one: the "Redline" setting, the limit learned from the limiter
@@ -257,6 +301,54 @@ mgu.run({
             if (oil >= warm) return { rpm: n, cold: false };
             const f = G.clamp((oil - 30) / (warm - 30), 0, 1);
             return { rpm: Math.round((cold + (n - cold) * f) / 50) * 50, cold: true };
+        }
+
+        /* ---------- shift timing (Shift times / Pull / Kickdown / Cold vs hot pages; from Shift Lab, #253) ----------
+         * Fed from Redline's own readings in the sample loop below (rpm, speed, gear, torque, g forward, the driving
+         * mode, the gearbox oil), never from the demo drive. The accelerator pedal stays out (its scaling is unchecked,
+         * above): a kickdown is found from the jump in engine torque to near the shift map's full-load torque, and marked
+         * as an estimate. The ratios are the shift map's where it knows the gear. Kept in data/shiftlab.json: the last
+         * 200 upshifts, the ratios, the pull per gear, the last 120 kickdowns. Written (flash wear) at most every 30 s
+         * after a new shift or kickdown, every LAB_PULL_MS when only the pull or the ratios moved, and when the app stops. */
+        const LAB_FILE = path.join(ctx.dataDir, 'shiftlab.json'), LAB_PULL_MS = 5 * 60000;
+        let fullCurve = [], fullAt = 0;
+        const fullTorque = (rpm) => {
+            if (Date.now() - fullAt > 2000) { fullAt = Date.now(); fullCurve = shiftMap.curve(); }
+            return torqueAt(fullCurve, rpm);
+        };
+        const lab = new ShiftLog({ minTorque: settings.get('labMinTorque'), known: (g) => shiftMap.ratio(g) }), kick = new KickLog({ fullTorque });
+        try { const o = JSON.parse(fs.readFileSync(LAB_FILE, 'utf8')); lab.load(o); kick.load(o.kicks); } catch (e) { /* first start */ }
+        let labSavedAt = Date.now();
+        const saveLab = (force) => {
+            if (!lab.unsaved() && !kick.changed) return;
+            // a new shift or kickdown: now; only the pull or a ratio: every few minutes, or when the app stops
+            if (!force && !lab.changed && !kick.changed && Date.now() - labSavedAt < LAB_PULL_MS) return;
+            lab.saved(); kick.changed = false; labSavedAt = Date.now();
+            // written to a temp file and renamed, as the other learned files (a power cut can't corrupt it)
+            Hud.writeAtomic(LAB_FILE, JSON.stringify(Object.assign(lab.toJSON(), { kicks: kick.toJSON() })), log, 'shift timing: not saved');
+        };
+        const labSave = setInterval(() => saveLab(false), 30000);
+        if (labSave.unref) labSave.unref();
+        process.on('exit', () => saveLab(true));
+        function feedLab(d, t, tq) {
+            const s = { rpm: d.rpm, speed: d.speed, gear: d.gear, torque: tq, gLong: fresh(extra.gLong, 500), mode: driveMode.v, gb: gearbox.value() };
+            lab.minTorque = settings.get('labMinTorque') || 150;
+            lab.feed(s, t); kick.feed(s, lab.ratios, t);
+        }
+        let labDemo = null;
+        /** What the shift timing pages draw: the drive so far, or made-up data in the demo. */
+        function labView() {
+            const d = car.data();
+            if (d.demo) {
+                labDemo = labDemo || shiftDemo.make(Date.now());
+                return { shifts: labDemo.shifts, ratios: labDemo.ratios, curves: pullCurves(labDemo.pull), perGear: perGear(labDemo.shifts), kicks: labDemo.kicks, gb: 82 };
+            }
+            return { shifts: lab.shifts, ratios: lab.ratios, curves: lab.pullCurves(), perGear: lab.perGear(), kicks: kick.kicks, gb: gearbox.value() };
+        }
+        function clearLab() {
+            if (car.data().demo) return null;
+            lab.clear(); kick.clear(); saveLab(true); log.info('shift timing cleared (the ratios kept)');
+            return render();
         }
 
         /* ---------- session state ---------- */
@@ -361,6 +453,7 @@ mgu.run({
                 if (G.isNum(d.speed)) launch.feed(t, d.speed);
                 const tq = Date.now() - torque.t < 300 ? torque.v : null;
                 if (learning()) shiftMap.feed(t, { rpm: d.rpm, speed: d.speed, gear: d.gear, torque: tq });
+                feedLab(d, t, tq);
                 const pr = profileRedline();
                 if (d.rpm !== lastRpmVal) { lastRpmVal = d.rpm; lastRpmChange = Date.now(); }
                 const rpmFresh = Date.now() - lastRpmChange < 300;
@@ -465,6 +558,11 @@ mgu.run({
         function drawTach(cv, t, d, now) {
             const sp = shiftPoint(d.oil, d.gear);
             background(cv, t);
+            // the cold guard on: the track from the lowered shift point to the redline faded yellow, as an M car's (#194)
+            if (sp.cold && sp.rpm < redline()) {
+                band(cv, sp.rpm, redline(), withAlpha(t.warn, 0.28));
+                for (let r = Math.ceil(sp.rpm / 500) * 500; r < redline(); r += 500) gapAt(cv, r, t.bg);
+            }
             const sx = BAR.x0 + barX(sp.rpm);                                                   // shift point mark
             cv.fillRect(sx + BAR.slant - 2, BAR.y0 - 14, 4, 12, t.warn);
             const rpm = d.rpm;
@@ -624,15 +722,13 @@ mgu.run({
                 });
             });
         }
-        /** One row of choice buttons: label, then [value, text] options; the current one filled. */
+        /** One row of choices: label, then [value, text] options in one bar to its column's end (the left one's: RX - 40,
+         *  the right one's: the page's), the current one filled. */
         function choiceRow(cv, t, y, label, key, cur, options, disabled, x0, lw) {
             cv.text(label, x0 ? x0 : 40, y + 27, 18, t.dim, { font: 'bold', spacing: 1 });
-            let x = (x0 || 40) + (lw || (x0 ? 120 : 160));
-            options.forEach((op) => {
-                const w = G.button(cv, t, x, y, 0, 40, op[1], () => { (studio.P || settings).set(key, op[0]); return render(); },
-                    { key: 'studio_' + key + '_' + op[0], primary: op[0] === cur, busy: disabled });
-                x += (w || 160) + 12;
-            });
+            const x = (x0 || 40) + (lw || (x0 ? 120 : 160)), end = x0 ? 1576 : 800;
+            G.segment(cv, t, x, y, end - x, 40, options.map((op) => ({ label: op[1], run: () => { (studio.P || settings).set(key, op[0]); return render(); },
+                on: op[0] === cur, busy: disabled, key: 'studio_' + key + '_' + op[0] })));
         }
         function drawLooks(cv, t) {
             const now = Date.now();
@@ -728,7 +824,7 @@ mgu.run({
             panels.forEach((pn) => {
                 const sel = studio.panel === pn[0], w = cv.textWidth(pn[1], 20, { font: 'bold', spacing: 2 });
                 cv.text(pn[1], tx, 388, 20, sel ? t.text : t.dim, { font: 'bold', spacing: 2 });
-                if (sel) cv.fillRect(tx - 4, 395, w + 8, 4, t.accent);
+                if (sel) cv.roundRect(tx + w / 2 - 16, 394, 32, 3, 1.5, t.sel || t.accent);
                 cv.target(tx - 16, 362, w + 32, 40, () => { studio.panel = pn[0]; return render(); }, 'studio_tab_' + pn[0]);
                 tx += w + 48;
             });
@@ -854,13 +950,14 @@ mgu.run({
          */
         function segmented(cv, t, x, y, options, cur, pick, key) {
             const h = 36, fs = 14, f = { font: 'bold', spacing: 1 };
-            const ws = options.map((op) => Math.round(cv.textWidth(op[1].toUpperCase(), fs, f)) + 36), total = ws.reduce((a, b) => a + b, 0);
-            cv.roundRect(x, y, total, h, h / 2, withAlpha('#ffffff', 0.06));
-            cv.strokeRoundRect(x, y, total, h, h / 2, 1.5, withAlpha('#ffffff', 0.16));
+            const ws = options.map((op) => Math.round(cv.textWidth(op[1].toUpperCase(), fs, f)) + 40), total = ws.reduce((a, b) => a + b, 0);
+            const S = t.sel || t.accent;
+            cv.roundRect(x, y, total, h, 10, withAlpha('#000000', 0.45));
+            cv.strokeRoundRect(x, y, total, h, 10, 1, withAlpha('#ffffff', 0.1));
             options.forEach((op, i) => {
                 const sel = op[0] === cur;
-                if (sel) cv.roundRect(x + 3, y + 3, ws[i] - 6, h - 6, (h - 6) / 2, withAlpha('#ffffff', 0.9));
-                cv.text(op[1].toUpperCase(), x + ws[i] / 2, y + h / 2 + 5, fs, sel ? '#000000' : t.dim, Object.assign({ align: 'center' }, f));
+                if (sel) cv.roundRect(x + 3, y + 3, ws[i] - 6, h - 6, 8, S);
+                cv.text(op[1].toUpperCase(), x + ws[i] / 2, y + h / 2 + 5, fs, sel ? G.onColour(S) : t.dim, Object.assign({ align: 'center' }, f));
                 cv.target(x, y, ws[i], h, () => { pick(op[0]); return render(); }, key + op[0]);
                 x += ws[i];
             });
@@ -868,8 +965,8 @@ mgu.run({
         }
         /**
          * On / off switches at y, after a section label: [label, on, flip]. Drawn as switches, not like
-         * the choice buttons: a green LED dot lit when on (an empty ring when off), the chip tinted and
-         * outlined bright when on, dim when off, so on / off reads at a glance.
+         * the choice bars: a green LED dot lit when on (an empty ring when off), the chip tinted in the
+         * theme's colour with a faint glow when on, dim when off, so on / off reads at a glance.
          */
         const SWITCH_ON = '#2ee66b';
         function switches(cv, t, y, label, list, x0) {
@@ -877,8 +974,11 @@ mgu.run({
             let x = x0 ? x0 + (label ? 150 : 0) : 200;
             list.forEach((c, i) => {
                 const on = !!c[1], txt = c[0], w = cv.textWidth(txt, 18, { font: 'bold' }) + 64, h = 40;
-                if (on) cv.roundRect(x, y, w, h, h / 2, withAlpha(t.accent, 0.16));
-                cv.strokeRoundRect(x, y, w, h, h / 2, 2, on ? t.accent : withAlpha('#ffffff', 0.3));
+                const S = t.sel || t.accent;
+                if (on) cv.roundRect(x - 3, y - 3, w + 6, h + 6, 13, withAlpha(S, 0.14));
+                cv.roundRect(x, y, w, h, 10, withAlpha('#ffffff', 0.09));
+                if (on) cv.roundRect(x, y, w, h, 10, withAlpha(S, 0.22));
+                cv.strokeRoundRect(x, y, w, h, 10, 1.5, on ? withAlpha(S, 0.75) : withAlpha('#ffffff', 0.2));
                 // the dot is a little LED: lit green when on, an empty ring when off
                 if (on) { cv.circle(x + 22, y + h / 2, 11, withAlpha(SWITCH_ON, 0.25)); cv.circle(x + 22, y + h / 2, 7, SWITCH_ON); } else cv.arc(x + 22, y + h / 2, 5.5, 7.5, 0, 360, withAlpha('#ffffff', 0.45));
                 cv.text(txt, x + 40, y + 27, 18, on ? t.text : t.dim, { font: 'bold' });
@@ -1084,20 +1184,21 @@ mgu.run({
 
         /** G20-style frame: tab bar with the page names along the top. */
         function header(cv, t, d) {
-            G.frame(cv, t, ['Tach', 'Shift log', 'Learned', 'HUD looks'], page, [d.demo && { text: 'DEMO' }]);
+            G.frame(cv, t, ['Tach', 'Shift log', 'Learned', 'HUD looks'].concat(ShiftPages.PAGES), page, [d.demo && { text: 'DEMO' }]);
         }
 
         async function render() {
             const t = ctx.theme(), d = car.data(), now = Date.now();
             let cv;
             cv = ctx.canvas(W, H).clear(t.bg);
-            if (page === 0) drawTach(cv, t, d, now); else if (page === 1) drawLog(cv, t); else if (page === 2) drawLearned(cv, t); else drawLooks(cv, t);
+            if (page === 0) drawTach(cv, t, d, now); else if (page === 1) drawLog(cv, t); else if (page === 2) drawLearned(cv, t); else if (page === 3) drawLooks(cv, t);
+            else ShiftPages.draw(cv, t, ShiftPages.WHICH[page - 4], Object.assign(labView(), { minTorque: settings.get('labMinTorque') || 150, clear: d.demo ? null : clearLab }));
             header(cv, t, d);
             await ui.image('MAIN_GFX', cv);
         }
 
         /* ---------- buttons ---------- */
-        const PAGES = 4;
+        const PAGES = 4 + ShiftPages.PAGES.length;
         const flip = () => { page = (page + 1) % PAGES; return render(); };
         const flipBack = () => { page = (page + PAGES - 1) % PAGES; return render(); };
         ui.onClick('BTN_PAGE', flip);
@@ -1167,5 +1268,5 @@ mgu.run({
             })),
         });
         render().then(() => log.info('first frame done')).catch((e) => log.warn('first render: ' + e));
-    },
-});
+    }
+}

@@ -1,8 +1,8 @@
 {
   "id": "warmup",
   "title": "Warm-Up",
-  "description": "Oil and coolant warm-up calculator (time to ready), safe rev limit, turbo cool-down and a cold start counter",
-  "version": "1.9.2",
+  "description": "Oil and coolant warm-up calculator (time to ready), ready for harder driving, safe rev limit, turbo cool-down, a cold start counter, and each drive summed up, compared and before / after a change",
+  "version": "1.12.1",
   "vendor": "custom",
   "loggingId": "OA9A",
   "iconGlyph": "temp",
@@ -17,7 +17,26 @@
   "signals": {
     "de.bmw.infotainment.vehicle.CDS": {
       "statusEngineSpeed2": "rs",
-      "statusEngineTemperature": "rs"
+      "statusEngineTemperature": "rs",
+      "statusBattery2": "rs"
+    },
+    "de.bmw.infotainment.vehicle.CDS2": {
+      "_optional": "g forward and sideways, for each drive's summary",
+      "statusLongitudinalAccelerationMassCenter": "rs",
+      "statusLateralAccelerationMassCenter": "rs"
+    },
+    "de.bmw.infotainment.KombiIF": {
+      "_optional": "the odometer (each drive's km), range and fuel (Ready?)",
+      "statusRangeTankStatus": "rs"
+    },
+    "de.bmw.infrastructure.EnvironmentalInformation": {
+      "_optional": "the outside temperature (Ready?)",
+      "ExteriorTemperature": "s"
+    },
+    "de.bmw.infotainment.vehicle.TPMS": {
+      "_optional": "tyre pressures and their targets (Ready?)",
+      "statusTyrePressure": "rs",
+      "statusTargetTyrePressure": "rs"
     },
     "de.bmw.infotainment.vehicle.Vehicle2": {
       "statusCarSpeed2": "rs",
@@ -40,12 +59,61 @@
       ]
     }
   },
+  "startWidget": {
+    "comment": "Home-screen widget, as eDrive's: the layout and cell names of BMW's Drive Recorder widget on this firmware; the picture goes into BackgroundImage1 (384 x 256), scaled up and cropped centred by the HMI (safe), the edges faded: the setting widgetFit keeps the content further in. The small widget gets text lines and the progress bar instead.",
+    "name": "Warm-Up",
+    "layout": "LT_Table_OnlineApps_DriveRecorderWidget",
+    "image": "BackgroundImage1",
+    "scale": 2,
+    "size": [
+      384,
+      256
+    ],
+    "safe": [
+      0.09,
+      0.17
+    ],
+    "cells": {
+      "ErrorInfo": [
+        false,
+        "Bool"
+      ],
+      "background": [
+        true,
+        "Bool"
+      ],
+      "ProgressbarVisible": [
+        false,
+        "Bool"
+      ],
+      "TextRecordings": [
+        "",
+        "Text"
+      ]
+    }
+  },
   "screens": [
     {
       "name": "MAIN",
       "kind": "canvas",
       "title": "Warm-Up",
       "buttons": [
+        [
+          "BTN_PREV",
+          "Previous"
+        ],
+        [
+          "BTN_NEXT",
+          "Next"
+        ],
+        [
+          "BTN_VIEW",
+          "Drives view"
+        ],
+        [
+          "BTN_MARK",
+          "Mark a change"
+        ],
         [
           "BTN_SETTINGS",
           "Settings"
@@ -200,6 +268,100 @@
       "label": "Turbo cool-down after hard driving",
       "type": "bool",
       "default": true
+    },
+    {
+      "key": "driveCsv",
+      "label": "Record a CSV of each drive",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "compareWith",
+      "label": "Compare a drive with",
+      "type": "choice",
+      "default": "prev",
+      "options": [
+        [
+          "prev",
+          "The drive before"
+        ],
+        [
+          "avg10",
+          "The average of the 10 before it"
+        ]
+      ]
+    },
+    {
+      "key": "markLabel",
+      "label": "Change to mark",
+      "type": "choice",
+      "default": "Service",
+      "options": [
+        [
+          "Service",
+          "Service"
+        ],
+        [
+          "New part",
+          "New part"
+        ],
+        [
+          "Tyres",
+          "Tyres"
+        ],
+        [
+          "Setting change",
+          "Setting change"
+        ],
+        [
+          "Fuel brand",
+          "Fuel brand"
+        ],
+        [
+          "Other",
+          "Other"
+        ]
+      ]
+    },
+    {
+      "key": "compareKind",
+      "label": "Before / After compares",
+      "type": "choice",
+      "default": "all",
+      "options": [
+        [
+          "all",
+          "All drives"
+        ],
+        [
+          "length",
+          "Drives of a similar length"
+        ],
+        [
+          "speed",
+          "Drives of a similar average speed"
+        ]
+      ]
+    },
+    {
+      "key": "widgetFit",
+      "label": "Home-screen widget: picture",
+      "type": "choice",
+      "default": "large",
+      "options": [
+        [
+          "small",
+          "Small, clear of the edges"
+        ],
+        [
+          "medium",
+          "Medium"
+        ],
+        [
+          "large",
+          "Fill the widget"
+        ]
+      ]
     },
     {
       "key": "tempUnit",

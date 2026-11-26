@@ -23,6 +23,11 @@
  *            each unit's type; a unit's page has its standard identification (std.js), the engine unit's
  *            the OBD-II data it supports, and every identifier its catalog lists except the curated
  *            battery/converter values reserved for Energy. "Read all" keeps what answered in data/scan-<address>.json.
+ *   Hunter   (Settings > Advanced settings > "Signal Hunter tab (developer)" only, hunter_tab.js): which value
+ *            moves when you do something in the car: Mark before, do it, What changed lists every value the car sent
+ *            differently since; Live, Found (your labels), Playback (a saved window step by step), How it works.
+ *            Listens read only to every status field the apps here declare (hunter_fields.js), nothing is sent,
+ *            and only while this screen is shown on a Hunter page (never in the background, never for the widget).
  *   Widget   the home-screen widget (app.json startWidget): the big one a picture of that screen's gauges,
  *            redrawn up to "Widget redraws" a second, as far from the edges as "Widget picture" says (the
  *            HMI enlarges it, crops and fades its edges); the small one its values as text lines.
@@ -67,6 +72,7 @@ const PAGES = require('./pages');
 const { t: translate, plural } = require('./kit/i18n');
 const Sim = require('./kit/sim');
 const TwinDme = require('./kit/twin_dme');
+const HunterTab = require('./hunter_tab');
 
 const W = 1600, H = 520, COLS = 5, CARDS = 30, ROWS = PAGES.ROWS, ROW_H = PAGES.ROW_H;
 const GO = '#2fd27a';
@@ -183,11 +189,41 @@ mgu.run({
             units.concat(soloDme ? [soloDme] : [], soloSlave ? [soloSlave] : []).forEach((u) => { u.useful = undefined; });
             relayout();
         }
+        /*
+         * The engine's cylinder count, from the engine unit's own list of its misfire monitors (OBD monitor ids A2 ..
+         * = cylinders 1 ..; asked as UDS 22 F6 A0, as M Vitals' kit/dids.js supported() does: the read-only link has
+         * no service 06). Its reply 62 F6 A0 b1 b2 b3 b4 is a bit map of A1 .. C0, b1's top bit A1. B38, B48 and B58
+         * share one SGBD, and a B48 answers the cylinder 5 and 6 identifiers too: with one engine unit, the cylinders
+         * past this count are left out of the Useful lists. Asked once a start (at most CYL_TRIES times, CYL_RETRY_MS
+         * apart, while it doesn't answer or refuses; a short or empty list ends it); 0 = not known, all listed as before.
+         */
+        const CYL_TRIES = 3, CYL_RETRY_MS = 30000;
+        let cylinders = 0, cylTries = 0, cylT = 0, cylPending = false;
+        function cylCheck() {
+            if (cylinders || cylPending || cylTries >= CYL_TRIES || Date.now() - cylT < CYL_RETRY_MS || useDemo() || !link.available) return;
+            cylPending = true; cylTries++; cylT = Date.now();
+            const ok = (x) => (x[0] === 0x62 && x[1] === 0xF6 && x[2] === 0xA0) || (x[0] === 0x7F && x[1] === 0x22);
+            link.physical(0x12, 0x22, [0xF6, 0xA0], 1500, ok).then((x) => {
+                cylPending = false;
+                // no answer or a refusal (which may be another read's: it doesn't name the identifier): asked again
+                if (!x || x[0] !== 0x62) return;
+                if (x.length < 7) { cylTries = CYL_TRIES; return; }
+                const has = (mid) => (x[3 + ((mid - 0xA1) >> 3)] & (0x80 >> ((mid - 0xA1) & 7))) !== 0;
+                let n = 0;
+                while (n < 12 && has(0xA2 + n)) n++;
+                if (!n) { cylTries = CYL_TRIES; return; }
+                cylinders = n;
+                log.info('engine: ' + n + ' cylinders (engine unit list)');
+                units.concat(soloDme ? [soloDme] : []).forEach((u) => { if (u.addr === 0x12) u.useful = undefined; });
+                relayout();
+            }, () => { cylPending = false; });
+        }
         let slaveWokenT = 0;
         setInterval(() => {
             try {
                 if (!useDemo() && link.available) twin.detect().then(twinCheck, () => {});
                 twinCheck();
+                cylCheck();
                 // the second unit without a scan, given up on after misses in a row (asleep while the ignition came
                 // on): asked again every 30 s, as a scan would (the master's own unit is woken by a scan)
                 if (soloSlave && soloSlave.silent && Date.now() - slaveWokenT > 30000) { slaveWokenT = Date.now(); soloSlave.silent = false; link.wake(0x13); changed(); }
@@ -258,7 +294,9 @@ mgu.run({
             const two = isTwin();
             const groups = u.addr === 0x13 ? (two ? USEFUL.BANK2(twin.perBank) : null) : USEFUL[u.addr] || USEFUL.bySgbd[u.sgbd];
             if (!groups) return (u.useful = null);
-            const fits = (item) => !item.only || (item.only === 'twin') === two;
+            // and the engine unit's cylinders past the engine's own count (one engine unit, the count known: cylCheck())
+            const fits = (item) => (!item.only || (item.only === 'twin') === two)
+                && !(u.addr === 0x12 && !two && cylinders && item.cyl > cylinders && !u.demo);
             const index = {};
             rowsOf(u, true).forEach((row) => { index[row.key + '/' + row.field] = row; });
             const find = (c) => index[c.indexOf('/') > 0 ? c : c + '/0'];
@@ -845,6 +883,9 @@ mgu.run({
         if (ctx.settingsRow) ctx.settingsRow({ label: 'Fuel price', value: () => (tc.price ? tc.price.toFixed(2) + ' ' + currency() + ' a litre' : 'Not set'), open: priceSheet });
         // a sheet the kit doesn't draw (no renderer that runs the screen): on the page, the knob drives it
         let inline = null, picker = null;
+        // the Signal Hunter tab (a developer tool, Settings > Advanced settings): listening only while it is turned on,
+        // the MAIN screen is visible and a Hunter page is the current one (see hunterSync)
+        const hunterTab = HunterTab.create(ctx, { native });
         const pickerItems = () => (picker ? picker.listed().map((it) => item(it.key, it.fav)) : []);
         function openSheet(sh) {
             sh.onClose = () => { if (picker === sh) picker = null; };
@@ -869,7 +910,7 @@ mgu.run({
         function pages() {
             const eu = engineUnit();
             const s2 = slaveUnit();
-            const v = [layoutVer, SIGU.ver, scrVer, tripsOn(), scrolls, eu.ver, s2 ? s2.ver : '-', units.map((u) => u.ver).join(',')].join(':');
+            const v = [layoutVer, SIGU.ver, scrVer, tripsOn(), scrolls, eu.ver, s2 ? s2.ver : '-', units.map((u) => u.ver).join(','), hunterTab.on()].join(':');
             if (pagesCache && pagesCache.v === v) return pagesCache.list;
             const list = [], n = (rows) => (scrolls ? 1 : Math.max(1, Math.ceil(rows / ROWS)));
             const ns = screens.length + (screens.length < SCR.MAX_SCREENS ? 1 : 0);
@@ -887,6 +928,7 @@ mgu.run({
                 const un = n(view(u).length);
                 for (let p = 0; p < un; p++) list.push({ group: 'units', unit: u, p, n: un });
             });
+            if (hunterTab.on()) for (let p = 0; p < 5; p++) list.push({ group: 'hunter', p, n: 5 });
             pagesCache = { v, list };
             return list;
         }
@@ -1171,6 +1213,7 @@ mgu.run({
         function move(d) {
             if (inline) { inline.move(d); changed(); return; }
             const pg = current();
+            if (pg.group === 'hunter') { hunterTab.move(pg.p, d > 0 ? 1 : -1); changed(); return; }
             if (pg.screen) { cursor = Math.max(0, Math.min(SCR.layout(pg.screen.layout).slots.length - 1, cursor + d)); changed(); return; }
             if (pg.group === 'units' && !pg.unit) { cursor = Math.max(0, Math.min(units.length - 1, cursor + d)); changed(); return; }
             if (!pg.unit && pg.group !== 'trips' && pg.group !== 'energy') return;
@@ -1186,6 +1229,7 @@ mgu.run({
         function press() {
             if (inline) { inlineDone(inline.press()); return; }
             const pg = current();
+            if (pg.group === 'hunter') { hunterTab.press(pg.p); changed(); return; }
             if (pg.screen) { openGauge(cursor); return; }                                          // a gauge: choose its value
             if (pg.group === 'units' && !pg.unit) { if (units[cursor]) goUnit(units[cursor]); return; }
             if (pg.group === 'trips' && pg.p === 1) openPrice();
@@ -1227,9 +1271,16 @@ mgu.run({
 
         /* ---------- the bar's buttons (where the kit runs the screen, the page has them instead) ---------- */
         const readAll = (u) => { if (sweep && sweep.u === u) endSweep('stopped'); else startSweep(u); buttons(); };
+        /** The Signal Hunter listens only while MAIN shows a Hunter page: called on every page change and on visibility. */
+        function hunterSync() {
+            let shown = false;
+            try { shown = !!(ui.isVisible && ui.isVisible('MAIN')) && current().group === 'hunter'; } catch (e) { shown = false; }
+            hunterTab.sync(shown);
+        }
         function buttons() {
             const pg = current();
-            ui.text('BTN_ACTION', inline ? 'Done' : pg.screen ? 'Layout: ' + SCR.layout(pg.screen.layout).name
+            hunterSync();
+            ui.text('BTN_ACTION', inline ? 'Done' : pg.group === 'hunter' ? hunterTab.actionLabel(pg.p) : pg.screen ? 'Layout: ' + SCR.layout(pg.screen.layout).name
                 : pg.group === 'trips' ? (tc.price ? 'Fuel price: ' + tc.price.toFixed(2) + ' ' + currency() : 'Set the fuel price')
                     : pg.group === 'units' && pg.unit ? (sweep && sweep.u === pg.unit ? 'Stop reading' : 'Read all') : busy ? 'Scanning...' : 'Scan units');
             ui.text('BTN_BROWSE', browsing ? 'Stop browsing' : 'Browse');
@@ -1237,6 +1288,7 @@ mgu.run({
         ui.onClick('BTN_ACTION', () => {
             const pg = current();
             if (inline) { inlineDone(inline.back()); return; }
+            if (pg.group === 'hunter') { hunterTab.action(pg.p); buttons(); changed(); return; }
             if (pg.screen) { setLayout(pg.screen, SCR.nextLayout(pg.screen.layout)); return; }        // the next layout; its values stay (by position)
             if (pg.group === 'trips') { openPrice(); return; }
             if (pg.group === 'units' && pg.unit) { readAll(pg.unit); return; }
@@ -1486,7 +1538,7 @@ mgu.run({
         async function render(force) {
             // a screen of your own every frame (its gauges glide), the rest when something changed (busy: the scan's moving bar)
             const pg0 = current();
-            if (!force && drawn === version && !busy && !gliding && !pg0.screen && !(sweep && pg0.unit === sweep.u)) return;
+            if (!force && drawn === version && !busy && !gliding && !pg0.screen && !(pg0.group === 'hunter' && hunterTab.animated(pg0.p)) && !(sweep && pg0.unit === sweep.u)) return;
             drawn = version;
             gliding = false;
             const t = ctx.theme();
@@ -1506,6 +1558,7 @@ mgu.run({
             else if (pg.group === 'signals') drawSignals(cv, t, pg);
             else if (pg.group === 'energy') drawEnergy(cv, t, pg);
             else if (pg.group === 'engine') drawEngine(cv, t, pg);
+            else if (pg.group === 'hunter') hunterTab.draw(cv, t, pg.p);
             else if (pg.unit) drawUnit(cv, t, pg);
             else drawUnits(cv, t);
             const pp = (x) => (x.n > 1 ? ' ' + (x.p + 1) + '/' + x.n : '');
@@ -1516,9 +1569,10 @@ mgu.run({
                 [pg.group === 'energy', 'Energy' + (pg.group === 'energy' ? pp(pg) : ''), 'energy'],
                 [pg.group === 'engine', 'Engine' + (pg.group === 'engine' ? pp(pg) : ''), 'engine'],
                 [pg.group === 'units', pg.group === 'units' && pg.unit ? ECU[pg.unit.addr] ? ECU[pg.unit.addr].split(' ')[0] + pp(pg) : 'Unit' + pp(pg) : 'Units', 'units']);
+            if (hunterTab.on()) tabs.push([pg.group === 'hunter', 'Hunter' + (pg.group === 'hunter' ? pp(pg) : ''), 'hunter']);
             tabKeys = tabs.map((x) => x[2]);
             const isDemo = (x) => (x.isSig ? !(x.sig && x.sig.tc) && sigDemo() : !!(x.unit && x.unit.demo));      // the trip computer's: always the car's
-            const demoNow = pg.group === 'trips' ? false : pg.screen ? screenItems(pg.screen).some(isDemo) : pg.group === 'signals' ? sigDemo()
+            const demoNow = pg.group === 'trips' ? false : pg.group === 'hunter' ? hunterTab.demo() : pg.screen ? screenItems(pg.screen).some(isDemo) : pg.group === 'signals' ? sigDemo()
                 : pg.group === 'energy' ? energyView().some((r) => r.unit && r.unit.demo)
                 : pg.unit ? !!pg.unit.demo : demoUnits || (!units.length && useDemo());
             G.frame(cv, t, tabs.map((x) => x[1]), Math.max(0, tabs.findIndex((x) => x[0])),
@@ -1594,13 +1648,14 @@ mgu.run({
         const redraw = () => { changed(); setTimeout(changed, 600); };
         ui.onVisible((name, on) => {
             if (name !== 'MAIN') return;
-            if (on) { maybeAuto(); redraw(); buttons(); } else { link.cancel(); browse(false); }
+            if (on) { maybeAuto(); redraw(); buttons(); } else { link.cancel(); browse(false); hunterSync(); }
         });
         if (ui.onFocus) ui.onFocus((name, on) => { if (name === 'MAIN' && on) redraw(); });
         if (ui.isVisible('MAIN')) maybeAuto();
         settings.onChange((key) => {
             // the ranges, peaks and traces so far are in the unit shown before
             if (key === 'tempUnit') { ranges.clear(); peaks.clear(); traces.clear(); }
+            if (key === 'hunter' || key === 'advanced') { pagesCache = null; hunterSync(); }
             relayout();
         });
         buttons();

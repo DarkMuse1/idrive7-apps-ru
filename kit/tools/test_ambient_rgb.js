@@ -19,6 +19,8 @@ let fails = 0, checks = 0;
 const ok = (c, msg) => { checks++; if (!c) { fails++; console.log('FAIL ' + msg); } };
 const log = { info() {}, warn() {}, error() {} };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+// until cond() holds, at most max ms (a busy machine runs the lights' timers late: a fixed wait then saw nothing)
+const until = async (cond, max) => { const t0 = Date.now(); while (!cond() && Date.now() - t0 < (max || 3000)) await sleep(20); };
 
 // status reply: 62 DA5F, records of 10 (location, blue, green, red, brightness, white, 4 faults), empty FF
 const reply = (did, locs, fault) => {
@@ -299,27 +301,28 @@ ok(Math.round(S.hueOf([0, 0, 255])) === 240 && S.hsv(120, 1, 1).join() === '0,25
     // an overlay with the car's own colour on: only the lights it picks are written, the rest keep the car's colour
     writes.length = 0;
     lights.overlay('doors', (l) => l.name === 'Driver front door line', () => ({ rgb: [255, 0, 0], bright: 100 }));
-    await sleep(150);
+    await until(() => lit[1][2].join() === '254,0,0');
     ok(writes.length >= 1 && writes.every((w) => w[0] === 0xe3 && w[2] === 3) && lit[1][2].join() === '254,0,0' && lit[1][0].join() === '0,0,0',
         'an open door: its light red alone, no write to the whole bus (' + writes.map((w) => w[2]).join() + ')');
     writes.length = 0;
     lights.overlay('turn', (l) => /^Passenger/.test(l.name), (t) => ({ rgb: [0, 230, 60], bright: 50 }));
-    await sleep(150);
+    await until(() => lit[0].every((c) => c.join() === '0,230,60'));
     ok(writes.some((w) => w[0] === 0xda && w[2] === 0) && lit[0].every((c) => c.join() === '0,230,60') && lit[1][2].join() === '254,0,0',
         'a turn signal\'s glow over that side (a bus all of it: one write), the door still red');
     // a blink: on one frame, off the next
     writes.length = 0;
     lights.overlay('turn', (l) => l.name === 'Driver front door line', (t, on) => (on ? { rgb: [0, 230, 60], bright: 100 } : { rgb: [0, 0, 0], bright: 0 }));
-    await sleep(200);
+    await until(() => writes.filter((w) => w[0] === 0xe3 && w[2] === 3).length >= 4);
     const nad3 = writes.filter((w) => w[0] === 0xe3 && w[2] === 3).map((w) => w[4]);
     ok(nad3.length >= 4 && nad3.every((b, i) => i === 0 || b !== nad3[i - 1]), 'a blink: fully on, then dark, write after write (' + nad3.join() + ')');
     lights.overlay('doors', null); lights.overlay('turn', null);
-    await sleep(300);
+    await until(() => lit[0].concat(lit[1]).every((c) => c.join() === '0,0,0'));
     ok(lit[0].concat(lit[1]).every((c) => c.join() === '0,0,0'), 'both taken off with the car\'s colour on: given back');
 
     refuse = true; writes.length = 0;
     lights.show(look('solid', { upper: { rgb: [1, 2, 3], bright: 50 } }));
-    await sleep(400);
+    await until(() => writes.length >= 4 && /refused/.test(lights.error || ''));
+    await sleep(300);                       // (and no fifth write after the pause)
     ok(writes.length === 4 && /refused/.test(lights.error), 'refused writes: paused after 4 (' + writes.length + ', ' + lights.error + ')');
     // giving back to a body module that no longer answers (the car going to sleep): each bus tried 3 times, then left
     refuse = false; lights._pauseTill = 0;
@@ -328,10 +331,12 @@ ok(Math.round(S.hueOf([0, 0, 255])) === 240 && S.hsv(120, 1, 1).join() === '0,25
     refuse = true; asleep = true; writes.length = 0;
     lights.carColour();
     await sleep(12500);
+    // (a busy machine runs the timers late: wait until the writes have stopped, at most 8 s more, before counting)
+    for (let n = -1, i = 0; n !== writes.length && i < 16; i++) { n = writes.length; await sleep(500); }
     const gb = writes.filter((w) => w[3] === 0);
     ok(gb.length <= 6 && gb.length >= 2, 'a give-back not taken: at most 3 tries a bus, then nothing more (' + gb.length + ')');
-    writes.length = 0; await sleep(300);
-    ok(writes.length === 0, 'and nothing after');
+    writes.length = 0; await sleep(1500);
+    ok(writes.length === 0, 'and nothing after (' + writes.length + ')');
     refuse = false; asleep = false;
     // carOwn (the car's own open-door warning on a door's lights): given back at once, no colour of ours meanwhile
     lights.show(look('solid', { upper: { rgb: [0, 0, 255], bright: 80 }, lower: { rgb: [0, 0, 255], bright: 80 } }));
@@ -381,6 +386,18 @@ ok(Math.round(S.hueOf([0, 0, 255])) === 240 && S.hsv(120, 1, 1).join() === '0,25
     c.carColour();
     c.night(true); ok(fake.f === 0.5, 'night: dimmer');
     settings.set('nightDim', false); c.night(true); ok(fake.f === 1, 'night dimming off');
+    // #231: off by day, only once the car has said it's day
+    settings.set('nightDim', true); settings.set('dayOff', true);
+    c.night(true); ok(fake.f === 0.5, 'off by day: at night still on (dimmed)');
+    c.night(false); ok(fake.f === 0, 'off by day: dark once the car says day');
+    c.night(true); ok(fake.f === 0.5, 'off by day: back on at night');
+    settings.set('dayOff', false); c.night(false); c.night(null); ok(fake.f === 1, 'off by day switched off: full by day');
+    {
+        const c2 = new Control({ settings, lights: fake, ambient: amb, log });
+        settings.set('dayOff', true); c2.night(null);
+        ok(fake.f === 1, 'off by day, the car not saying day or night yet: the lights stay on');
+        settings.set('dayOff', false);
+    }
 
     for (let i = 0; i < 7; i++) { c.setLook({ upper: { rgb: [i, 0, 0], bright: 50 } }); c.saveFav(); }
     ok(c.favs().length === 6 && c.favs()[0].upper.rgb[0] === 1, 'favourites: six, the oldest goes');
@@ -463,6 +480,11 @@ ok(Math.round(S.hueOf([0, 0, 255])) === 240 && S.hsv(120, 1, 1).join() === '0,25
     c.doors([]); fake.lights = fake.lights.concat([0x62, 0x63, 0x64, 0x65].map(pl)); c.turn(null); c.turn('left'); c.doors(['passenger front']);
     ok(fake.overs.turn.test(pl(0x05)) && fake.overs.turn.test(pl(0x09)) && !fake.overs.turn.test(pl(0x62)) && !fake.overs.turn.test(pl(0x63))
         && fake.overs.doors.test(pl(0x0c)) && !fake.overs.doors.test(pl(0x64)), 'two-strip door lines: the turn glow and an open door blink the first strip only');
+    settings.set('blinkBoth', true); c.signals();
+    ok(fake.overs.turn.test(pl(0x05)) && fake.overs.turn.test(pl(0x62)) && fake.overs.turn.test(pl(0x63)) && !fake.overs.turn.test(pl(0x64))
+        && fake.overs.doors.test(pl(0x0c)) && fake.overs.doors.test(pl(0x64)) && !fake.overs.doors.test(pl(0x65)), 'setting blinkBoth: both strips of a door line blink (#169)');
+    settings.set('blinkBoth', false); c.signals();
+    ok(!fake.overs.turn.test(pl(0x62)), 'blinkBoth off again: the first strip only');
     fake.lights = fake.lights.filter((l) => l.loc < 0x62);
     c.doors([]); c.doors(['driver front']);
     fake.lights = fake.lights.filter((l) => l.loc !== 0x05);
@@ -540,6 +562,53 @@ ok(Math.round(S.hueOf([0, 0, 255])) === 240 && S.hsv(120, 1, 1).join() === '0,25
         ok(hw.some((w) => w.on === 1 && w.at - end < 5000), 'after a blink: the still colour renewed before the blink\'s 5 s hold runs out');
         lc.stop();
         await sleep(50);
+    }
+
+    // #264: upper and lower in two colours. Once they're on, a renewal (every 40 s) and the once-more after it never
+    // put one zone's colour on the other's lights (the bus-wide NAD 0 write did: the upper lights flashed the lower
+    // colour until their own writes came); a colour change still goes out with NAD 0 first
+    {
+        let clock = 2e6;
+        const BUS2 = [[0x0f, 0x0c], [0x15, 0x01, 0x05, 0x13]], shown = BUS2.map((b) => b.map(() => null)), log2 = [];
+        let lc = null, wrong = 0, nad0 = 0, after = false;
+        const want = (l) => { const w = lc.at(l); return w ? L.writeFrame(l.bus, l.nad, w.rgb, w.bright, 60).slice(5, 8).join() : null; };
+        const zdiag = { physical: async (t, sid, data) => {
+            await sleep(1);
+            if (t !== L.BDC) return null;
+            const bus = data[0] === 0xda ? 0 : 1;
+            if (sid === 0x22) {
+                const b = [0x62].concat(data);
+                for (let i = 0; i < 26; i++) b.push.apply(b, BUS2[bus][i] ? [BUS2[bus][i], 0, 0, 0, 100, 0, 0, 0, 0, 0] : [0xff, 0xff, 0xff, 0xff, 0x7f, 3, 7, 7, 7, 7]);
+                return b.concat([2]);
+            }
+            const nad = data[2], rgb = data.slice(5, 8).join();
+            if (nad === 0) shown[bus] = shown[bus].map(() => rgb); else shown[bus][nad - 1] = rgb;
+            if (after) {
+                if (nad === 0) nad0++;
+                lc.lights.forEach((l) => { if (shown[l.bus][l.nad - 1] !== null && shown[l.bus][l.nad - 1] !== want(l)) { wrong++; log2.push(l.name); } });
+            }
+            return [0x6e, data[0], data[1]];
+        } };
+        lc = new Lights({ diag: zdiag, log, now: () => clock, checkMs: 40 });
+        await lc.find();
+        const blueGreen = { kind: 'solid', upper: { rgb: [0, 0, 255], bright: 80 }, lower: { rgb: [0, 255, 0], bright: 80 } };
+        const w0 = lc.writes;
+        lc.show(blueGreen);
+        for (let i = 0; i < 20; i++) { await sleep(10); clock += 100; lc._kick(); }
+        ok(lc.writes > w0 && lc.lights.every((l) => shown[l.bus][l.nad - 1] === want(l)), 'two colours: every light shows its own');
+        after = true;
+        const w1 = lc.writes;
+        for (let i = 0; i < 40; i++) { clock += 5000; lc._kick(); await sleep(15); }      // 200 s: five renewals
+        ok(lc.writes > w1 + 4, 'renewed meanwhile (' + (lc.writes - w1) + ' writes)');
+        ok(wrong === 0 && nad0 === 0, 'renewals and once-mores: no light shows the other zone\'s colour, no bus-wide write (' + wrong + ' wrong: ' + log2.slice(0, 3).join(', ') + ')');
+        after = false; nad0 = 0;
+        const n0 = [];
+        const orig = zdiag.physical; zdiag.physical = async (t, sid, data) => { if (sid === 0x2e) n0.push(data[2]); return orig(t, sid, data); };
+        lc.show({ kind: 'solid', upper: { rgb: [255, 0, 0], bright: 80 }, lower: { rgb: [255, 255, 0], bright: 80 } });
+        for (let i = 0; i < 20; i++) { await sleep(10); clock += 100; lc._kick(); }
+        ok(n0.indexOf(0) >= 0 && lc.lights.every((l) => shown[l.bus][l.nad - 1] === want(l)), 'a new colour: still a bus-wide write (NAD 0) where most lights take it, then every light its own');
+        lc.stop();
+        await sleep(30);
     }
 
     // decorWith (#140): the decor lights with the upper colour (default) or the lower one, as BMW groups them

@@ -46,10 +46,13 @@ const stubs = {
 const load = Module._load;
 Module._load = function (req, parent, isMain) {
     if (stubs[req]) return stubs[req];
+    // kit/readonly-diag.js (the app's read link) takes its Diag from ./diag beside it: the same stand-in
+    if (req === './diag' && parent && parent.filename && parent.filename.indexOf(KIT) === 0) return stubs['./kit/diag'];
     if (req.startsWith('./kit/')) return load.call(this, path.join(KIT, req.slice(6)), parent, isMain);
     return load.call(this, req, parent, isMain);
 };
-const flush = async () => { for (let i = 0; i < 40; i++) await new Promise((r) => setImmediate(r)); };
+// (the reads go through the read-only link, which paces them 25 ms apart: give a page's reads real time)
+const flush = async () => { await new Promise((r) => setTimeout(r, 700)); for (let i = 0; i < 40; i++) await new Promise((r) => setImmediate(r)); };
 
 (async () => {
     const dir = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), 'service-'));
@@ -61,7 +64,7 @@ const flush = async () => { for (let i = 0; i < 40; i++) await new Promise((r) =
         const texts = [];
         let frame = null, tab = null, last = null;
         const ctx = {
-            ui: { onClick() {}, text() {}, image: async () => {}, onVisible() {}, onFocus() {} },
+            ui: { onClick() {}, text() {}, image: async () => {}, onVisible() {}, onFocus() {}, isVisible: () => true },
             settings: { get: (k) => S[k], onChange() {} },
             log: { info() {}, warn() {}, error() {}, debug() {} }, spec: SPEC, dataDir: dir,
             signals: { watch: () => Promise.resolve({}), call: () => Promise.reject(new Error('no')) },

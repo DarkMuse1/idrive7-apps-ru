@@ -27,11 +27,16 @@ const { Ambient, SLOTS } = require('./ambient');
 const { Lights } = require('./lights');
 const { Control } = require('./control');
 const { Others } = require('./others');
-const { Strobe, gateChecks, gateWhy } = require('./strobe');
+const { gateChecks, gateWhy } = require('./strobe');
+// the strobe with your own light sequence and Stealth (lamps.js, presets.js, seqview.js: from Exterior Lights, PR #254)
+const { Lamps, stealthWhy, playWhy } = require('./lamps');
+const Presets = require('./presets');
+const { drawSequencer, drawStealth } = require('./seqview');
 const { Lever, beamOf } = require('./lever');
 const Parked = require('./kit/parked');
 const { t: translate } = require('./kit/i18n');
-const { drawCabin } = require('./cabin');
+const { legendMark } = require('./cabin');
+const { drawCarView, MAX_PITCH, MAX_ROLL } = require('./carview');
 const { sample } = require('./lin');
 const S = require('./scenes');
 
@@ -45,6 +50,7 @@ const RING = { cx: 290, cy: 288, R: 186, r: 136 }, DIAL = { cx: 655, cy: 400, R:
 const ON_BY_DEFAULT = ['follow', 'flashAlerts'];
 const MOVE_DRAW_MS = 250;            // a moving scene's picture: at most 4 a second
 const FIND_LATER_MS = 5000;          // lights known from an earlier start: read again once the first colour is out
+const FAULT_RECHECK_MS = 30000;      // a light faulty at the search: read again this long after our colour is on
 const IDLE_MS = 15 * 60000;          // without the car's own state: not driven nor the app used this long = parked and left
 /* The car's turn signals (Light.StatusFunctionsIndicators activeFunctionIndicateDirection, by name or number): the
  * driver's (held or tapped), the driving assistant's, and the hazards; the lock and alarm flashes are none. */
@@ -103,6 +109,16 @@ async function background(bg) {
     };
     const find = () => lights.find().then(counted).then((l) => { if (!l.length) again(); }, (e) => { log.warn('lights: ' + e); again(); });
     setTimeout(find, lights.lights.length ? FIND_LATER_MS : 0);
+    // a light read as faulty at the search may only have been off (IterioDev's Comfort 0.6.5: an M8's footwells read
+    // "faulty" with the car off and clean later): read once more FAULT_RECHECK_MS after our colour is on, once a start
+    let faultCheck = null;
+    lights.on('change', () => {
+        if (faultCheck || lights.state !== 'ours' || !lights.lights.some((l) => l.fault)) return;
+        faultCheck = setTimeout(() => {
+            log.info('lights: ' + lights.lights.filter((l) => l.fault).map((l) => l.name).join(', ') + ' reported a fault at the search: read again, the lights on');
+            find();
+        }, FAULT_RECHECK_MS);
+    });
     signals.watch('de.bmw.infotainment.vehicle.Vehicle', '1', {
         statusDayNightChangeOver: (v) => {
             const x = v && typeof v === 'object' ? v.dayNightChangeOver : v, c = typeof x === 'string' ? DAY_NIGHT[x] : x;
@@ -154,10 +170,10 @@ async function background(bg) {
     signals.watch('de.bmw.body.DoorsWindowsRoofMirrors', '1', { CentralLockingSystemAndPanelStatus: (v) => control.doors(doorsOf(v)) }, log)
         .catch((e) => log.warn('doors: ' + (e && e.message || e)));
     settings.onChange((key) => {
-        if (key === 'nightDim') control.night(control._night);
+        if (key === 'nightDim' || key === 'dayOff') control.night(null);
         if (key === 'decorWith') { S.setDecor(settings.get('decorWith')); lights.redraw(); }
         if (key === 'follow') control.apply();
-        if (key === 'turnGlow' || key === 'doorRed' || key === 'hazardRed' || key === 'drive') control.signals();
+        if (key === 'turnGlow' || key === 'doorRed' || key === 'hazardRed' || key === 'drive' || key === 'blinkBoth') control.signals();
         if (key === 'doorCar') control.carDoorSetting();
     });
     const others = new Others({ log }).start();
@@ -174,8 +190,10 @@ async function background(bg) {
     // with someone in the car; the light show also with the car standing still (kit/parked.js, checked again on every
     // step: it stops when the car moves off); why not, or null
     const parked = Parked.watch(bg, log);
-    const checks = () => gateChecks({ setting: settings.get('strobe') === true, away: control._away, moving: parked.moving() });
-    const gate = (what) => gateWhy(checks(), what);
+    const checks = () => gateChecks({ setting: settings.get('strobe') === true, stealth: settings.get('stealth') === true, away: control._away, moving: parked.moving() });
+    // Stop all (kit/panic.js) from any app: nothing new starts until it ends
+    let panicked = false;
+    const gate = (what) => (panicked ? 'Stopped by Stop all' : gateWhy(checks(), what));
     // the high beam's channels learned on a headlight unit, kept in the data folder
     const fs = require('fs'), path = require('path');
     const chFile = bg.dataDir ? path.join(bg.dataDir, 'strobe_channels.json') : null;
@@ -183,9 +201,19 @@ async function background(bg) {
     try { channels = chFile ? JSON.parse(fs.readFileSync(chFile, 'utf8')) : null; } catch (e) { channels = null; }
     // while the strobe runs, the ambient lights stop writing (the gateway takes one request at a time: theirs in
     // between got the strobe's refused)
-    const strobe = new Strobe({ diag, log, allowed: gate, channels, hold: (on) => lights.hold('strobe', on) });
+    const strobe = new Lamps({ diag, log, allowed: gate, channels, hold: (on) => lights.hold('strobe', on) });
     strobe.on('learned', (c) => { try { if (chFile) fs.writeFileSync(chFile, JSON.stringify(c)); } catch (e) { log.warn('strobe: ' + e); } });
-    const findStrobe = () => { if (settings.get('strobe') === true && !strobe.kind) strobe.find().catch((e) => log.warn('strobe: ' + e)); };
+    // the headlight units for Stealth (reads only), only with its setting on
+    let headsAsked = false;
+    const findHeads = () => {
+        if (settings.get('strobe') !== true || settings.get('stealth') !== true || headsAsked) return;
+        headsAsked = true;
+        strobe.findHeads().catch((e) => { headsAsked = false; log.warn('stealth: ' + e); });
+    };
+    const findStrobe = () => {
+        if (settings.get('strobe') === true && !strobe.kind) strobe.find().then(findHeads, (e) => log.warn('strobe: ' + e));
+        else findHeads();
+    };
     findStrobe();
     // the flasher lever (lever.js): three quick pulls while parked (also while driving with strobeLeverDriving, for
     // private property) start the strobe as the Strobe page has it, while its Lever start is on (off until switched on),
@@ -218,8 +246,17 @@ async function background(bg) {
     watchLever();
     settings.onChange((key) => {
         if (key === 'strobe') { if (settings.get('strobe') === true) findStrobe(); else strobe.stop(); }
+        if (key === 'stealth') { if (settings.get('stealth') === true) findStrobe(); else if (strobe.running === 'stealth') strobe.stop(); }
         if (key === 'strobeLever') watchLever();
     });
+    // Stop all: the strobe or light show stops (its own stop gives the lamps back) and the ambient lights hold their
+    // writes, as for the Strobe tab, until it ends
+    if (bg.onPanic) {
+        bg.onPanic((on) => {
+            panicked = on;
+            if (on) { strobe.stop(); lights.hold('panic', true).catch((e) => log.warn('ambient: hold: ' + e)); } else lights.hold('panic', false);
+        });
+    }
     // (the car locked and left mid-flash: the gate says no at the next step and the strobe stops)
     return { ambient, lights, control, active, others, strobe, checks, lookAgain: () => lights.find({ force: true }).then(counted) };
 }
@@ -240,7 +277,8 @@ mgu.run({
         const { ui, settings, log } = ctx;
         const { ambient, lights, control, active, others, strobe, checks, lookAgain } = ctx.background || await background(ctx);
         // the Strobe tab only with its experimental setting on
-        const tabs = () => TABS.concat(settings.get('strobe') === true ? ['Strobe'] : []);
+        // and Sequencer with it; Stealth only with its own setting as well
+        const tabs = () => TABS.concat(settings.get('strobe') === true ? ['Strobe', 'Sequencer'].concat(settings.get('stealth') === true ? ['Stealth'] : []) : []);
         // editing: null (the driver's own look) or a driving mode whose look the Colour and Animations tabs change
         let page = 0, part = 'all', dirty = true, editing = null;
         const T0 = Date.now();
@@ -254,6 +292,11 @@ mgu.run({
         const partColour = (l) => (part === 'lower' ? l.lower : l.upper);
         const shown = () => (lights.lights.length ? lights.lights : sample());
         const rhd = () => settings.get('drive') === 'rhd';
+        // the car's picture on the Colour and Animations tabs, and how a finger has turned it (carview.js): leaned back
+        // (pitch) and turned about its length (roll), the nose always up
+        const CAR_BOX = [{ x: 790, y: 92, w: 330, h: 404 }, { x: 700, y: 92, w: 420, h: 404 }];
+        const carView = { pitch: 0, roll: 0 };
+        const carAt = (x, y) => page <= 1 && x >= CAR_BOX[page].x && x < CAR_BOX[page].x + CAR_BOX[page].w && y >= CAR_BOX[page].y && y < CAR_BOX[page].y + CAR_BOX[page].h;
         // (a tap: the app in use - the car is not left, also for a car that does not say so)
         const redraw = () => { dirty = true; if (active) active(); return render(); };
 
@@ -333,18 +376,24 @@ mgu.run({
 
             G.panel(cv, t, 776, 44, 800, 468, editing ? MODE_NAMES[editing] + ' will look' : 'In the car');
             if (lights.state === 'none' && !editing) return drawBmwColours(cv, t);
-            drawCabin(cv, t, { x: 790, y: 92, w: 330, h: 404 }, shown(), pictureOf(carNow, l), { rhd: rhd() });
+            drawCarView(cv, t, CAR_BOX[0], shown(), pictureOf(carNow, l), Object.assign({ rhd: rhd() }, carView));
             const x = 1150;
-            [['Upper', l.upper], ['Lower', l.lower]].forEach(([n, v], i) => {
-                cv.roundRect(x, 104 + i * 40, 26, 26, 7, v.rgb);
-                cv.text(n + ': ' + nearest(v.rgb) + ', ' + v.bright + '%', x + 38, 124 + i * 40, 20, t.text);
-            });
+            legend(cv, t, x, l, true);
             if (editing) return editBar(cv, t, x);
             G.button(cv, t, x, 210, 268, 48, 'Original colour', () => { control.carColour(); return redraw(); }, { primary: !control.on(), key: 'car' });
             G.button(cv, t, x, 270, 268, 48, 'Save favourite', () => { control.saveFav(); return redraw(); }, { key: 'save' });
             status(cv, t, x, 352);
         }
 
+        // the key to the car's picture: each part's mark, its colour (and brightness), where its lights are
+        function legend(cv, t, x, l, bright) {
+            [['upper', 'Upper', l.upper, 'Dash and door lines'], ['lower', 'Lower', l.lower, 'Footwells, door pockets and handles']].forEach(([k, n, v, where], i) => {
+                const y = 100 + i * 46;
+                legendMark(cv, k, x, y + 12, v.rgb);
+                cv.text(n + ': ' + nearest(v.rgb) + (bright ? ', ' + v.bright + '%' : ''), x + 40, y + 19, 20, t.text);
+                cv.text(where, x + 40, y + 37, 15, t.dim);
+            });
+        }
         // changing a driving mode's look: which mode, and Done back to the Driving modes tab
         function editBar(cv, t, x) {
             cv.text('Changing ' + MODE_NAMES[editing] + '\'s look', x, 222, 22, t.text, { font: 'bold' });
@@ -377,19 +426,15 @@ mgu.run({
                 cv.text(d, 284, y + 32, 20, on ? t.text : t.dim);
             });
             cv.text('Speed', 44, 470, 20, t.dim);
-            [[1, 'Slow'], [2, 'Normal'], [3, 'Fast']].forEach(([v, n], i) => {
-                G.button(cv, t, 120 + i * 150, 440, 136, 48, n, () => { setLook({ speed: v }); return redraw(); }, { primary: (l.speed || 2) === v, key: 'sp-' + v });
-            });
+            G.segment(cv, t, 120, 440, 436, 48, [[1, 'Slow'], [2, 'Normal'], [3, 'Fast']]
+                .map(([v, n]) => ({ label: n, run: () => { setLook({ speed: v }); return redraw(); }, on: (l.speed || 2) === v, key: 'sp-' + v })));
 
             G.panel(cv, t, 678, 44, 898, 468, editing ? MODE_NAMES[editing] + ' will look' : 'In the car');
             // the picture shows the animation picked even before the car has answered
             const preview = (x) => (lights.scene ? lights.at(x) : control.on() ? S.lightAt(l, x, Date.now() - T0) : null);
-            drawCabin(cv, t, { x: 700, y: 92, w: 420, h: 404 }, shown(), pictureOf(preview, l), { rhd: rhd() });
+            drawCarView(cv, t, CAR_BOX[1], shown(), pictureOf(preview, l), Object.assign({ rhd: rhd() }, carView));
             const x = 1150;
-            [['Upper', l.upper], ['Lower', l.lower]].forEach(([n, v], i) => {
-                cv.roundRect(x, 104 + i * 40, 26, 26, 7, v.rgb);
-                cv.text(n + ': ' + nearest(v.rgb), x + 38, 124 + i * 40, 20, t.text);
-            });
+            legend(cv, t, x, l, false);
             cv.text('Colours: on the Colour tab', x, 214, 18, t.dim);
             if (editing) return editBar(cv, t, x);
             G.button(cv, t, x, 240, 0, 48, 'Original colour', () => { control.carColour(); return redraw(); }, { primary: !control.on(), key: 'car2' });
@@ -471,7 +516,7 @@ mgu.run({
                 : 'Looking for the headlights\' lamp control...';
             cv.text(kindText, 44, 112, 18, t.dim);
             // (three checks in the room two had: 26 px apart, the warning and the note under them)
-            checks().forEach(([label, ok, why], i) => {
+            checks().filter((c) => !c[3] || c[3] === 'show').forEach(([label, ok, why], i) => {
                 const y = 140 + i * 26;
                 cv.arc(52, y - 6, 0, 7, 0, 360, ok ? '#2fd27a' : t.crit);
                 cv.text(label + (!ok && why ? ' · ' + why : ''), 70, y, 20, ok ? t.text : t.dim);
@@ -543,7 +588,7 @@ mgu.run({
             G.button(cv, t, 520, 428, 220, 48, on ? 'Stop' : 'Start strobe', () => {
                 if (on) strobe.stop(); else strobe.start(strobeOptions(settings, strobe)).catch((e) => log.warn('strobe: ' + e));
                 return redraw();
-            }, { primary: on, key: 'strobe-go', confirm: !on, busy: !strobe || !strobe.kind || strobe.running === 'show' || strobe.running === 'learn' });
+            }, { primary: on, key: 'strobe-go', confirm: !on, busy: !strobe || !strobe.kind || (!!strobe.running && strobe.running !== 'strobe') });
 
             G.panel(cv, t, 776, 44, 800, 468, 'Light show');
             (strobe && strobe.kind === 'fn' ? ['Every outside light flashes in turn for 15 s: high beam,', 'cornering, fog, indicators, brake, reverse and more.']
@@ -564,13 +609,50 @@ mgu.run({
             G.button(cv, t, 1336, 426, 220, 48, showing ? 'Stop' : 'Start show', () => {
                 if (showing) strobe.stop(); else strobe.show({ rate: srate }).catch((e) => log.warn('light show: ' + e));
                 return redraw();
-            }, { primary: showing, key: 'show-go', confirm: !showing, busy: !strobe || !strobe.kind || strobe.running === 'strobe' || strobe.running === 'learn' });
+            }, { primary: showing, key: 'show-go', confirm: !showing, busy: !strobe || !strobe.kind || (!!strobe.running && strobe.running !== 'show') });
+        }
+
+        /*
+         * Sequencer (with the Strobe setting): six sequences of 16 beats on the body controller's light functions, kept
+         * in presets.json; the preview steps through the chosen one on screen, Play runs it on the car (parked, 30 s).
+         */
+        const presetsFile = ctx.dataDir ? require('path').join(ctx.dataDir, 'presets.json') : null;
+        const presets = presetsFile ? Presets.load(presetsFile) : Presets.DEFAULTS.map((d) => Presets.clean(null, d));
+        let slot = 0;
+        const savePresets = () => { if (presetsFile) Presets.save(presetsFile, presets); };
+        function drawSeq(cv, t) {
+            const p = presets[slot], playing = !!strobe && strobe.running === 'sequence';
+            const beat = playing ? strobe.beat : Math.floor((Date.now() - T0) / p.beatMs) % Presets.BEATS;
+            drawSequencer(cv, t, {
+                presets, slot, preset: p, beat, playing, lit: Presets.lit(p, beat),
+                blocked: !strobe ? 'not available' : playWhy(strobe) || (strobe.running && !playing ? 'the ' + strobe.running + ' is running' : null) || gateWhy(checks(), 'sequence'),
+                note: strobe && strobe.note, noteType: strobe && strobe.noteType,
+                pick: (i) => { slot = i; return redraw(); },
+                toggle: (b, fn) => { Presets.toggle(p, b, fn); savePresets(); return redraw(); },
+                play: () => { strobe.play(p.beats, { beatMs: p.beatMs, loops: 10 }).catch((e) => log.warn('sequence: ' + e)); return redraw(); },
+                stop: () => { strobe.stop(); return redraw(); },
+                beatLen: () => { const v = [200, 250, 300, 400, 500]; p.beatMs = v[(v.indexOf(p.beatMs) + 1) % v.length]; savePresets(); return redraw(); },
+            });
+        }
+        // Stealth (its own setting, private property only): the headlight units dark while parked, for the minutes set
+        let stealthT0 = 0;
+        function drawStealthTab(cv, t) {
+            const on = !!strobe && strobe.running === 'stealth', mins = ['1', '5', '10'].indexOf(String(settings.get('stealthMin'))) >= 0 ? +settings.get('stealthMin') : 5;
+            drawStealth(cv, t, {
+                on, minutes: mins, leftMs: mins * 60000 - (Date.now() - stealthT0),
+                why: !strobe ? 'not available' : stealthWhy(strobe), headName: strobe && strobe.headKind ? strobe.headKind.toUpperCase() : '',
+                blocked: !strobe ? null : (strobe.running && !on ? 'the ' + strobe.running + ' is running' : null) || gateWhy(checks(), 'stealth'),
+                note: strobe && strobe.note, noteType: strobe && strobe.noteType,
+                start: () => { stealthT0 = Date.now(); strobe.stealth({ ms: mins * 60000 }).catch((e) => log.warn('stealth: ' + e)); return redraw(); },
+                stop: () => { strobe.stop(); return redraw(); },
+                cycleMinutes: () => { settings.set('stealthMin', String({ 1: 5, 5: 10, 10: 1 }[mins])); return redraw(); },
+            });
         }
 
         async function render() {
             const t = ctx.theme(), cv = ctx.canvas(W, H).clear(t.bg);
             if (page >= tabs().length) page = 0;
-            [drawColour, drawAnimations, drawModes, drawFavs, drawStrobe][page](cv, t);
+            [drawColour, drawAnimations, drawModes, drawFavs, drawStrobe, drawSeq, drawStealthTab][page](cv, t);
             G.frame(cv, t, tabs(), page, []);
             dirty = false;
             await ui.image('MAIN_GFX', cv);
@@ -584,7 +666,8 @@ mgu.run({
         const PAUSE_KEY = 'strobe-tab', SEEN_MS = 1500;
         const animating = () => !!((lights.scene && S.moves(lights.scene)) || (lights._overs && lights._overs.size));
         const pauseCheck = () => {
-            const want = page === 4 && tabs().length > 4 && Date.now() - strobeSeen < SEEN_MS;
+            // (and the Sequencer and Stealth tabs: the same body controller and headlights)
+            const want = page >= 4 && tabs().length > 4 && Date.now() - strobeSeen < SEEN_MS;
             if (want && !paused) {
                 paused = { moving: animating() };
                 log.info('ambient: ' + (paused.moving ? 'animation' : 'light updates') + ' paused for the Strobe tab');
@@ -602,12 +685,12 @@ mgu.run({
         // changes
         let movedAt = 0;
         const tick = () => {
-            if (page === 4) { strobeSeen = Date.now(); pauseCheck(); }
+            if (page >= 4) { strobeSeen = Date.now(); pauseCheck(); }
             const moving = (lights.scene && S.moves(lights.scene)) || (page === 1 && control.on() && S.moves(look()));
             const due = moving && page <= 1 && Date.now() - movedAt >= MOVE_DRAW_MS;
             if (due) movedAt = Date.now();
             // (the Strobe tab: its checks follow the car, so it draws on each tick)
-            return dirty || due || page === 4 ? render() : null;
+            return dirty || due || page >= 4 ? render() : null;
         };
 
         // the colour ring and the brightness dial under a finger (Colour tab): 'ring' or 'dial', else null
@@ -621,16 +704,27 @@ mgu.run({
         // a finger on the ring or the dial: the colour or the brightness follows it while it moves, sent to the lights at
         // most every DRAG_MS and once more where it lets go (a tap: there at once)
         const DRAG_MS = 120;
-        let drag = null;                                    // { what: 'ring' | 'dial', at, x, y, timer }
+        let drag = null;                                    // { what: 'ring' | 'dial' | 'car', at, x, y, timer }
         const dragApply = () => {
             if (!drag) return null;
             drag.at = Date.now(); clearTimeout(drag.timer); drag.timer = null;
+            if (drag.what === 'car') {
+                // a finger across turns the car about its length, up and down leans it back; it stays as left
+                carView.roll = Math.max(-MAX_ROLL, Math.min(MAX_ROLL, drag.r0 + (drag.x - drag.x0) * 0.25));
+                carView.pitch = Math.max(0, Math.min(MAX_PITCH, drag.p0 + (drag.y - drag.y0) * 0.25));
+                return redraw();
+            }
             return drag.what === 'ring' ? setRgb(S.hsv(hueAt(drag.x, drag.y), 1, 1)) : setBright(brightAt(drag.x, drag.y));
         };
         if (ctx.onTouch) {
             ctx.onTouch((phase, x, y) => {
                 if (phase === 1) {
                     drag = null;
+                    // the car's picture, where it shows (not over the body module's colour buttons)
+                    if (carAt(x, y) && (page === 1 || lights.state !== 'none' || editing)) {
+                        drag = { what: 'car', at: 0, x, y, x0: x, y0: y, r0: carView.roll, p0: carView.pitch, timer: null };
+                        return true;
+                    }
                     if (page !== 0) return false;
                     const what = ringAt(x, y) ? 'ring' : dialAt(x, y) ? 'dial' : null;
                     if (!what) return false;
@@ -653,7 +747,7 @@ mgu.run({
                 return null;
             });
         }
-        ctx.onTab((i) => { page = i; if (i >= 2) editing = null; if (i === 4) strobeSeen = Date.now(); pauseCheck(); return redraw(); });
+        ctx.onTab((i) => { page = i; if (i >= 2) editing = null; if (i >= 4) strobeSeen = Date.now(); pauseCheck(); return redraw(); });
         lights.on('change', () => { dirty = true; });
         ambient.on('change', () => { dirty = true; });
         others.on('change', () => { dirty = true; });

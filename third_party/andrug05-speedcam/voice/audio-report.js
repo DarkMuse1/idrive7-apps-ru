@@ -24,6 +24,7 @@ function gpsSnapshot(value){
 async function collect(d,request,options){
  const o=options||{},s=d.s,report={format:'SpeedCAM-audio-diagnostics',schema:2,createdAt:new Date().toISOString(),serviceVersion:o.serviceVersion||null,appVersion:text(request.appVersion),readOnly:true,audibilityTested:false,
   gps:gpsSnapshot(request.gps),
+  mapStorage:request.mapStorage&&request.mapStorage.schema===1&&Buffer.byteLength(JSON.stringify(request.mapStorage))<=8192?JSON.parse(JSON.stringify(request.mapStorage)):null,
   mixerSettings:d.mix?d.mix.snapshot():null,
   beeperSound:d.beeperSounds?d.beeperSounds.snapshot():null,
   pulseAudio:s.pulseDiagnostics?JSON.parse(JSON.stringify(s.pulseDiagnostics)):null,

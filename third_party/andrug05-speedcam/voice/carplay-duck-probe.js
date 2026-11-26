@@ -61,8 +61,8 @@ class CarplayDuckProbe {
    await control.write(id,property,applied);writeConfirmed=true;journal.uncertain=false;this.persist(this.journal,journal);guard();
    if(await this.value(control,id,property)!==applied)throw Error('BMW did not confirm reduced CarPlay offset');
    await checkRoute();guard();
-   const file=path.join(this.o.root||'/var/opt/bmwcaminfo-voice/current','audio/volume-40/strelka.m4a');
-   const duration=require('./audio-manifest')['strelka.m4a'].durationSeconds;
+   const file=path.join(this.o.root||'/var/opt/bmwcaminfo-voice/current','audio/volume-40/'+require('./speech-language').file('strelka.m4a'));
+   const duration=require('./audio-manifest')[require('./speech-language').file('strelka.m4a')].durationSeconds;
    if(!(duration>0&&duration<10))throw Error('Invalid test phrase duration');
    const r=await output.mp.callMethod('playFile',{path:file,languageCode:7695972},3000);
    if(!r||r.EntError!=='OK')throw Error('Overlay rejected M4A test phrase');

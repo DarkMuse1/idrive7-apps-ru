@@ -60,6 +60,8 @@ function fakeCar(car, o, clock) {
                 }
                 return [0x7F, sid, 0x31];
             }
+            // fnBusy: the first n light-function reads unanswered or turned away busy (a crowded transport at boot)
+            if ((car === 'fn' || car === 'fnflm') && sid === 0x22 && data[0] === 0xD5 && opt.fnBusy && sent.filter((x) => / 22 D5 42/.test(x)).length <= opt.fnBusy) return opt.fnBusyNrc ? [0x7F, 0x22, opt.fnBusyNrc] : null;
             if ((car === 'fn' || car === 'fnflm') && sid === 0x22) return data[0] === 0xD5 && data[1] === 0x42 ? [0x62, 0xD5, 0x42].concat(new Array(20).fill(0)) : [0x7F, 0x22, 0x31];
             if ((car === 'fn' || car === 'fnflm') && sid === 0x2E) {
                 if (data[0] !== 0xD5 || data[1] !== 0x42 || data.length !== 6) return [0x7F, 0x2E, 0x13];
@@ -381,6 +383,87 @@ const writes = (diag, a) => diag.sent.filter((x) => x.indexOf(hex([a]) + ' 31 01
         ok(s.high && s.high[0].ch === 1, 'FLE: learned channels kept from before');
     }
 
+    // FLM02 (a G20's LED headlights, #218): 15 channels of 5 bytes at 22 D6DB, each set with 31 01 A54B <ch> <pwm> <s>;
+    // found before the body controller (BDC_G05 answers too, but its lamp outputs aren't the LED high beam)
+    {
+        const clock = { t: 0 }, sent = [], session = {};
+        const ch = { 0x43: new Array(15).fill(0).map((x, i) => (i === 2 ? { pwm: 88, ma: 1000 } : { pwm: 0, ma: 0 })), 0x44: null };
+        ch[0x44] = ch[0x43].map((c) => Object.assign({}, c));
+        const read = (a) => [0x62, 0xD6, 0xDB].concat(...ch[a].map((c) => [c.pwm, c.ma >> 8, c.ma & 0xFF, 12, 1]));
+        const diag = {
+            sent,
+            async send() { return { ok: true }; },
+            async physical(target, sid, data) {
+                sent.push(hex([target, sid].concat(data)));
+                clock.t += 200; await new Promise((r) => setImmediate(r));
+                if (target === 0x40) return sid === 0x22 && data[0] === 0xE3 && data[1] === 0xB9 ? [0x62, 0xE3, 0xB9].concat(new Array(31).fill(0)) : [0x7F, sid, 0x31];
+                if (target !== 0x43 && target !== 0x44) return null;
+                if (sid === 0x10) { session[target] = data[0]; return [0x50, data[0], 0, 0x32, 0x01, 0xF4]; }
+                if (sid === 0x3E) return data[0] === 0x80 ? null : [0x7E, 0x00];
+                if (sid === 0x22) return data[0] === 0xD6 && data[1] === 0xDB ? read(target) : [0x7F, 0x22, 0x31];
+                if (sid === 0x31 && data[0] === 0x01 && data[1] === 0xA5 && data[2] === 0x4B) {
+                    if (session[target] !== 0x03) return [0x7F, 0x31, 0x7F];
+                    if (data.length !== 6 || data[3] < 1 || data[3] > 15) return [0x7F, 0x31, 0x13];
+                    const c = ch[target][data[3] - 1];
+                    c.pwm = data[4]; c.ma = data[4] ? 900 : 0;
+                    return [0x71, 0x01, 0xA5, 0x4B];
+                }
+                return [0x7F, sid, 0x31];
+            },
+        };
+        const s = new Strobe({ diag, log, allowed: () => null, now: () => clock.t, sleep: (ms) => new Promise((r) => { clock.t += Math.max(ms, 1); setImmediate(r); }) });
+        const kind = await s.find();
+        ok(kind === 'flm2' && s.sides.length === 2, 'FLM02: found at both headlights, before the body controller (' + kind + ')');
+        sent.length = 0;
+        await s.start({});
+        ok(sent.length === 0 && /Learn/.test(s.note), 'FLM02: not started before the high beam is learned');
+        const run = s.learn();
+        setImmediate(() => setImmediate(() => { [0x43, 0x44].forEach((a) => { ch[a][0] = { pwm: 75, ma: 1000 }; }); }));
+        const found = await run;
+        ok(found && found.length === 1 && found[0].ch === 1, 'FLM02: the high beam learned on channel 1 (' + JSON.stringify(found) + ')');
+        [0x43, 0x44].forEach((a) => { ch[a][0] = { pwm: 0, ma: 0 }; });
+        sent.length = 0;
+        const run2 = s.start({ lights: 'high' });
+        const tick = () => (sent.length >= 30 ? s.stop() : setImmediate(tick)); setImmediate(tick);
+        await run2;
+        const sets = sent.filter((x) => / 31 01 A5 4B /.test(x));
+        ok(sets.length >= 4 && sets.every((x) => / 31 01 A5 4B 01 (64|00) 02$/.test(x)), 'FLM02: flashes channel 1 only (100 % / dark, 2 s each): ' + sets.slice(0, 4).join(' | '));
+        ok(s.note && !/refused|did not follow/.test(s.note), 'FLM02: the first flash followed (' + s.note + ')');
+        ok(sent.slice(-2).join() === '43 10 01,44 10 01' && ch[0x43][2].pwm === 88, 'FLM02: ended by leaving the session, the low beam never written');
+    }
+
+    // #218: the light functions crowded out at the head unit's start: still found, not the body controller's lamp outputs
+    {
+        const { s } = make('fn', { fnBusy: 8 });
+        ok(await s.find() === 'fn', 'light functions unanswered 8 times: still found (' + s.kind + ')');
+    }
+    {
+        const { s } = make('fn', { fnBusy: 8, fnBusyNrc: 0x21 });
+        ok(await s.find() === 'fn', 'light functions turned away busy (7F 22 21) 8 times: still found (' + s.kind + ')');
+    }
+    {
+        const { s, diag } = make('fnflm', { fnBusy: 1000 });
+        const t0 = s._clock.t;
+        ok(await s.find() === 'flm' && s._clock.t - t0 < 90000, 'light functions never answering: the headlights after ~30 s (' + s.kind + ', ' + Math.round((s._clock.t - t0) / 1000) + ' s)');
+        diag.sent.length = 0;
+    }
+    {
+        // they answer only once the headlights have been asked: the last try before settling wins
+        const { s, diag } = make('fnflm', { fnBusy: 1000 });
+        const orig = diag.physical;
+        diag.physical = async (t, sid, d) => {
+            if (t === 0x43 && sid === 0x22 && d[0] === 0xD6 && d[1] === 0x67) s._fnBack = true;
+            if (t === 0x40 && sid === 0x22 && d[0] === 0xD5 && s._fnBack) return [0x62, 0xD5, 0x42].concat(new Array(20).fill(0));
+            return orig(t, sid, d);
+        };
+        ok(await s.find() === 'fn', 'asked once more before settling for the headlights: light functions (' + s.kind + ')');
+    }
+    {
+        const { s, diag } = make('bdc');
+        await s.find();
+        ok(s.kind === 'bdc' && diag.sent.filter((x) => / 22 D5 42/.test(x)).length === 1, 'a car without light functions (7F 22 31): asked once, no waiting');
+    }
+
     // the body controller: not allowed / nothing to drive
     {
         const { s, diag } = make('bdc', { allowed: () => 'the car is moving' });
@@ -463,7 +546,13 @@ const writes = (diag, a) => diag.sent.filter((x) => x.indexOf(hex([a]) + ' 31 01
         ok(g({ moving: true }, 'learn') === null, 'moving: learning may run');
         ok(g({ setting: false }, 'strobe') === 'switched on in the settings: no', 'off in the settings');
         ok(g({ away: true }, 'strobe') === 'someone in the car: no', 'nobody in the car');
-        ok(gateChecks({ setting: true, away: false, moving: true }).length === 3, 'the Strobe tab lists three checks');
+        ok(gateChecks({ setting: true, away: false, moving: true }).filter((c) => !c[3] || c[3] === 'show').length === 3, 'the Strobe tab lists three checks');
+        // the sequence as the light show; Stealth only with its own setting and the car known to stand still
+        ok(g({ moving: true }, 'sequence') === 'the car standing still (sequence): no' && g({}, 'sequence') === null, 'sequence: standing only');
+        ok(g({}, 'stealth') === 'stealth switched on in the settings: no', 'stealth: off without its setting');
+        ok(g({ stealth: true }, 'stealth') === null, 'stealth: setting on, standing: may run');
+        ok(g({ stealth: true, moving: null }, 'stealth') === 'the car standing still (stealth): no', 'stealth: no speed known yet is no');
+        ok(g({ stealth: true, moving: true }, 'stealth') !== null && g({ stealth: true, away: true }, 'stealth') !== null && g({ stealth: true, setting: false }, 'stealth') !== null, 'stealth: moving, nobody in the car or Strobe off: no');
     }
     // the speed the light show goes by (kit/parked.js): re-read every 2 s, quiet after driving = moving
     {

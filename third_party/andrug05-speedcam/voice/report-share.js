@@ -32,6 +32,7 @@ class ReportShare {
  async start(request,live){
   if(this.pending)throw Error('Сбор отчёта уже выполняется.');
   this.pending=true;const closing=this.stop(),generation=this.generation;let s=null;
+  const english=request&&request.language==='en';
   const check=()=>{if(generation!==this.generation||(live&&!live()))throw Error('Передача отчёта отменена.');};
   try{
    await closing;check();this.error=null;
@@ -54,7 +55,9 @@ class ReportShare {
      return end(200,s.body,'application/json; charset=utf-8');
     }
     if(req.url!==base)return end(404,'Not found');
-    return end(200,'<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SpeedCAM — отчёт</title><style>body{background:#080808;color:white;font:20px system-ui;max-width:580px;margin:60px auto;padding:24px}a{display:block;background:#cf2336;color:white;padding:22px;text-align:center;border-radius:8px}p{line-height:1.5}</style><h1>SpeedCAM</h1><h2>Диагностический отчёт</h2><p>'+(this.o.simulated?'Эмулятор: демонстрационные данные, не диагностика автомобиля.':'Снимок аудиодиагностики и GPS. Раздел GPS содержит координаты. Передайте скачанный JSON-файл для анализа.')+'</p><a href="'+base+'report.json" download>Скачать отчёт JSON</a><p>Ссылка временная. После отключения передачи в инженерном меню она перестанет работать.</p></html>','text/html; charset=utf-8');
+    let html='<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SpeedCAM — отчёт</title><style>body{background:#080808;color:white;font:20px system-ui;max-width:580px;margin:60px auto;padding:24px}a{display:block;background:#cf2336;color:white;padding:22px;text-align:center;border-radius:8px}p{line-height:1.5}</style><h1>SpeedCAM</h1><h2>Диагностический отчёт</h2><p>'+(this.o.simulated?'Эмулятор: демонстрационные данные, не диагностика автомобиля.':'Снимок аудиодиагностики и GPS. Раздел GPS содержит координаты. Передайте скачанный JSON-файл для анализа.')+'</p><a href="'+base+'report.json" download>Скачать отчёт JSON</a><p>Ссылка временная. После отключения передачи в инженерном меню она перестанет работать.</p></html>';
+    if(english){const labels={"lang=\"ru\"": "lang=\"en\"", "SpeedCAM — отчёт": "SpeedCAM — report", "Диагностический отчёт": "Diagnostic report", "Эмулятор: демонстрационные данные, не диагностика автомобиля.": "Emulator: sample data, not vehicle diagnostics.", "Снимок аудиодиагностики и GPS. Раздел GPS содержит координаты. Передайте скачанный JSON-файл для анализа.": "Audio and GPS diagnostics. The GPS section contains coordinates. Share the downloaded JSON file for analysis.", "Скачать отчёт JSON": "Download JSON report", "Ссылка временная. После отключения передачи в инженерном меню она перестанет работать.": "This link is temporary. It will stop working when sharing is disabled in the engineering menu."};Object.keys(labels).forEach(k=>{html=html.split(k).join(labels[k]);});}
+    return end(200,html,'text/html; charset=utf-8');
    });
    s.server.timeout=5000;s.server.maxConnections=4;
    s.server.on('connection',socket=>{s.sockets.add(socket);socket.on('close',()=>s.sockets.delete(socket));});

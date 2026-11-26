@@ -8,7 +8,7 @@ const ROOT = '/var/opt/bmwcaminfo-voice/current';
 const SRC_ID = 1046;
 const SINK_ID = 1024;
 const LANG = 7695972;
-const SERVICE_VERSION='0.1.49';
+const SERVICE_VERSION='0.1.52';
 const ASSETS = require('./audio-manifest.json');
 const ALLOWED = Object.create(null);
 Object.keys(ASSETS).forEach(function (file) {
@@ -154,6 +154,7 @@ VoiceService.prototype.createCarplayDuckingControl = async function () {
 };
 
 VoiceService.prototype.play = async function (file, volume, permit, internal) {
+  file=require('./speech-language').file(file);
   if(this.diagnosticBusy&&!(internal&&internal.diagnostic))return {ok:false,retryable:true,error:'Engineering audio test active'};
   if (!ALLOWED[file]) throw new Error('Unsupported voice asset');
   if(volume===undefined)volume=100;
@@ -355,6 +356,11 @@ var server = net.createServer(function (socket) {
         reply(socket, { ok: false, error: 'Invalid JSON' });
         continue;
       }
+      if(request.action==='map-storage-prepare'){
+        require('./map-storage-helper').prepareAsync(request).then(r=>reply(socket,r),e=>reply(socket,{ok:false,mapStorageProtocol:1,error:e.code||e.message}));
+        continue;
+      }
+      require('./speech-language').set(request.language);
       // GPS evidence is allowed only on read-only report requests. Other commands keep the old limit.
       if(Buffer.byteLength(line)>4096&&['audio-report','audio-report-share-start'].indexOf(request.action)<0){
         reply(socket,{ok:false,error:'Request too large'});continue;

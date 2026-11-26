@@ -109,22 +109,6 @@ matches). The kit builder:
   (the C code was changed but the prebuilt wasn't updated), it says so and asks before packing
   the older binary.
 
-Unattended builds stop before changing kit output if neither a matching prebuilt nor
-a successful Docker build is available. They no longer silently accept the fallback.
-An explicit `--allow-stale-renderer` permits an existing older prebuilt after printing
-the mismatch; it does not permit a missing renderer. `--software-renderer` explicitly
-omits both the GPU renderer and controller gate and skips Docker. The two options are
-mutually exclusive. Neither fallback establishes GPU performance or Doom controller
-support on a head unit.
-
-In this repository the renderer's script files reach the kit from `deploy/upstream-renderd/`
-(`make_kit.py` CAR_FILES, also used by the desktop installer's kit builder): byte for byte the
-same as `prebuilt/` here (`foreground_gate.js`, `hmi_template.js`, `mgu-render-hmi.sh`,
-`mgu-render-hmi-guard.sh`, `LICENSE`, `LICENSE.mgu-renderd`), which
-`tests/build/test_renderd_kit.py` checks together with the prebuilt's fingerprint. The
-installer scripts (`deploy/mgu-app-install.sh`, `deploy/car/deploy-car.sh`) are upstream's
-unchanged and start the renderer with `-s key=value` settings, which only mgu-render 2.x reads.
-
 ## Install
 
 `deploy-car.sh install` installs it along with the apps. By hand on the unit / VM:
@@ -168,6 +152,7 @@ the template is made by the install (`postInstall`, needs mgu-deploy 0.6.1).
 | `idrive7-renderd` installed through the Store | `renderd --persist` removes it through the Store's own deploy tool (the Store then shows it removed), then installs its own |
 | the installer's renderer, then `idrive7-renderd` from the Store | the Store takes it over (removes the installer's unit and program); the installer's template unit stands down |
 | mgu-store's own **mgu-render** beside ours, in either order | both run, each fully: this kit's apps draw on ours (`/run/mgu-renderd/renderd.sock` first), the Store's own apps on mgu-render. Each has its own touch divert (ours: table `ip idrive7_render`, ports 30572/30573; mgu-render: `ip mgu_render`, 30570/30571) and its own ivi ids (ours `0x4d470000`/`0x4d470100`, as the first renderer; mgu-render `0x4d520000`/`0x4d520100`). The page template is mgu-render's while it is installed |
+| IterioDev's renderer (his App Manager's service package, or the Store's `mgu-renderd` tool) | the two cannot run together (the same community socket and ivi ids): ours stands down while his is installed or running (it logs why once and looks again every 30 s), and all the apps draw on his. The kit installer refuses to overwrite his `mgu-renderd.service` (same name); the Store package's install step leaves it alone |
 | our renderer from the Store (2.1.x) | every app in the Store requires it, so it comes with the apps; its install step removes the installer's renderer it replaces |
 
 ### In-page drawing: the page template
@@ -277,7 +262,8 @@ crashing, the renderer stopping, a clock jump backwards) opens it.
 sh mgu-app-install.sh inputgate             # copy next to the renderer + boot guard: loads at the next head-unit start
 sh mgu-app-install.sh inputgate --now       # VM / bench only: restart the HMI with it now (on a car that reboots the unit)
 sh mgu-app-install.sh inputgate-status      # loaded / set up / left out by the boot guard
-sh mgu-app-install.sh inputgate-remove      # take it out (the HMI drops it at the next start; --now: restart it)
+sh mgu-app-install.sh inputgate-remove      # take it out: gone after a head-unit reboot (systemctl reboot or hold the
+                                            # volume knob; an ignition cycle is not one); --reboot: reboot now; --now: restart the HMI (VM)
 ```
 
 The HMI is never restarted on a car: `hmi.service` stops with SIGABRT and the head unit's crash

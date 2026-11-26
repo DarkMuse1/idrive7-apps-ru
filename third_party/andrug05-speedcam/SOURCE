@@ -1,32 +1,17 @@
 Upstream: https://github.com/skalitov-bit/bmwcaminfo
-Release: aurelm_speed_camera_warning@0.9.95 (the tag is commit 038594c7b5ee04ff585ec2b1259dbd2f85a94508)
-SpeedCAM 0.9.95 and its voice service bmwcaminfo-voice 0.1.49, by andrug05
-The files are the author's release assets, unchanged. Original author notices are retained.
+Release: aurelm_speed_camera_warning@0.9.105
+SpeedCAM 0.9.105 and voice service bmwcaminfo-voice 0.1.52, by andrug05.
+Author notices, camera databases and all kit files are preserved.
+Localization only: HU display language automatically selects the author's Russian/English
+presentation and voice language, including changes while running. Unsupported HU languages
+fall back to English. The initial language prompt is replaced by automatic selection.
+The app is repacked with two read/subscribe-only HMI language declarations.
 
-LICENSE and DATA-NOTICE.txt are the ones inside the author's app package.
-DATA-NOTICE.txt is the author's notice for the camera database in that package.
+Original author app: 11830326 bytes, sha256 5f5759a4f8436b1058554f9847a0f54c73a18ca9ee8a024fa7e7a271e88977f4
+Original voice service: 21087054 bytes, sha256 9a908843a2006c77ec708729427613cbe2c73ef654445e2aa597fa636a7744a1
+The voice service is unpacked byte for byte, component file hashes are checked.
+Corresponding PulseAudio source: PulseAudio_Corresponding_Source.zip from the author's same release,
+36634358 bytes, sha256 13ea5dd4911e4e6c345f722b66b237cc15ca2a09acfa6ed69d21c0e491a69ce2.
 
-app/aurelm_speed_camera_warning@0.9.95.tgz is the author's package as released,
-with the camera database in it (javascript/hybrid-*-v1.bin); it installs as it is.
-  11704423 bytes, sha256 dc61d7539578d39c36a2c682a7df0c38e4ef3a0ca4bd3348adbcc38dbbba5f7d
-  https://github.com/skalitov-bit/bmwcaminfo/releases/download/aurelm_speed_camera_warning%400.9.95/aurelm_speed_camera_warning%400.9.95.tgz
-app/icon.png is SpeedCAM.png of the author's `catalog` release, whose
-catalog.json gives the title, the description (without its sentence about
-adding another source: this repository has the renderer and the controller
-gate) and the versions of them and of the voice service the app requires.
-
-voice/ is the author's tool kit unpacked: component.json as it is, with the
-members of its files/ and units/ beside it.
-  bmwcaminfo-voice@0.1.49.tgz, 12090373 bytes, sha256 58be53341db1b1c7dd16c7b49f2d50622c28561f9b4292c1ba8d80436464ff3d
-  https://github.com/skalitov-bit/bmwcaminfo/releases/download/aurelm_speed_camera_warning%400.9.95/bmwcaminfo-voice%400.1.49.tgz
-
-voice/pulse holds PulseAudio 5.0 and its libraries (Debian Jessie binaries,
-GPL and LGPL; voice/pulse/provenance.json, voice/pulse/licenses), and
-voice/alsa-probe comes with voice/ALSA_PROBE_GLIBC_NOTICE.txt. Their
-corresponding source is the author's release asset, not committed here:
-  PulseAudio_Corresponding_Source.zip, 36634358 bytes, sha256 13ea5dd4911e4e6c345f722b66b237cc15ca2a09acfa6ed69d21c0e491a69ce2
-  https://github.com/skalitov-bit/bmwcaminfo/releases/download/aurelm_speed_camera_warning%400.9.95/PulseAudio_Corresponding_Source.zip
-
-.gitattributes keeps the package and voice/ out of the repository's source
-tarball. mgu-updater 0.8.40 and newer read them file by file, which is why both
-components require it.
+app/*.tgz and voice/ stay export-ignore to keep the Store repository tarball below 64 MiB;
+mgu-updater 0.8.40+ reads those component files directly.

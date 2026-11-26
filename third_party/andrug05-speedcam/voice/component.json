@@ -1,7 +1,7 @@
 {
   "id": "bmwcaminfo-voice",
   "kind": "tool",
-  "version": "0.1.49",
+  "version": "0.1.52",
   "title": "BMW Camera Voice Service",
   "description": "ALSA voice and beeper mixer, M4A compatibility mode, experimental private PulseAudio + Overlay",
   "enable": [
@@ -33,17 +33,17 @@
     {
       "path": "stable-output.js",
       "mode": "0644",
-      "sha256": "699b55c67f3fc8d9c45f0ba0e66cff39f7fb051de9dfc0a0e2d7f2dd433c606f"
+      "sha256": "737f8ebe2ddaf017d244920fa5780ac434e6fd12c50a8cd95c318e699ecd73af"
     },
     {
       "path": "voice.js",
       "mode": "0644",
-      "sha256": "0b95bf7d8e6c0059c3198a5acafc936babc61002cb8e699c0ed6fee33aa067a2"
+      "sha256": "a1584c45d149620e2ce55564192755eeab70b027666a4d9d01376ccd073c7b22"
     },
     {
       "path": "audio-manifest.json",
       "mode": "0644",
-      "sha256": "85e4bcac5ef4a16cbd3ec571812b754900164835d6a6c5bf4f13ac90fe3308be"
+      "sha256": "dcc60b8ae20cc6214445c49b6ea331d7b055c76a9ef77aed071b03caf7034720"
     },
     {
       "path": "audio/avtodoria-200.m4a",
@@ -88,7 +88,7 @@
     {
       "path": "volume-manifest.json",
       "mode": "0644",
-      "sha256": "115e48099fe29421fae88abe396eafc6ef28c23705ecdb23db378fb5cd5119ae"
+      "sha256": "fd11da4be2ebec542b3f5097b2619f1b0ae30c11f0c2edd6c8280e6270bd8588"
     },
     {
       "path": "audio/volume-10/strelka.m4a",
@@ -708,12 +708,12 @@
     {
       "path": "pcm-output.js",
       "mode": "0644",
-      "sha256": "b64d1fbdaa9b1d6ff7018f5ecd62f664d78f6904c7674f0a91d7d7feae278d5a"
+      "sha256": "bde6c1a09fd5fdd53a9e4db8baa5fabbaa589db7874a58cc3943abcda58a514f"
     },
     {
       "path": "pcm-manifest.json",
       "mode": "0644",
-      "sha256": "303af5a062ef10ac04ab4dd0e4efcce8de8c3f45f21f2fe031ca39ce6acaa99e"
+      "sha256": "73c02153548d581475615418c997e2c04470e7bc58bc6a4bbf27bc38422ef9e5"
     },
     {
       "path": "pcm/average-end.pcm",
@@ -813,7 +813,7 @@
     {
       "path": "alsa-diagnostics.js",
       "mode": "0644",
-      "sha256": "8125584fcb14531417d487391a1fb204fb2c11c390c501306a80ed8ea68fe5a8"
+      "sha256": "bee615a8ff63fbdf94c546d7b6f9f4edfb033dd1b9ff8e02ae7c6b5d6b26dbee"
     },
     {
       "path": "ALSA_PROBE_GLIBC_NOTICE.txt",
@@ -823,7 +823,7 @@
     {
       "path": "alsa-output.js",
       "mode": "0644",
-      "sha256": "f4794ed816aba083cc6e5672bdae0343e6910e8e45738b1e6734a8f98d9df3d5"
+      "sha256": "20672191bdf80183c4eaceddb84275b2a777066eb7190a43249cd0e39ad8fbf1"
     },
     {
       "path": "audio-output.js",
@@ -848,7 +848,7 @@
     {
       "path": "overlay-probe.js",
       "mode": "0644",
-      "sha256": "a3556c8f8b7f77f3d935972c2a019b96c5109a87a1bbb8612045ee6f2279ab93"
+      "sha256": "22a9d88ccf00cca4fb2188abe724c65cfed93c28fc23804cd4498c9aaad6f214"
     },
     {
       "path": "overlay-output.js",
@@ -863,12 +863,12 @@
     {
       "path": "carplay-duck-probe.js",
       "mode": "0644",
-      "sha256": "1f8419f9cb6e8cf8b1f47d868d5dfe4ba9d4a72bf3b7f2ee13fa894512a891f2"
+      "sha256": "bc1e6932e241fdb4ba63d1ae4d435955292bb343d6ec6bbb61421dad4b90bb43"
     },
     {
       "path": "audio-report.js",
       "mode": "0644",
-      "sha256": "03083d015cb063bc535e97856aad5beec1c0497deada5510da37d85b11fc0759"
+      "sha256": "42220280631565d6cea301336a965fa66d5e5983db3defc404ab597d1bf5f4c8"
     },
     {
       "path": "converter-output.js",
@@ -878,7 +878,7 @@
     {
       "path": "report-share.js",
       "mode": "0644",
-      "sha256": "ba414dbd7adc5983e00e4c9ee4bcaadf678056c3be94202784d763c56c4d1b78"
+      "sha256": "9d11dc8bb26f45e172c703441506dd3f910b3974646b886757ade3587322b429"
     },
     {
       "path": "report-network.js",
@@ -1749,6 +1749,1181 @@
       "path": "beeper-sounds.js",
       "mode": "0644",
       "sha256": "4927606ea6795399112d6191272362c7fb7f21ede18bfb4325143e859694ac3a"
+    },
+    {
+      "path": "audio/school.m4a",
+      "mode": "0644",
+      "sha256": "fdc4f2c64e37599e852bb02e454c30b20f5bdbc4e011efb136f2918bb7056f36"
+    },
+    {
+      "path": "pcm/school.pcm",
+      "mode": "0644",
+      "sha256": "83795cb66b2fe0174c6e1d7cd1d3bf9545fa3dba997a336c7ec860a71b66be8b"
+    },
+    {
+      "path": "audio/volume-10/school.m4a",
+      "mode": "0644",
+      "sha256": "c76ba29881754575b1f7a914e8673e9aead06242b3541308c50de476c54560fd"
+    },
+    {
+      "path": "audio/volume-20/school.m4a",
+      "mode": "0644",
+      "sha256": "56679d427893cd8de03f0c1b2829dcf45312d1538be9ae99feef7d5c6b79cb37"
+    },
+    {
+      "path": "audio/volume-30/school.m4a",
+      "mode": "0644",
+      "sha256": "157bb742224ddd036d2766efcf3c4247d05f106098c619764078ae7e312c79c8"
+    },
+    {
+      "path": "audio/volume-40/school.m4a",
+      "mode": "0644",
+      "sha256": "337f64a1c5866bb5aab3a67efcee96663168342394f48c27cd6882d083939896"
+    },
+    {
+      "path": "audio/volume-50/school.m4a",
+      "mode": "0644",
+      "sha256": "6701e75ecbb339310d47acab1e051b1e2e293f342b940841b74dc1345e340ba2"
+    },
+    {
+      "path": "audio/volume-60/school.m4a",
+      "mode": "0644",
+      "sha256": "d166175268e3e35d2675ca15ce50bf638fccb6d41649a402d9e078d10e075790"
+    },
+    {
+      "path": "audio/volume-70/school.m4a",
+      "mode": "0644",
+      "sha256": "6be92c0a1cf72b8b47b881c571b23f2b70648483cec4ce8138d3f686569fe646"
+    },
+    {
+      "path": "audio/volume-80/school.m4a",
+      "mode": "0644",
+      "sha256": "15defe312fab6f38087118a8bdd97f78f725e30f8c106d44fdb3baab111ffde2"
+    },
+    {
+      "path": "audio/volume-90/school.m4a",
+      "mode": "0644",
+      "sha256": "6167d2e13635cfb34fb028f4f481baf36ce443205f123c7e371a0cb867c89aa2"
+    },
+    {
+      "path": "audio/school-200.m4a",
+      "mode": "0644",
+      "sha256": "04360209cc72c443d840c07834b89a203bff7ffdfc282f6d06268f50b7aa22ac"
+    },
+    {
+      "path": "pcm/school-200.pcm",
+      "mode": "0644",
+      "sha256": "eece0467b041a247fe1bfacc2045728692aeca0b3fcd5532d7515affc2f9b769"
+    },
+    {
+      "path": "audio/volume-10/school-200.m4a",
+      "mode": "0644",
+      "sha256": "d7b38599e71e012814e74a5f92085911c42ced987f2ec14fae7dcb9c09e31e19"
+    },
+    {
+      "path": "audio/volume-20/school-200.m4a",
+      "mode": "0644",
+      "sha256": "8fb373fc7a580ccc2ad9abdc2b6a57792122f509c01fc80b5fb30b9fbe7273f7"
+    },
+    {
+      "path": "audio/volume-30/school-200.m4a",
+      "mode": "0644",
+      "sha256": "cf67b2d155457950d6217718037537a9d591ca9a06c433adea25abddcb8ed49e"
+    },
+    {
+      "path": "audio/volume-40/school-200.m4a",
+      "mode": "0644",
+      "sha256": "d30ac289de0aa92262bc23d93f6f4135d4777db495302e7867f636d9f8307e1a"
+    },
+    {
+      "path": "audio/volume-50/school-200.m4a",
+      "mode": "0644",
+      "sha256": "b99f35bc3cbe21450ac34101b53c85bc1d776d2581f2051247feb80327fb0dc9"
+    },
+    {
+      "path": "audio/volume-60/school-200.m4a",
+      "mode": "0644",
+      "sha256": "5854b90efd8193b0b4406a58631ba061acd98d5ea3510f0c6323bdbd5267efc2"
+    },
+    {
+      "path": "audio/volume-70/school-200.m4a",
+      "mode": "0644",
+      "sha256": "840b1aa413f3a41cc4dcd2389efdb571190ac8ac7212ae278d02a7d5e86f7205"
+    },
+    {
+      "path": "audio/volume-80/school-200.m4a",
+      "mode": "0644",
+      "sha256": "39bd6126a51072ebde6b8d21ed15b0fb08f7eb1d8bed73b8df50c9af8a2431a1"
+    },
+    {
+      "path": "audio/volume-90/school-200.m4a",
+      "mode": "0644",
+      "sha256": "c73d70e41dfbde7da8e1a55b1246c6538806b00f9f3d71672f0c1036ce0df741"
+    },
+    {
+      "path": "audio/speed-bump.m4a",
+      "mode": "0644",
+      "sha256": "feca58a3c20b1d3286f0e4bdb18036cbc9f80d8ca54fefd62f3fdcbd6a555030"
+    },
+    {
+      "path": "pcm/speed-bump.pcm",
+      "mode": "0644",
+      "sha256": "325537d860658e8476e9aecca5633f9508b49ce854d45d16adda8fe42c7c4815"
+    },
+    {
+      "path": "audio/volume-10/speed-bump.m4a",
+      "mode": "0644",
+      "sha256": "f9d5d736a0611985e36bf7acb1b5d22219533efa929ec1d91440ae1c62c4e872"
+    },
+    {
+      "path": "audio/volume-20/speed-bump.m4a",
+      "mode": "0644",
+      "sha256": "9dbdf121fc5c18f23f820adcd30ca99ff8edb4240f9b882470259a34a8ecf3d0"
+    },
+    {
+      "path": "audio/volume-30/speed-bump.m4a",
+      "mode": "0644",
+      "sha256": "b573df85b3889689bcc78a7c8d23066af0617ffa094f47d87bb5962bcf9c0421"
+    },
+    {
+      "path": "audio/volume-40/speed-bump.m4a",
+      "mode": "0644",
+      "sha256": "3b976ca843415bce64e56b8c75327f9499b7bc92f937d84209e0d717aa838e1d"
+    },
+    {
+      "path": "audio/volume-50/speed-bump.m4a",
+      "mode": "0644",
+      "sha256": "93f6cc24d6ad2ba79b332b646f58c566a65c50228b863a870d86dd5c43bdb519"
+    },
+    {
+      "path": "audio/volume-60/speed-bump.m4a",
+      "mode": "0644",
+      "sha256": "acf34e4f70d5d75bc92ac6b5ab15938a90077a88f591bbdfe40ef64e8084502d"
+    },
+    {
+      "path": "audio/volume-70/speed-bump.m4a",
+      "mode": "0644",
+      "sha256": "d96ad376c619783ae93098c15787248e22f6270534f1ebdff1ab6535a83a89fc"
+    },
+    {
+      "path": "audio/volume-80/speed-bump.m4a",
+      "mode": "0644",
+      "sha256": "c8a5c6e2a32e285d058c581c2bb95185a2787bf6870eef84d66427004281e78e"
+    },
+    {
+      "path": "audio/volume-90/speed-bump.m4a",
+      "mode": "0644",
+      "sha256": "9829e3bc413322679afca06652ecaa05adb8ecff5d2ba4aa219d4d2a302b086a"
+    },
+    {
+      "path": "audio/speed-bump-200.m4a",
+      "mode": "0644",
+      "sha256": "cda99141ce9645700be7fd5c1d9ed9fee879661e7df7c039f79b31e27785b083"
+    },
+    {
+      "path": "pcm/speed-bump-200.pcm",
+      "mode": "0644",
+      "sha256": "ef864f0e5e63df21dcbd8b396d880175af6c576c4e494d1ef4f19f07404a37f1"
+    },
+    {
+      "path": "audio/volume-10/speed-bump-200.m4a",
+      "mode": "0644",
+      "sha256": "102a16003a7bda9ef3eccc5a7a65d8f4f9259d4899c6ac23e62954429e8d0c6f"
+    },
+    {
+      "path": "audio/volume-20/speed-bump-200.m4a",
+      "mode": "0644",
+      "sha256": "bd5b8b27dd583c078f9cf21cee0fa77fb19bafd8e03510b75d4dc89d6f2d6bff"
+    },
+    {
+      "path": "audio/volume-30/speed-bump-200.m4a",
+      "mode": "0644",
+      "sha256": "4bca1a1c6381b60efff5e04d886fb0fca5c9b22ffd00503e28d910b03cd34c2e"
+    },
+    {
+      "path": "audio/volume-40/speed-bump-200.m4a",
+      "mode": "0644",
+      "sha256": "31a926424a0fe93ede8ee9b8094c842f3d2a184f0ed75547bd78b8a27d6f6626"
+    },
+    {
+      "path": "audio/volume-50/speed-bump-200.m4a",
+      "mode": "0644",
+      "sha256": "4810462e9854a04a79eb22e26f517b50cc7efad75ce090fa3afcc18ce5e29d2e"
+    },
+    {
+      "path": "audio/volume-60/speed-bump-200.m4a",
+      "mode": "0644",
+      "sha256": "84824788ccf5acbc394cc2953873254256816076ff16f658a351b99e8a80fe9b"
+    },
+    {
+      "path": "audio/volume-70/speed-bump-200.m4a",
+      "mode": "0644",
+      "sha256": "44f698245877fb06b1b7f0696affb6944c4d28a45ebfaf7d1c90ba879df86ad4"
+    },
+    {
+      "path": "audio/volume-80/speed-bump-200.m4a",
+      "mode": "0644",
+      "sha256": "8a787526badf2d2d7b1c25e526098b510684f461d6edca0614e861fe8031c147"
+    },
+    {
+      "path": "audio/volume-90/speed-bump-200.m4a",
+      "mode": "0644",
+      "sha256": "0bc9003f4d0e92bfe2bf74601f35c5f0714488ffe7e23a4031e930184ed79b81"
+    },
+    {
+      "path": "speech-language.js",
+      "mode": "0644",
+      "sha256": "4f391d41e8e343787602eb042ec4363b07f3a1abd498e3812db6e8e25cdea665"
+    },
+    {
+      "path": "diagnostics/en-both.m4a",
+      "mode": "0644",
+      "sha256": "30a5ab375e2e5d025a0b93e9484a5134940ae8fe5b3810680030962fc71e338f"
+    },
+    {
+      "path": "audio/en-camera-500.m4a",
+      "mode": "0644",
+      "sha256": "5e3d758db21322eefb69493fb6ebaf6c82aeff0c384b5f68ef6b601dc5f4e276"
+    },
+    {
+      "path": "pcm/en-camera-500.pcm",
+      "mode": "0644",
+      "sha256": "808fb60c5f896cafaa36c1876cc0977c033bc7b479ae2c12ae243dc6306ee553"
+    },
+    {
+      "path": "audio/volume-10/en-camera-500.m4a",
+      "mode": "0644",
+      "sha256": "716ff05927e21f53723f517734233b22f563088e44c57fced57296392654b1bf"
+    },
+    {
+      "path": "audio/volume-20/en-camera-500.m4a",
+      "mode": "0644",
+      "sha256": "5dad6406bccbc27869432b3b13f4317f476080df1f6326188e4acfb603078f58"
+    },
+    {
+      "path": "audio/volume-30/en-camera-500.m4a",
+      "mode": "0644",
+      "sha256": "ca93fa89293a9f4dcfa54e358a51e48f206132cd3a8d9c4864d91a223e806047"
+    },
+    {
+      "path": "audio/volume-40/en-camera-500.m4a",
+      "mode": "0644",
+      "sha256": "134ff61baddb99926ea7b33a592858249c047701fca0f057e42ee80423e1010f"
+    },
+    {
+      "path": "audio/volume-50/en-camera-500.m4a",
+      "mode": "0644",
+      "sha256": "cc66c5358d37efc6ca99715b0e6ed6a84a3845db9bdb9610ff342684616aa390"
+    },
+    {
+      "path": "audio/volume-60/en-camera-500.m4a",
+      "mode": "0644",
+      "sha256": "a1c2371c59f6b0cd9ac6798c3a40fccd6d3763d6322e2a7a1bd39f69290db480"
+    },
+    {
+      "path": "audio/volume-70/en-camera-500.m4a",
+      "mode": "0644",
+      "sha256": "881ff6ffe4a457e0d122158e95989d5328bab785724aeb345a7c23e55cc1d04b"
+    },
+    {
+      "path": "audio/volume-80/en-camera-500.m4a",
+      "mode": "0644",
+      "sha256": "c853f9d5832c889a5e5415e0ea49aa3d1b0ac73e0a7d23488691f7d81542406d"
+    },
+    {
+      "path": "audio/volume-90/en-camera-500.m4a",
+      "mode": "0644",
+      "sha256": "66e090ffeddeb7d3fb7bd157d964ba0249c83dafb1b7eca85cd45ca4ec153afd"
+    },
+    {
+      "path": "audio/en-camera-200.m4a",
+      "mode": "0644",
+      "sha256": "186479d18754a92a511948599c2353eea34abe7a23ff6d2fb778b0516aacc2fc"
+    },
+    {
+      "path": "pcm/en-camera-200.pcm",
+      "mode": "0644",
+      "sha256": "f676ccd7dc3db9102781295e957a0338dc402852b0303b50877c4ca473dbf500"
+    },
+    {
+      "path": "audio/volume-10/en-camera-200.m4a",
+      "mode": "0644",
+      "sha256": "894a99f53b79c0322152d1c5a8459ad867453777225778c0b7d462a36e3744c7"
+    },
+    {
+      "path": "audio/volume-20/en-camera-200.m4a",
+      "mode": "0644",
+      "sha256": "abff6432ccd652d86ddf8c1d83dbc79e84e3ba308061ff6261c9e6a43ef9cca7"
+    },
+    {
+      "path": "audio/volume-30/en-camera-200.m4a",
+      "mode": "0644",
+      "sha256": "f9c13d0b91983cc47e0adfe7a2c886880430b5ac611c64aaef5d708f1b3f3e81"
+    },
+    {
+      "path": "audio/volume-40/en-camera-200.m4a",
+      "mode": "0644",
+      "sha256": "cac4dbe5ac17fe5ffc2cdc5000d004adc83a978ce5b14dcd85df20fa2419ef06"
+    },
+    {
+      "path": "audio/volume-50/en-camera-200.m4a",
+      "mode": "0644",
+      "sha256": "49d664a13b725b83c5b6ea3bea93f4b374dc4982b5d0780504e73f2a9c91b501"
+    },
+    {
+      "path": "audio/volume-60/en-camera-200.m4a",
+      "mode": "0644",
+      "sha256": "16d11442084be40517e39caf5a88a756d7170128b3237b4c24c30fe48c2094f9"
+    },
+    {
+      "path": "audio/volume-70/en-camera-200.m4a",
+      "mode": "0644",
+      "sha256": "0e9f51d664114948790f99d4de951e4269b9461fe85596ad16b3ce7fd1d79219"
+    },
+    {
+      "path": "audio/volume-80/en-camera-200.m4a",
+      "mode": "0644",
+      "sha256": "13fa51556c4d01588587798a145df4c01ae58c6a289f652e3bd6785b48a0bc66"
+    },
+    {
+      "path": "audio/volume-90/en-camera-200.m4a",
+      "mode": "0644",
+      "sha256": "131890facf1ded1c31406f994f6e88687361a014d2a2450f4b48a2a3289ed414"
+    },
+    {
+      "path": "audio/en-strelka.m4a",
+      "mode": "0644",
+      "sha256": "6f4ebc01a26f6c3859cdde3b694de32c9b3a7c20a925290c792b806d0822e320"
+    },
+    {
+      "path": "pcm/en-strelka.pcm",
+      "mode": "0644",
+      "sha256": "be30963b689091ec6740a3f62713b3c2ae9f8b73610cc232eaa85754ab7d7e97"
+    },
+    {
+      "path": "audio/volume-10/en-strelka.m4a",
+      "mode": "0644",
+      "sha256": "a81c44e10ef4d2871e936695a613d1b27ca2adb74bb59c746ec60a1ca02ac489"
+    },
+    {
+      "path": "audio/volume-20/en-strelka.m4a",
+      "mode": "0644",
+      "sha256": "0dd9c6c53ff36e516b362091a84617a5e0ab2fc87fe99f1cee0412fa569c1c59"
+    },
+    {
+      "path": "audio/volume-30/en-strelka.m4a",
+      "mode": "0644",
+      "sha256": "be74cbdee090b704caefb5c197250a54c897f3e31ff7d0e849089abd08608060"
+    },
+    {
+      "path": "audio/volume-40/en-strelka.m4a",
+      "mode": "0644",
+      "sha256": "901f06c5df6f3acc6c2585b20c835defd2154ac9b8c8ac193878a4f4a57a05ec"
+    },
+    {
+      "path": "audio/volume-50/en-strelka.m4a",
+      "mode": "0644",
+      "sha256": "8937988a075cadc0b32947b344e5bdd40de5c8c3ae85d3eef9ef1130958ea012"
+    },
+    {
+      "path": "audio/volume-60/en-strelka.m4a",
+      "mode": "0644",
+      "sha256": "74ac45105f468ac172352894df92b511e151cda3489be81c8e3ac6a37d000564"
+    },
+    {
+      "path": "audio/volume-70/en-strelka.m4a",
+      "mode": "0644",
+      "sha256": "68b3a736397a2ff58113238d13ded94c6af21d585116448fc372cba6460f7eca"
+    },
+    {
+      "path": "audio/volume-80/en-strelka.m4a",
+      "mode": "0644",
+      "sha256": "8019a1cbcbbd7e559b665e9112bf8a137869ae9bfdcb5324440e76b297bd9697"
+    },
+    {
+      "path": "audio/volume-90/en-strelka.m4a",
+      "mode": "0644",
+      "sha256": "49c7cd7b5a7896f2723c2d8984913c13856ca4fbf259d7fc653b321798dd42b6"
+    },
+    {
+      "path": "audio/en-strelka-200.m4a",
+      "mode": "0644",
+      "sha256": "cb41256c31bec0adcc220ad192dede28441c500965034adc4876fa581331448d"
+    },
+    {
+      "path": "pcm/en-strelka-200.pcm",
+      "mode": "0644",
+      "sha256": "74a873fc4d311c61d56a35ae432cea2b65949566598c5f8e406f19dd64b7d69b"
+    },
+    {
+      "path": "audio/volume-10/en-strelka-200.m4a",
+      "mode": "0644",
+      "sha256": "5c5241684459d6e01c028940a4a9e3ef6602fe2f4e80c13d0af17db6870f7565"
+    },
+    {
+      "path": "audio/volume-20/en-strelka-200.m4a",
+      "mode": "0644",
+      "sha256": "fd508250665b6af1ae2724ffd14435aec28390438a92efae42f66a5956f20c3a"
+    },
+    {
+      "path": "audio/volume-30/en-strelka-200.m4a",
+      "mode": "0644",
+      "sha256": "2970508e4e43f062cc61d6c2fad7ad8518f6d03cea75bacf2444a52bd9695f93"
+    },
+    {
+      "path": "audio/volume-40/en-strelka-200.m4a",
+      "mode": "0644",
+      "sha256": "e65e82d715977ddad54cdcf8212980734251c8829eacce4c093e0e5b94e6662b"
+    },
+    {
+      "path": "audio/volume-50/en-strelka-200.m4a",
+      "mode": "0644",
+      "sha256": "b64ad2b690687ffe7416e61f29ba1ccbf8891829306dfece5990a605b4a60a77"
+    },
+    {
+      "path": "audio/volume-60/en-strelka-200.m4a",
+      "mode": "0644",
+      "sha256": "cd479e827ac3d8f00433888d361323903f2331d2bc7a7c94509679d22930bff5"
+    },
+    {
+      "path": "audio/volume-70/en-strelka-200.m4a",
+      "mode": "0644",
+      "sha256": "987beefc98e941f24eb1eefb1ac1510404e414c4f14523535f38c5f62d8e0ce4"
+    },
+    {
+      "path": "audio/volume-80/en-strelka-200.m4a",
+      "mode": "0644",
+      "sha256": "7b5dd2a73a090567d87d77a31a7571c444b1df2ec7660559ddbfaf988dd758b3"
+    },
+    {
+      "path": "audio/volume-90/en-strelka-200.m4a",
+      "mode": "0644",
+      "sha256": "717f92320a75e349523612dad711c20e3b75d653d432e74f372e021682464d77"
+    },
+    {
+      "path": "audio/en-avtodoria.m4a",
+      "mode": "0644",
+      "sha256": "158b1a809077347aad64508d81fbeae9cb3ad3189e991329a5df75631710f8da"
+    },
+    {
+      "path": "pcm/en-avtodoria.pcm",
+      "mode": "0644",
+      "sha256": "cdb945655db2daa7dab6cd29a22f1542f4352de44f11007f367473d8f7c344ac"
+    },
+    {
+      "path": "audio/volume-10/en-avtodoria.m4a",
+      "mode": "0644",
+      "sha256": "1bc770e5874b6e9bd2f67a3f4ed3cd34eb94d5f8539d3e7a3c1a21ac9f8c662d"
+    },
+    {
+      "path": "audio/volume-20/en-avtodoria.m4a",
+      "mode": "0644",
+      "sha256": "4d4ce0d706fd6bd2bf831038d997d80b4a50feeec13d3c15b8fde4fdd3dd0e01"
+    },
+    {
+      "path": "audio/volume-30/en-avtodoria.m4a",
+      "mode": "0644",
+      "sha256": "3e3b8ba068e40c7b4c4f7c4963701bc0f80bd9e18abfb6aa3947cf68a3feabf8"
+    },
+    {
+      "path": "audio/volume-40/en-avtodoria.m4a",
+      "mode": "0644",
+      "sha256": "042db1971d83d38e66c44104fdc99a97b805dabebc9268eda1090d2553763bff"
+    },
+    {
+      "path": "audio/volume-50/en-avtodoria.m4a",
+      "mode": "0644",
+      "sha256": "069c880f29d006af3c2b316cb48caa89caeefbe9d99dd8bbb740c97ee929b1a0"
+    },
+    {
+      "path": "audio/volume-60/en-avtodoria.m4a",
+      "mode": "0644",
+      "sha256": "2b854e43bee1043d4f45075d6bb6da62d28ebdf84971670dd2ae35c574988fbc"
+    },
+    {
+      "path": "audio/volume-70/en-avtodoria.m4a",
+      "mode": "0644",
+      "sha256": "9bb0b5c960a3d19e6e19a005c0809523ac71842b4c955d45d15b6eb26ecc2fa0"
+    },
+    {
+      "path": "audio/volume-80/en-avtodoria.m4a",
+      "mode": "0644",
+      "sha256": "51b7c53178c6cd74cd3da65d920f68fa7a3ac596b5bf79724f939ec2bd3d9f03"
+    },
+    {
+      "path": "audio/volume-90/en-avtodoria.m4a",
+      "mode": "0644",
+      "sha256": "ceeb5b82c3d32149ad3f4bc4d93cac3a7a167fe2ad8691a15dd0beb3edb44412"
+    },
+    {
+      "path": "audio/en-avtodoria-200.m4a",
+      "mode": "0644",
+      "sha256": "4772ebc78b9ff675e1af4778249f94cf981679f06ceedcbb2f3f6b05fd21377a"
+    },
+    {
+      "path": "pcm/en-avtodoria-200.pcm",
+      "mode": "0644",
+      "sha256": "1827cd161d4919b2f0fa2d3a7751a07b3fa654e4d28e53e5a449f533699c6971"
+    },
+    {
+      "path": "audio/volume-10/en-avtodoria-200.m4a",
+      "mode": "0644",
+      "sha256": "8d38d133dbb1d9c90dea39e7229431c4e86ea0d8d36a2dfb45924ed42f87ea12"
+    },
+    {
+      "path": "audio/volume-20/en-avtodoria-200.m4a",
+      "mode": "0644",
+      "sha256": "00c18f1a5ed42fa783d66f38379f4c370bc605d22c18b18af046021554e72723"
+    },
+    {
+      "path": "audio/volume-30/en-avtodoria-200.m4a",
+      "mode": "0644",
+      "sha256": "ce916957e0eaa221fd921aaf76551a1479b42083d4bc3c2cd2269763368762a3"
+    },
+    {
+      "path": "audio/volume-40/en-avtodoria-200.m4a",
+      "mode": "0644",
+      "sha256": "f41b1be1360bce0833a7aa1e61d96357685c7ea1da414ab417d5dacc0a5c5e5a"
+    },
+    {
+      "path": "audio/volume-50/en-avtodoria-200.m4a",
+      "mode": "0644",
+      "sha256": "0bbbc7b509e41d2c9313ee81ddec8a5c8ac8bcef19a093ea5f041a68b7edaf6c"
+    },
+    {
+      "path": "audio/volume-60/en-avtodoria-200.m4a",
+      "mode": "0644",
+      "sha256": "fbdd9ce5954ab0e4c76aa8d0c9506f466420d68eac45d180c80cf08964635cd2"
+    },
+    {
+      "path": "audio/volume-70/en-avtodoria-200.m4a",
+      "mode": "0644",
+      "sha256": "a58e849189c912a80eef2d9e089f7b9caeaf3c675aa1f2b30cabf071a73f89c6"
+    },
+    {
+      "path": "audio/volume-80/en-avtodoria-200.m4a",
+      "mode": "0644",
+      "sha256": "1fd1f96b31c49566c6282d372c020a3f911049c0cf0c73fcf2d63fab87e85405"
+    },
+    {
+      "path": "audio/volume-90/en-avtodoria-200.m4a",
+      "mode": "0644",
+      "sha256": "55bdf517fa27f2d70db3fbfd87233a6339dc409f512f33db7fb1af682709d3b8"
+    },
+    {
+      "path": "audio/en-avtodoria-average.m4a",
+      "mode": "0644",
+      "sha256": "9c00868a3ef4d84729f7caf11eb406225608120d2ddde81472a904bf57b5cf33"
+    },
+    {
+      "path": "pcm/en-avtodoria-average.pcm",
+      "mode": "0644",
+      "sha256": "4404b21584cc97438c60b07e843db6a2efc8ba4e4be297f01c8f64be2052b626"
+    },
+    {
+      "path": "audio/volume-10/en-avtodoria-average.m4a",
+      "mode": "0644",
+      "sha256": "b8cd62b02d2b59b6578c14dc880e35f59f7f9ebeaa11701b9beddc5d273c6ae7"
+    },
+    {
+      "path": "audio/volume-20/en-avtodoria-average.m4a",
+      "mode": "0644",
+      "sha256": "455a280d1179e46045741c60545aa7f1d87209f7ea9cae3541c333309f216764"
+    },
+    {
+      "path": "audio/volume-30/en-avtodoria-average.m4a",
+      "mode": "0644",
+      "sha256": "b19468714d05bd4decd7d02aa2147790410d13317887d5f0a0754132650e15a9"
+    },
+    {
+      "path": "audio/volume-40/en-avtodoria-average.m4a",
+      "mode": "0644",
+      "sha256": "bc435b28abd2f7b0dd2143dc86f6760b047e0c0feb0e9202814b5c563fb8f674"
+    },
+    {
+      "path": "audio/volume-50/en-avtodoria-average.m4a",
+      "mode": "0644",
+      "sha256": "e8ec8a7e8766ab1d8f412781beb4882976b30a484e923f06ef133caccc06c5a4"
+    },
+    {
+      "path": "audio/volume-60/en-avtodoria-average.m4a",
+      "mode": "0644",
+      "sha256": "26dfa4f997a60c7733fbdb67399d38a645c9b4252cf3ace85cc621efb92bc838"
+    },
+    {
+      "path": "audio/volume-70/en-avtodoria-average.m4a",
+      "mode": "0644",
+      "sha256": "3075533b12942834633868bda106106c147e31eeb2afb8e584b5999d2baf3d34"
+    },
+    {
+      "path": "audio/volume-80/en-avtodoria-average.m4a",
+      "mode": "0644",
+      "sha256": "788b098f99d72a0f0cfcb879c9fef69d6dd94c81a08f9fac22127915d1a77d98"
+    },
+    {
+      "path": "audio/volume-90/en-avtodoria-average.m4a",
+      "mode": "0644",
+      "sha256": "33e592d78be1b9866e5e8acf6d589d97d44db7345aa1865d2471568aaed4f47f"
+    },
+    {
+      "path": "audio/en-avtodoria-average-200.m4a",
+      "mode": "0644",
+      "sha256": "17523be4b9aaaafe1540349b4f0b55c431e7f34532d0a6124795f8cbb5b37576"
+    },
+    {
+      "path": "pcm/en-avtodoria-average-200.pcm",
+      "mode": "0644",
+      "sha256": "4cf7a3e30f45c6cfc2df845ad5fa9867ce13e62265259b64f02c8f95e7622fe8"
+    },
+    {
+      "path": "audio/volume-10/en-avtodoria-average-200.m4a",
+      "mode": "0644",
+      "sha256": "fbda034797b9f707d2e6fffaafc0017893fdb1e3a381ae90c3227ff7619f844a"
+    },
+    {
+      "path": "audio/volume-20/en-avtodoria-average-200.m4a",
+      "mode": "0644",
+      "sha256": "9eab1ee1bf7f159581a463b00e749f81c129f4427832e4978cfbbd20d3929363"
+    },
+    {
+      "path": "audio/volume-30/en-avtodoria-average-200.m4a",
+      "mode": "0644",
+      "sha256": "8fddc1988bc8f696799dbd81a0449d520bae5effc291d50105082e1d953560b7"
+    },
+    {
+      "path": "audio/volume-40/en-avtodoria-average-200.m4a",
+      "mode": "0644",
+      "sha256": "8551122437160ac3e23bfd3bb335e8139059dbd265a98175650d254b554e321d"
+    },
+    {
+      "path": "audio/volume-50/en-avtodoria-average-200.m4a",
+      "mode": "0644",
+      "sha256": "3a3f6151aeb52a82a489c89b8552796d63ed962d817efd572a11acd47fd42cc4"
+    },
+    {
+      "path": "audio/volume-60/en-avtodoria-average-200.m4a",
+      "mode": "0644",
+      "sha256": "fbb116a827b0fc2c41ecbf8f66539940f31793e2e270395959e30ffd9cca027f"
+    },
+    {
+      "path": "audio/volume-70/en-avtodoria-average-200.m4a",
+      "mode": "0644",
+      "sha256": "f34ab8cb4f9b8745f26e49c8459357dedb6deeb59f44dff5f7a15d20c95480fb"
+    },
+    {
+      "path": "audio/volume-80/en-avtodoria-average-200.m4a",
+      "mode": "0644",
+      "sha256": "a747ea2ebbb8f786fe28f30c854cec456ac4f1bfd8d0fa07ae069fc6faad09a6"
+    },
+    {
+      "path": "audio/volume-90/en-avtodoria-average-200.m4a",
+      "mode": "0644",
+      "sha256": "742164c078c69fae5fd0ea03548bfba8a9d7711cbf7d697ccf340b1788dc4f9f"
+    },
+    {
+      "path": "audio/en-dps-post.m4a",
+      "mode": "0644",
+      "sha256": "8646d0b35f4341352c1e4ba2f5bb5722dc6b356790b35271ad1a50484066c2b0"
+    },
+    {
+      "path": "pcm/en-dps-post.pcm",
+      "mode": "0644",
+      "sha256": "1d7d1266043d7f03769d4c07c54aa604a4ce8e9010b2d0f79590379f662b8db7"
+    },
+    {
+      "path": "audio/volume-10/en-dps-post.m4a",
+      "mode": "0644",
+      "sha256": "37d0060c8ecb54d056bb317e30b02c8d2fbf16b75180a412202e8d6d5db24a94"
+    },
+    {
+      "path": "audio/volume-20/en-dps-post.m4a",
+      "mode": "0644",
+      "sha256": "90f180bf1952ba799162b319f23789bdb5cb81647e76d54ad3c9716d67d40030"
+    },
+    {
+      "path": "audio/volume-30/en-dps-post.m4a",
+      "mode": "0644",
+      "sha256": "b323e62e4be8a11999d900f058d1683449360ed64aab967a7c6ee7261c49f2a5"
+    },
+    {
+      "path": "audio/volume-40/en-dps-post.m4a",
+      "mode": "0644",
+      "sha256": "b8d82042994c541827b67ab648e1513c1fbad6b7032df7b5d3b57ff2b892d7dc"
+    },
+    {
+      "path": "audio/volume-50/en-dps-post.m4a",
+      "mode": "0644",
+      "sha256": "85509114256d9c7cd3bcf81a31630aa42a8428e0c9be2b2077f74b59311ac445"
+    },
+    {
+      "path": "audio/volume-60/en-dps-post.m4a",
+      "mode": "0644",
+      "sha256": "a65b83545a44ebe950b2da08dc7b960bb41cb30883d88857bcdf97b29a32d431"
+    },
+    {
+      "path": "audio/volume-70/en-dps-post.m4a",
+      "mode": "0644",
+      "sha256": "768a62cf1aae2456b3ce6f7c1be4c708edef95041754c0513f57f1c192aeefd1"
+    },
+    {
+      "path": "audio/volume-80/en-dps-post.m4a",
+      "mode": "0644",
+      "sha256": "ec2a711bcf924da8dc3b5960b9804df7d277d4ee241e268c43a216efc20c1467"
+    },
+    {
+      "path": "audio/volume-90/en-dps-post.m4a",
+      "mode": "0644",
+      "sha256": "ff2d0104e46885fac93dfb58c5d140fa1f73f32c03800ec2c5abf3637d4506bf"
+    },
+    {
+      "path": "audio/en-dps-post-200.m4a",
+      "mode": "0644",
+      "sha256": "16a3a8ebf90e23a861b56c55518be8330bf009f48127e4a82975391d30829ce4"
+    },
+    {
+      "path": "pcm/en-dps-post-200.pcm",
+      "mode": "0644",
+      "sha256": "d293ee35406ec02478f7cf33bc9004b787ba0af2f316d2fdd50e019e4fdbea5b"
+    },
+    {
+      "path": "audio/volume-10/en-dps-post-200.m4a",
+      "mode": "0644",
+      "sha256": "51d702dd859b09059a6bf7813e5a53c0d00ce4c9de8fb66066146753991eb1c9"
+    },
+    {
+      "path": "audio/volume-20/en-dps-post-200.m4a",
+      "mode": "0644",
+      "sha256": "4eb0bf53510a9ac0d10baa7187020246080f424ba729cd9bf131d40f8e92b8f6"
+    },
+    {
+      "path": "audio/volume-30/en-dps-post-200.m4a",
+      "mode": "0644",
+      "sha256": "99f659695bea75ab0dc08362c9d6fc48a4732fd4bdb5a7686d218cdc50cbbd1c"
+    },
+    {
+      "path": "audio/volume-40/en-dps-post-200.m4a",
+      "mode": "0644",
+      "sha256": "f875f364901ea5755b628d5dfd37f0b9b6b45cf3abcfdd83063b90dd7c46d2ee"
+    },
+    {
+      "path": "audio/volume-50/en-dps-post-200.m4a",
+      "mode": "0644",
+      "sha256": "3d3e73fec6faa1452f3fe3da5ab18691637b3e8d5dcaea7c8ba9f1e5b05ead06"
+    },
+    {
+      "path": "audio/volume-60/en-dps-post-200.m4a",
+      "mode": "0644",
+      "sha256": "1936a647f8c6e7937a78b7077a838ab3413dc22245254d8a43888933f8ffbdd3"
+    },
+    {
+      "path": "audio/volume-70/en-dps-post-200.m4a",
+      "mode": "0644",
+      "sha256": "44a01fdef3371661749f35d22b4b8ea750b979a109ab65765e4ed91e56c20cfa"
+    },
+    {
+      "path": "audio/volume-80/en-dps-post-200.m4a",
+      "mode": "0644",
+      "sha256": "7cdef756d76702e292027b96a0c834b97986718106b2219af9d709996244c8d1"
+    },
+    {
+      "path": "audio/volume-90/en-dps-post-200.m4a",
+      "mode": "0644",
+      "sha256": "9e8e2d6621de2a56e8bdb5a757a3ac5e897ccec70133fe0b2bae507fcad12105"
+    },
+    {
+      "path": "audio/en-dps-stationary.m4a",
+      "mode": "0644",
+      "sha256": "5c797bc62a6477a292546b98dc83c2d2c3f3aea51dd93ae239bf5360283f7ccd"
+    },
+    {
+      "path": "pcm/en-dps-stationary.pcm",
+      "mode": "0644",
+      "sha256": "56d80badd0222ea37cb4e80ed133b53724ff8bab025af97ed9692caea8baf121"
+    },
+    {
+      "path": "audio/volume-10/en-dps-stationary.m4a",
+      "mode": "0644",
+      "sha256": "e9efef36f44d9d88a8304cb35b7279dcfbb43fd04de90deb84c3f1a786c1d6fd"
+    },
+    {
+      "path": "audio/volume-20/en-dps-stationary.m4a",
+      "mode": "0644",
+      "sha256": "85dc3f4d0935753b79655afc7efb97e7d292aefbb0724148747cbaabc8707ff0"
+    },
+    {
+      "path": "audio/volume-30/en-dps-stationary.m4a",
+      "mode": "0644",
+      "sha256": "af6ad6f3d552dbede0a60bb02d7f9739a3f7538c85d685314d6b65276c32cbb6"
+    },
+    {
+      "path": "audio/volume-40/en-dps-stationary.m4a",
+      "mode": "0644",
+      "sha256": "45383f1c59d1c5bebe6a004ab021a15dff706410a29e4ab0c9520f0f64f5573a"
+    },
+    {
+      "path": "audio/volume-50/en-dps-stationary.m4a",
+      "mode": "0644",
+      "sha256": "4be5e09b7a3b9705ad6348cff4c686745ebb6318e3bed85ac5748f775d3c9037"
+    },
+    {
+      "path": "audio/volume-60/en-dps-stationary.m4a",
+      "mode": "0644",
+      "sha256": "d9ac989f80b72091462e5714cda256adf9b00470d7b1020ee5feb178ec532669"
+    },
+    {
+      "path": "audio/volume-70/en-dps-stationary.m4a",
+      "mode": "0644",
+      "sha256": "16f41864a5a6bc26e8586c23218f82e6f3de5eb424477b54e6ab02b85ae78f77"
+    },
+    {
+      "path": "audio/volume-80/en-dps-stationary.m4a",
+      "mode": "0644",
+      "sha256": "ee5535d540f3d1c92e78d00291d88c0bbc42415a065e8b43ebeb7f8789f43c94"
+    },
+    {
+      "path": "audio/volume-90/en-dps-stationary.m4a",
+      "mode": "0644",
+      "sha256": "5b2234784f872d6223e5196b90b0f7030b0ccae743cf221ff671aa3e00a144b8"
+    },
+    {
+      "path": "audio/en-dps-stationary-200.m4a",
+      "mode": "0644",
+      "sha256": "79e140315f0fba28a1d60d9f0894ac860aedb9a35e2f4bbffb8583bf069e7acf"
+    },
+    {
+      "path": "pcm/en-dps-stationary-200.pcm",
+      "mode": "0644",
+      "sha256": "b0af3a634ee32d661f91f6ea4b11f1dc2a4da8d14575e396674028fc61e93bb0"
+    },
+    {
+      "path": "audio/volume-10/en-dps-stationary-200.m4a",
+      "mode": "0644",
+      "sha256": "4ccfc734fb7c75a10930083f228f786badfcc33418af7fda44e7c628bfeca2c4"
+    },
+    {
+      "path": "audio/volume-20/en-dps-stationary-200.m4a",
+      "mode": "0644",
+      "sha256": "7250823bec059d6b3cf2c8fad8d99b6185f5d8f42893c06bedae954f7a0a90a4"
+    },
+    {
+      "path": "audio/volume-30/en-dps-stationary-200.m4a",
+      "mode": "0644",
+      "sha256": "09da5f098d507dfdec6aacf324e4917a23a31bc541d933cc405beef92f614fb5"
+    },
+    {
+      "path": "audio/volume-40/en-dps-stationary-200.m4a",
+      "mode": "0644",
+      "sha256": "623db413f9947c4486ffbd25f77fed03113d248ab7cc7d5544b06b179bb47984"
+    },
+    {
+      "path": "audio/volume-50/en-dps-stationary-200.m4a",
+      "mode": "0644",
+      "sha256": "b8b2280031bd13ffcaaafbf7c87ea55c7e3a17ffb4db17d2fb1f19f47af757d4"
+    },
+    {
+      "path": "audio/volume-60/en-dps-stationary-200.m4a",
+      "mode": "0644",
+      "sha256": "a39026809e3831770fdb28bc41a205b8adb64d2ea07a1e758237e0b2f4e5a885"
+    },
+    {
+      "path": "audio/volume-70/en-dps-stationary-200.m4a",
+      "mode": "0644",
+      "sha256": "ba741bb29598e28e517009f494656a82b906c134afaee50a75e7e1f7bdd17a69"
+    },
+    {
+      "path": "audio/volume-80/en-dps-stationary-200.m4a",
+      "mode": "0644",
+      "sha256": "0f2764be38b1515619559b89ac3f8df70626e463fac19657bb52a8b494e19eb0"
+    },
+    {
+      "path": "audio/volume-90/en-dps-stationary-200.m4a",
+      "mode": "0644",
+      "sha256": "52f427dd21ab6b0c8dba0f237894273c45552c43927bf42a790247eda2cbcc94"
+    },
+    {
+      "path": "audio/en-average-end.m4a",
+      "mode": "0644",
+      "sha256": "108daf4cd3840d13dfdefffeb06e7252702e6fa65524d8c70af2315d9d80499f"
+    },
+    {
+      "path": "pcm/en-average-end.pcm",
+      "mode": "0644",
+      "sha256": "cce5e6b22dacfccff50e91f4b98c07d72d754f6b73724b1e5ec9171f8abb9b58"
+    },
+    {
+      "path": "audio/volume-10/en-average-end.m4a",
+      "mode": "0644",
+      "sha256": "00d2105efef5b026c0c1e53d295a5e0441d24202425ebe9e6dde6de53db365f4"
+    },
+    {
+      "path": "audio/volume-20/en-average-end.m4a",
+      "mode": "0644",
+      "sha256": "ffa464b018606789ce22b492395218e72223ef68ccc3bc95b866edeef2c90718"
+    },
+    {
+      "path": "audio/volume-30/en-average-end.m4a",
+      "mode": "0644",
+      "sha256": "a7144270b852a5d2f0ef48b4b2f92e20bcca2b1085d56e8ec49ca8e92b374105"
+    },
+    {
+      "path": "audio/volume-40/en-average-end.m4a",
+      "mode": "0644",
+      "sha256": "18f4c95af22f86c222d0cbad0b2d058b1c819679895068631b5d5223774cbdf1"
+    },
+    {
+      "path": "audio/volume-50/en-average-end.m4a",
+      "mode": "0644",
+      "sha256": "954319b3bfdf78bfc5bd9a4ca129530d01e9842e917650a10f2e7c335416828e"
+    },
+    {
+      "path": "audio/volume-60/en-average-end.m4a",
+      "mode": "0644",
+      "sha256": "2c2b3c73598fdebd8154181a41f4f55dc377cd47251a44e3f274b909e77bf4c9"
+    },
+    {
+      "path": "audio/volume-70/en-average-end.m4a",
+      "mode": "0644",
+      "sha256": "5e80b2f77286b7dae518d9517048dc49420d65b48364e2d09f73f6b6115ca841"
+    },
+    {
+      "path": "audio/volume-80/en-average-end.m4a",
+      "mode": "0644",
+      "sha256": "67c2e35d8edbdb7aa8e2873843832cc10bbeecf1ddd8eec0f96dfa70a6af6bd0"
+    },
+    {
+      "path": "audio/volume-90/en-average-end.m4a",
+      "mode": "0644",
+      "sha256": "36489cb44c36025520e147b9039356dbd45c991006401162cc8b4997a3bcbf9f"
+    },
+    {
+      "path": "audio/en-school.m4a",
+      "mode": "0644",
+      "sha256": "de72b63d5ef2208bbb14b768ac78c8992335de4f2337d91d1e6135fdad248da7"
+    },
+    {
+      "path": "pcm/en-school.pcm",
+      "mode": "0644",
+      "sha256": "272ad0d2e03e7415291050f06d699468132a8ad41262900b189b4bb98163016f"
+    },
+    {
+      "path": "audio/volume-10/en-school.m4a",
+      "mode": "0644",
+      "sha256": "32d33bee09c1579f24b1cf06eaf7a3a3eab3190c33a3209e9172ada8fb3d97ba"
+    },
+    {
+      "path": "audio/volume-20/en-school.m4a",
+      "mode": "0644",
+      "sha256": "0ecadf0795666ec8469610a4c04c399b0f20ebbad0e3b3d32fd714cc4a2322c8"
+    },
+    {
+      "path": "audio/volume-30/en-school.m4a",
+      "mode": "0644",
+      "sha256": "00c52cc4d4734dab3640bd56be1a45101b947f9fa2159ac4b6ab48935fc20687"
+    },
+    {
+      "path": "audio/volume-40/en-school.m4a",
+      "mode": "0644",
+      "sha256": "c9e27fcd5ded52ef0ef31ae7f1315a6f088360f92e24d3fc2066388ba8c526e2"
+    },
+    {
+      "path": "audio/volume-50/en-school.m4a",
+      "mode": "0644",
+      "sha256": "1a01ba38d8893c530517945f2e61640b4be96399dc917edbf1399c792d7700e8"
+    },
+    {
+      "path": "audio/volume-60/en-school.m4a",
+      "mode": "0644",
+      "sha256": "71e78dfb60ed357ab732ed8146bc61cfcc13a6a90ae7d4b845dc040a3667e244"
+    },
+    {
+      "path": "audio/volume-70/en-school.m4a",
+      "mode": "0644",
+      "sha256": "ed968d0e812d485c199f7b5759c06e38c11cda00f326af4e6e44116501e4d68f"
+    },
+    {
+      "path": "audio/volume-80/en-school.m4a",
+      "mode": "0644",
+      "sha256": "b25b7e569dba1a76d68aaa59a4613832eacd4988e355e6b5c1ffbe09f4dbcd6f"
+    },
+    {
+      "path": "audio/volume-90/en-school.m4a",
+      "mode": "0644",
+      "sha256": "e1303addef58af28e656891fd2a3e4e1abae58b229a07f61558559759fbc8995"
+    },
+    {
+      "path": "audio/en-school-200.m4a",
+      "mode": "0644",
+      "sha256": "9b88111b3140ca90fc23ebd786c6d87d496dadc57bf538d444c3a00546bd5984"
+    },
+    {
+      "path": "pcm/en-school-200.pcm",
+      "mode": "0644",
+      "sha256": "3acb136b14640aeed9e39a5df2dedaa64e95b3462bb3b4ea18c7d8dbe0c96558"
+    },
+    {
+      "path": "audio/volume-10/en-school-200.m4a",
+      "mode": "0644",
+      "sha256": "b3e0865ec11a2130a7a94da9dfb6200a39d441988ccc3c513188801f272f487a"
+    },
+    {
+      "path": "audio/volume-20/en-school-200.m4a",
+      "mode": "0644",
+      "sha256": "84ebf04dd3e4c01a26ff13382e0116a89459ce889c4ffcba42b0020bf45087cd"
+    },
+    {
+      "path": "audio/volume-30/en-school-200.m4a",
+      "mode": "0644",
+      "sha256": "c0f3468001be5e7bb02d52bddf9476b7a8453d818140e8d78a370e74c8a46440"
+    },
+    {
+      "path": "audio/volume-40/en-school-200.m4a",
+      "mode": "0644",
+      "sha256": "d5d51d03f5df5ccaf2ddd15a78d0b8109176e9c344fc566c0736f90226f1335e"
+    },
+    {
+      "path": "audio/volume-50/en-school-200.m4a",
+      "mode": "0644",
+      "sha256": "13aa2779d6da0cf695a91bfba0bcaa31ab46cb48343d1d20ac5ebeb9a0fdcff7"
+    },
+    {
+      "path": "audio/volume-60/en-school-200.m4a",
+      "mode": "0644",
+      "sha256": "c62996e770865846514737b190d0e01c123c0d96fe3182553953c0c6cebeb4cb"
+    },
+    {
+      "path": "audio/volume-70/en-school-200.m4a",
+      "mode": "0644",
+      "sha256": "805fdea78b8c3f9cfa4e9f4cddb99f4dc4b7291974244758d54e4e1e1ea314bd"
+    },
+    {
+      "path": "audio/volume-80/en-school-200.m4a",
+      "mode": "0644",
+      "sha256": "818f20a511ba4778c99c5a70db9d0581f036f03cf9e7423105df3a24ad1bc476"
+    },
+    {
+      "path": "audio/volume-90/en-school-200.m4a",
+      "mode": "0644",
+      "sha256": "8bb3c822a1996f231af0f4218245b901cc3a12d4ea4bc5662f50028437d64a66"
+    },
+    {
+      "path": "audio/en-speed-bump.m4a",
+      "mode": "0644",
+      "sha256": "a476e78ac12c96474c44f10481e57e3922b58ed7019ecc6e1eaf3a93c64e0127"
+    },
+    {
+      "path": "pcm/en-speed-bump.pcm",
+      "mode": "0644",
+      "sha256": "c8391fa0fa4fbe6b920df9b21a0076497903d661bb4956064c7f72e7bb0e5a56"
+    },
+    {
+      "path": "audio/volume-10/en-speed-bump.m4a",
+      "mode": "0644",
+      "sha256": "71c47d7618ace71973a772cfd155253baebde6177fd0b0d4ff91441578955a1d"
+    },
+    {
+      "path": "audio/volume-20/en-speed-bump.m4a",
+      "mode": "0644",
+      "sha256": "4192a10aba6220ab308af5c12afddfd2e4fb09a32a8ed0c51d2683bf782d9839"
+    },
+    {
+      "path": "audio/volume-30/en-speed-bump.m4a",
+      "mode": "0644",
+      "sha256": "dfb481d15de09a18f81acf7d771b475b5abb074879a7ff99055d3d977ba6e87f"
+    },
+    {
+      "path": "audio/volume-40/en-speed-bump.m4a",
+      "mode": "0644",
+      "sha256": "720e2eba5d8df8e486e4e495d76c0d17871bb51b0b4900dda5fc2b0de628b1f1"
+    },
+    {
+      "path": "audio/volume-50/en-speed-bump.m4a",
+      "mode": "0644",
+      "sha256": "097f51a7eff5392c8c01e66393d116b5fc2b70329dce3458af5a4b40e001959f"
+    },
+    {
+      "path": "audio/volume-60/en-speed-bump.m4a",
+      "mode": "0644",
+      "sha256": "1ca771067fe125bbc01ee233f9278a24db5b6715badc625a86c4b4ecddf5c8a9"
+    },
+    {
+      "path": "audio/volume-70/en-speed-bump.m4a",
+      "mode": "0644",
+      "sha256": "6b9e81f715d8561941ee112d15904a2a26424558a59e789b6ddfc59dda131fdc"
+    },
+    {
+      "path": "audio/volume-80/en-speed-bump.m4a",
+      "mode": "0644",
+      "sha256": "ea4cd78bd9cf8842afacc828b90927dea331916f6707e66c34df1c25c9793f82"
+    },
+    {
+      "path": "audio/volume-90/en-speed-bump.m4a",
+      "mode": "0644",
+      "sha256": "8943ef6c4c2bcedc6bf64d9154c16772cdb0ac9d25c3f80f02154f81eaf26345"
+    },
+    {
+      "path": "audio/en-speed-bump-200.m4a",
+      "mode": "0644",
+      "sha256": "48849754b0eca972f57bc15fee1dd8e2f78b44d4127fd2e550d8b9773bbee817"
+    },
+    {
+      "path": "pcm/en-speed-bump-200.pcm",
+      "mode": "0644",
+      "sha256": "c229446b1915736b8a7008c7402d3b40ac1385ef1e4bb29a16f5a0d1d57bb0d3"
+    },
+    {
+      "path": "audio/volume-10/en-speed-bump-200.m4a",
+      "mode": "0644",
+      "sha256": "cfaf317710f899f1141ed1c8e34cf92ba9a3fdcee4bb4798e6c17266135d2832"
+    },
+    {
+      "path": "audio/volume-20/en-speed-bump-200.m4a",
+      "mode": "0644",
+      "sha256": "3f9d06019c5ea1385459e7ce3d18075b40c2b7c3595183381c22f07823f44fb2"
+    },
+    {
+      "path": "audio/volume-30/en-speed-bump-200.m4a",
+      "mode": "0644",
+      "sha256": "c72c92d7b7a642b0a183522ad4978b59b887e7231f57061ec398c1fff607246f"
+    },
+    {
+      "path": "audio/volume-40/en-speed-bump-200.m4a",
+      "mode": "0644",
+      "sha256": "4690d7c035610b94ac3ed9cf660f826d6c08b61ea7dea5381afc8b3bedfc0bfe"
+    },
+    {
+      "path": "audio/volume-50/en-speed-bump-200.m4a",
+      "mode": "0644",
+      "sha256": "cebc424172b59a79c0493d84121bb11e7979beed159376effc01249863409be6"
+    },
+    {
+      "path": "audio/volume-60/en-speed-bump-200.m4a",
+      "mode": "0644",
+      "sha256": "8ede27211b6d308bf13726c3b752ead1ddb272abee212a21bb0ff7b88d213a42"
+    },
+    {
+      "path": "audio/volume-70/en-speed-bump-200.m4a",
+      "mode": "0644",
+      "sha256": "dfcfd7f51031520b2bd99da11c442feda046ed7fd6178c9f8112495184f35baa"
+    },
+    {
+      "path": "audio/volume-80/en-speed-bump-200.m4a",
+      "mode": "0644",
+      "sha256": "662a7512e0234318526f14d3bb17f47aad21738f0ff8dda13b65d71adb126bdf"
+    },
+    {
+      "path": "audio/volume-90/en-speed-bump-200.m4a",
+      "mode": "0644",
+      "sha256": "da61d2c487941f8c88b9115ab933df138df6f2d966e505e1b890b0557040a669"
+    },
+    {
+      "path": "hdd-mounts.js",
+      "mode": "0644",
+      "sha256": "c4e072cf18ad33bec87ec5bfe03922085d47b2ab89df7da3c34405095c28f9ec"
+    },
+    {
+      "path": "map-storage-helper.js",
+      "mode": "0644",
+      "sha256": "b7f8e4571039cfd7ed8a3828d43d88380574c1f749c8f70a34b3cd380b8cced0"
     }
   ],
   "units": [

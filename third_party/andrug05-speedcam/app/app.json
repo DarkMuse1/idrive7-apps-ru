@@ -1,10 +1,10 @@
 {
   "id": "aurelm_speed_camera_warning",
-  "version": "0.9.95",
+  "version": "0.9.105",
   "title": "SpeedCAM",
   "description": "Камеры, HUD, приборная панель и голосовые уведомления. Звуковой сервис устанавливается вместе с приложением.",
   "package": {
-    "size": 11704423,
-    "sha256": "dc61d7539578d39c36a2c682a7df0c38e4ef3a0ca4bd3348adbcc38dbbba5f7d"
+    "size": 11832619,
+    "sha256": "e66b055c47400d29293e594af58ba651861708e04fbd2b27269a23e6d17db213"
   }
 }
