@@ -440,16 +440,16 @@ class Page {
         // live state from waze.js: the map showing, waiting, the Waze app busy, Waze on Cluster missing
         const info = this.hud.waze ? this.hud.waze.info() : { text: 'Not available in this app', up: false, ok: false };
         let text = info.text;
-        if (this.get('mapInTheme') && !this.hud.mapLayout && this.hud.activeName !== 'off') text = 'This theme has no map version (GT3, Sport and M do)';
+        if (this.get('mapInTheme') && !this.hud.mapLayout && this.hud.activeName !== 'off') text = 'This theme has no map version (GT3, Sport, M, M view and Vector do)';
         glass(cv, CX, y, w, 46, false);
         cv.circle(CX + 26, y + 23, 7, info.up ? C.live : info.ok ? C.dim : '#e0a340');
         cv.text(text, CX + 46, y + 30, 18, info.up ? C.live : C.text, { literal: true });
         y += 54;
         note(cv, CX, y + 26, [
-            'On: GT3, Sport and M open a window in the middle and Waze on Cluster draws its map in it, above',
-            'BMW\'s own map view, so nothing shows twice. When the map goes away the theme fills back in.',
-            'While on, Waze\'s map on the HUD is off (the cluster and the HUD share one picture).',
-            'Needs robertnisipeanu\'s Waze on Cluster. Turning this off gives Waze its usual place back.',
+            'On: GT3, Sport, M, M view and Vector open a window in the middle and Waze\'s map shows in it,',
+            'above BMW\'s own map view, so nothing shows twice. When the map goes away the theme fills back in.',
+            'Needs robertnisipeanu\'s Waze on Cluster 0.14.5 or newer with cluster-render 0.8.2 or newer.',
+            'Turning this off gives Waze its usual place back.',
         ]);
     }
 

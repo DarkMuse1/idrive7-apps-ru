@@ -37,7 +37,12 @@ const HIST_MS = 3000;         // the features kept this long, to look up the mom
 const STALE_MS = 4000;        // eDrive Live silent this long: nothing shown
 const LAMBDA = 0.985;         // forgetting per reading: about the last 60 readings count
 const A_TAU_MS = 80;          // the acceleration's smoothing (its sensor is noisy at rest)
-const SIG_FRESH_MS = 2500;    // a car signal older than this: not used (some only notify on a change: held that long)
+const SIG_FRESH_MS = 2500;    // a polled/ordinary car signal older than this: not used
+// The eDRIVE needle (rel) is change-notified: it holds its value until the power changes, so when steady it stops
+// arriving for many seconds (gaps over 20 s seen). It is current until the next change, so it is held far longer -
+// else a steady cruise drops off the fast needle onto the 2 s battery reading and the gauge goes laggy. This is the
+// same hold eDrive Live's fastkw.js uses. A genuinely dropped needle self-heals: the offset pulls to the reading.
+const NEEDLE_HOLD_MS = 30000;
 const MIN_FITS = 12;          // readings a car signal's model needs before it shows
 const ERR_TAU = 0.9;          // the error's average: about the last 10 readings
 // The anchor: a car signal is fast but coarse (the eDRIVE needle steps ~7.5 kW) and a quantised signal leaves the
@@ -62,7 +67,7 @@ const isNum = (v) => typeof v === 'number' && isFinite(v);
  * guess and its uncertainty, the bounds kept. A model's features are null while it can't say. */
 const MODELS = {
     rel: {
-        feat: (s, t) => { const r = s.sig.rel; return r && t - r[0] < SIG_FRESH_MS ? [r[1].drive || 0, r[1].recup || 0, 1] : null; },
+        feat: (s, t) => { const r = s.sig.rel; return r && t - r[0] < NEEDLE_HOLD_MS ? [r[1].drive || 0, r[1].recup || 0, 1] : null; },
         start: [0.9, -0.6, 1.5], P: [0.05, 0.05, 4],
     },
     sport: {

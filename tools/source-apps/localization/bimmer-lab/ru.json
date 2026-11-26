@@ -3282,5 +3282,17 @@
   "Match speed": "Согласовать скорость",
   "Start with the car is off: waiting to be opened": "Автозапуск выключен: ожидает открытия",
   "Pressure": "Давление",
-  "Same": "Так же"
+  "Same": "Так же",
+  "This theme has no map version (GT3, Sport, M, M view and Vector do)": "В этой теме нет карты (она есть в GT3, Sport, M, M view и Vector)",
+  "On: GT3, Sport, M, M view and Vector open a window in the middle and Waze's map shows in it,": "В GT3, Sport, M, M view и Vector карта Waze показывается в центральном окне",
+  "above BMW's own map view, so nothing shows twice. When the map goes away the theme fills back in.": "поверх штатной карты BMW, без дублирования. Когда карта закрывается, тема снова занимает всё место.",
+  "Needs robertnisipeanu's Waze on Cluster 0.14.5 or newer with cluster-render 0.8.2 or newer.": "Нужны Waze on Cluster от robertnisipeanu версии 0.14.5 или новее и cluster-render 0.8.2 или новее.",
+  "Turning this off gives Waze its usual place back.": "Выключение возвращает Waze на обычное место.",
+  "Update Waze on Cluster and cluster-render to show the map in the theme": "Обновите Waze on Cluster и cluster-render для показа карты внутри темы",
+  "Update Waze on Cluster to show its map in the theme": "Обновите Waze on Cluster для показа карты внутри темы",
+  "Another app is showing the Waze map": "Карта Waze показана другим приложением",
+  "Waiting for the theme to show on the cluster": "Ожидание появления темы на приборной панели",
+  "Waiting for the theme to draw": "Ожидание отрисовки темы",
+  "Waiting to show the map": "Ожидание показа карты",
+  "Waiting for the cluster": "Ожидание приборной панели"
 }

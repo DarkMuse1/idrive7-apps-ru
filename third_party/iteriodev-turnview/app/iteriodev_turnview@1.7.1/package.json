@@ -1,6 +1,6 @@
 {
   "name": "iteriodev_turnview",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "Control panel of the Turn View tool (iDrive 7 and iDrive 8): the front camera in the cluster (iDrive 8: its widget, iDrive 7: the map view in the centre) with a blue turn sign near each turn, or on the head unit instead (the Camera page, any speed); on cars with BMW Night Vision its picture instead of the front camera (Camera page: Night Vision); on / off, status, camera calibration; asks the camera ECU for the front view when no other app does; talks to the tool over its control socket; GPU renderer screens",
   "private": false,
   "main": "javascript/runner.js",

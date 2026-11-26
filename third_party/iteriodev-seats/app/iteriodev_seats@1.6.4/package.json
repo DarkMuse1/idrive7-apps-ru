@@ -1,6 +1,6 @@
 {
   "name": "iteriodev_seats",
-  "version": "1.6.3",
+  "version": "1.6.4",
   "description": "Seats (iDrive 7 + 8): both front seats on one page, seen from the side with hold controls round them (also while driving; Make room parked only), three memories per seat under each, the Gentleman function for the passenger seat and easy exit for both front seats (out of the way when its door opens with someone in the seat, back once the door is shut: driver with the car on, passenger seated; the driver's electric steering column too); seats with motors but no memory keep their hold controls; front end of the iteriodev-comfort tool over its control socket; GPU renderer screens",
   "private": false,
   "main": "javascript/runner.js",

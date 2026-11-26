@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "id": "iteriodev_seats",
-  "version": "1.6.3",
-  "tree": "iteriodev_seats@1.6.3",
+  "version": "1.6.4",
+  "tree": "iteriodev_seats@1.6.4",
   "modules": [
     "src/main.js",
     "src/online-host.js",

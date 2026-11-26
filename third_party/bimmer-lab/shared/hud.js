@@ -184,7 +184,11 @@
  * Any widget: "toggle": "<bool setting>" hides it when that setting is off, "!<setting>" when it is on,
  * "<choice setting>=<value>" shows it only while that choice is picked (also with "!");
  * "mapUp" (toggle or holeWhen) is not a saved setting: on while the Waze map shows inside the theme (waze.js; the
- * "mapInTheme" setting); the map is a content z 0 layer, so a frame meant to sit over it is content z 1 or more.
+ * "mapInTheme" setting). The first widget with holeWhen "mapUp" and a "hole" names the map's window: its hole inset by
+ * "holeInset", where cluster-render hosts the map (PROTOCOL.md "Hosting from layers", 0.8.2 and newer) on that
+ * widget's connection, drawn just under that connection's lowest layer over the window; so every layer of it there is
+ * see-through in the window while mapUp. With an older service (Waze on Cluster's "start panel") the map is a content
+ * z 0 layer at MAP_SLOT instead, so a frame meant to sit over it is content z 1 or more.
  * "themes": [...] shows it only in those themes. Text "color2": a second role, the colour at the bottom
  * of the box (a top-to-bottom gradient, the chrome look). Text: "hotWhen": "now" turns it the shift red
  * at the shift point; "coldWhen": "cold" turns it blue while the cold guard lowers the shift point.
@@ -298,6 +302,9 @@ const STATUS_ASK_MS = 2000;      // after a rebuild: ask cluster-render for its 
 const STALL_WARN_MS = 5000;
 const LAYER_BUDGET = 8;          // cluster-render's limit per client connection (CompositorLimits.per_client; confirmed on the car Nov 5 2026)
 const MAX_CONN = 4;              // connections a layout may ask for ("conn"): 32 layers service-wide / 8 per connection
+// The map (Waze on Cluster, 1088x480) where "start panel" put it on the panel, BMW's own map view (the calibration
+// theme's window): the themes' windows were drawn around it, so a hosted map shows that same part, 1:1 where it fits.
+const MAP_SLOT = [416, 120, 1088, 480];
 const PIXEL_BYTES = 16 * 1024 * 1024;   // cluster-render's pixel memory for every app's images together (CompositorLimits.pixel_bytes)
 const SHEET_AREA_FRAC = 4;       // the first sheet size limit: 1/4 of the target area (see the header)
 const TICK_MS = 50;              // 20 Hz: shift bar and gauges
@@ -575,6 +582,9 @@ class HudApp {
         })) : null;
         this.mapShown = false;           // "mapUp" when the layout was built (or last opened / closed, mapLive)
         this.mapLive = false;            // the active layout opens and closes its map window without a rebuild
+        this.mapRect = null;             // where the active layout hosts the map (_mapHostRect), null: no window
+        this.hostKey = '';               // the map host sent (_mapHost), '' none
+        this.hostCi = null;              // the connection it went on
         // the screen shared with the other app (screen.js): stepping aside while the driver gave it to the other one
         this.screen = new Screen(this.target === 'panel' ? 'cluster' : 'hud', ctx.dataDir, this.log,
             () => !!(this.started && this.activeName && this.activeName !== 'off'), () => this._guard('screen', () => this._rebuild()),
@@ -861,8 +871,25 @@ class HudApp {
 
     _wireClientEvents(c, ci) {
         const tag = ci ? ' [connection ' + (ci + 1) + ']' : '';
-        c.on('ready', () => { this.log.info('cluster-render ready' + tag + ' (backend=' + c.backend + ')'); if (ci === 0) this._rebuild(); else this._status(); });
-        c.on('disconnected', () => { this.log.warn('cluster-render disconnected' + tag + ', client will retry'); this._status(); });
+        c.on('ready', () => {
+            this.log.info('cluster-render ready' + tag + ' (backend=' + c.backend + (c.hostLayers ? ', hosts from layers' : '') + ')');
+            if (ci === 0 && this.waze && this.target === 'panel') this.waze.hosting(c.hostLayers === true);
+            if (ci === 0) this._rebuild(); else this._status();
+        });
+        c.on('disconnected', () => {
+            this.log.warn('cluster-render disconnected' + tag + ', client will retry');
+            if (ci === this.hostCi && this.waze) this.waze.hostState(null);
+            this._status();
+        });
+        // the Waze map hosted in the theme's window (_mapHost): our host's state, and where the map is
+        c.on('hosting', (target, ev) => {
+            if (target !== 'map' || ci !== this.hostCi || !this.waze) return;
+            this.waze.hostState(ev.state, (ev.reason || '') + (ev.by ? ' (' + ev.by + ')' : ''));
+        });
+        c.on('host', (target, ev) => {
+            if (target !== 'map' || ci !== 0) return;
+            this.log.info('cluster-render: the map ' + (ev.into ? 'hosted on ' + ev.into + ' at ' + ev.x + ',' + ev.y + ' ' + ev.w + 'x' + ev.h + (ev.shown === 0 ? ', shown nowhere' : '') : 'on its own slot'));
+        });
         c.on('layer', (ref, state, reason) => {
             const key = ci + ':' + ref;
             const old = this.layerStates.get(key);
@@ -957,7 +984,50 @@ class HudApp {
 
     /** Waze's map on the panel only while the setting is on and the theme shown has a map window. */
     _wazeWant() {
-        if (this.waze) this.waze.want(this.started && this.setting('mapInTheme') === true && this.mapLayout);
+        if (!this.waze) return;
+        const on = !!(this.started && this.setting('mapInTheme') === true && this.mapLayout);
+        this.waze.want(on);
+        this._mapHost(on ? this.mapRect : null);
+    }
+
+    /**
+     * Where the layout's map window hosts the map: the first widget with holeWhen "mapUp" and a hole, the hole inset
+     * by holeInset (what shows through), on that widget's connection. The map's part: MAP_SLOT's pixels under the
+     * window, 1:1, or scaled down to fit the map where the window is bigger, centred where it was. Null under 64x32.
+     */
+    _mapHostRect(layout) {
+        const w = layout.widgets.find((x) => x.holeWhen === 'mapUp' && Array.isArray(x.hole) && x.hole.length === 4 && x.hole.every(isNum));
+        if (!w) return null;
+        const inset = isNum(w.holeInset) ? w.holeInset : 6;
+        const r = { conn: this._connOf(w), x: Math.round(w.hole[0] + inset), y: Math.round(w.hole[1] + inset),
+            w: Math.round(w.hole[2] - 2 * inset), h: Math.round(w.hole[3] - 2 * inset) };
+        if (r.w < 64 || r.h < 32) return null;
+        const k = Math.max(1, r.w / MAP_SLOT[2], r.h / MAP_SLOT[3]);
+        r.src_w = Math.min(MAP_SLOT[2], Math.round(r.w / k));
+        r.src_h = Math.min(MAP_SLOT[3], Math.round(r.h / k));
+        const clamp = (v, hi) => Math.max(0, Math.min(hi, Math.round(v)));
+        r.src_x = clamp(r.x + r.w / 2 - MAP_SLOT[0] - r.src_w / 2, MAP_SLOT[2] - r.src_w);
+        r.src_y = clamp(r.y + r.h / 2 - MAP_SLOT[1] - r.src_h / 2, MAP_SLOT[3] - r.src_h);
+        return r;
+    }
+
+    /**
+     * Ask cluster-render to host Waze's map in the theme's window (r from _mapHostRect), or end it (null). Sent only when
+     * it changes; the client keeps it and sends it again after a reconnect, and only to a service with host_layers.
+     */
+    _mapHost(r) {
+        if (!this.waze || this.target !== 'panel') return;
+        const key = r ? [r.conn, r.x, r.y, r.w, r.h, r.src_x, r.src_y, r.src_w, r.src_h].join(',') : '';
+        if (key === this.hostKey) return;
+        if (this.hostCi !== null && this.clients[this.hostCi]) this.clients[this.hostCi].unhost('map');
+        const was = this.hostKey;
+        this.hostKey = key;
+        this.hostCi = r ? r.conn : null;
+        this.waze.hostState(null);
+        if (!r) { if (was) this.log.info('waze: map host ended'); return; }
+        this._clientAt(r.conn).host('panel', { target: 'map', x: r.x, y: r.y, w: r.w, h: r.h, src_x: r.src_x, src_y: r.src_y, src_w: r.src_w, src_h: r.src_h });
+        this.log.info('waze: map host at ' + r.x + ',' + r.y + ' ' + r.w + 'x' + r.h + ', the map\'s ' + r.src_w + 'x' + r.src_h + ' at ' + r.src_x + ',' + r.src_y +
+            ', connection ' + (r.conn + 1) + (this.clients[r.conn].ready ? (this.clients[r.conn].hostLayers ? '' : ' (kept: this cluster-render can\'t host)') : ' (sent once connected)'));
     }
 
     /** Boost, intake, fuel % and hybrid battery from the car's units (config.dme), over the read-only link. */
@@ -1897,6 +1967,7 @@ class HudApp {
         this.activeName = name;
         this.holidayAt = this._holidayNow();     // the light string's holiday (garland.js); the minute timer rebuilds when it changes
         this.mapLayout = false;
+        this.mapRect = null;
         this.mapShown = this.setting('mapUp');
         if (name === 'off') {
             this._wazeWant();
@@ -1913,6 +1984,7 @@ class HudApp {
         }
         this.problem = null;
         this.mapLayout = layout.widgets.some((w) => w.holeWhen === 'mapUp');
+        this.mapRect = this.mapLayout ? this._mapHostRect(layout) : null;
         // "mapLive" holds only while nothing else changes with the map (a widget toggled on mapUp needs the rebuild)
         this.mapLive = layout.mapLive === true && !layout.widgets.some((w) => typeof w.toggle === 'string' && w.toggle.indexOf('mapUp') >= 0);
         this._wazeWant();
@@ -1967,13 +2039,6 @@ class HudApp {
             }
             row.forEach((w) => { w.conn = best.ci; });
         }
-        // the demo show's DEMO tag (demo_script.js), at a free spot that costs the fewest layers and pixels. It is in every
-        // layout (drawn empty until the show plays), so pressing Play changes one small image and rebuilds nothing;
-        // the calibration layouts only get it while the show plays (there it would cost a layer)
-        if (this.demo && (this.demo.playing() || !CAL_LAYOUTS[name])) {
-            const tag = DemoShow.tagWidget(this.target, shown, (l) => { const p = this._plan(l, Math.floor(area / SHEET_AREA_FRAC), waste); return { over: over(p), layers: p.length, px: p.reduce((a, e) => a + (e.kind === 'sheet' ? e.w * e.h : 0), 0) }; });
-            if (tag) shown.push(tag);
-        }
         // the holiday light string (garland.js): its own image layers on a connection with room for them
         const gk = this._garlandHoliday(name, shown);
         if (gk) {
@@ -1985,6 +2050,13 @@ class HudApp {
             this.log.info('holiday lights (' + gk + '): ' + (gs.length ? gs.length + ' stretch' + (gs.length > 1 ? 'es' : '') + ', ' +
                 gs.reduce((a, g) => a + g.g.bulbs.length, 0) + ' bulbs (' + gs.map((g) => g.w + 'x' + g.h + ' at ' + g.x + ',' + g.y + ' scale ' + g.g.s).join(', ') + ')' +
                 ', connection ' + ((gs[0].conn || 0) + 1) : 'no room'));
+        }
+        // the demo show's DEMO tag (demo_script.js), after the light string (an empty tag must not take its place), at a free spot that costs the fewest layers and pixels. It is in every
+        // layout (drawn empty until the show plays), so pressing Play changes one small image and rebuilds nothing;
+        // the calibration layouts only get it while the show plays (there it would cost a layer)
+        if (this.demo && (this.demo.playing() || !CAL_LAYOUTS[name])) {
+            const tag = DemoShow.tagWidget(this.target, shown, (l) => { const p = this._plan(l, Math.floor(area / SHEET_AREA_FRAC), waste); return { over: over(p), layers: p.length, px: p.reduce((a, e) => a + (e.kind === 'sheet' ? e.w * e.h : 0), 0) }; });
+            if (tag) shown.push(tag);
         }
         let maxPx = Math.floor(area / SHEET_AREA_FRAC), plan = this._plan(shown, maxPx, waste);
         while (over(plan) && (maxPx !== Infinity || waste !== Infinity)) {
